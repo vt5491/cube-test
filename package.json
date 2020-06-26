@@ -1,0 +1,19 @@
+{
+	"name": "cube-test",
+	"dependencies": {
+		"@hapi/ammo": "^5.0.1",
+		"babylonjs": "^4.1.0",
+		"babylonjs-gui": "^4.1.0",
+		"babylonjs-loaders": "^4.1.0",
+		"babylonjs-materials": "^4.1.0",
+		"cannon": "^0.6.2",
+		"oimo": "^1.0.9",
+		"pepjs": "^0.5.2",
+		"react": "16.13.0",
+		"react-dom": "16.13.0",
+		"webxr-polyfill": "^2.0.3"
+	},
+	"devDependencies": {
+		"shadow-cljs": "2.9.3"
+	}
+}

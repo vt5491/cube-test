@@ -1,14 +1,16 @@
-pom.xml
-pom.xml.asc
-*.jar
-*.class
-/lib/
-/classes/
+/out/
+/resources/public/js/compiled/
 /target/
-/checkouts/
-.lein-deps-sum
-.lein-repl-history
-.lein-plugins/
-.lein-failures
-.nrepl-port
-.cpcache/
+/*-init.clj
+/*.log
+
+# Leiningen
+/.lein-*
+/.nrepl-port
+
+# Node.js dependencies
+/node_modules/
+
+# shadow-cljs cache, port files
+/shadow-cljs.edn
+/.shadow-cljs/
