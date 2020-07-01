@@ -8,7 +8,9 @@
    [cube-test.controller-xr :as ctrl-xr]
    [cube-test.cube-fx :as cube-fx]
    [cube-test.projectile :as projectile]
-   [cube-test.utils.fps-panel :as fps-panel]))
+   [cube-test.utils.fps-panel :as fps-panel]
+   [cube-test.scenes.cube-spin-scene :as cube-spin-scene]
+   [cube-test.scenes.face-slot-scene :as face-slot-scene]))
 
 
 (re-frame/reg-event-db
@@ -19,13 +21,14 @@
 ;;
 ;; game
 ;;
-(re-frame/reg-event-db
-  :run-main-scene
-  (fn [db [_]]
-    ; non-rf side effect
-    ; (game/run-scene game/render-loop)
-    (game/run-scene)
-    db))
+; (re-frame/reg-event-db
+;   :run-main-scene
+;   (fn [db [_]]
+;   ; (fn [db [_ top-level-scene-initializer]]
+;     ; non-rf side effect
+;     ; (game/run-scene game/render-loop)
+;     (game/run-scene)
+;     db))
 
 ;;
 ;;> main-scene
@@ -40,11 +43,18 @@
  (fn [db [_ scene]]
    (assoc db :main-scene scene)))
 
+; (re-frame/reg-event-db
+;   :init-main-scene
+;   (fn [db [_]]
+;     ; non-rf side effect
+;     (main-scene/init)
+;     db))
+
 (re-frame/reg-event-db
   :init-main-scene
-  (fn [db [_]]
+  (fn [db [_ top-level-scene-initializer]]
     ; non-rf side effect
-    (main-scene/init)
+    (main-scene/init top-level-scene-initializer)
     db))
 
 (re-frame/reg-event-db
@@ -53,11 +63,11 @@
    (main-scene/enter-vr)
    db))
 
-(re-frame/reg-event-db
- :setup-btn
- (fn [db [_]]
-   (main-scene/setup-btn)
-   db))
+; (re-frame/reg-event-db
+;  :setup-btn
+;  (fn [db [_]]
+;    (main-scene/setup-btn)
+;    db))
 
 ;;> xr events
 (re-frame/reg-event-db
@@ -78,6 +88,34 @@
    (ctrl-xr/init xr)
    db))
 
+;;
+;; cube-spin scene
+(re-frame/reg-event-db
+ :init-cube-spin-scene
+ (fn [db _]
+   ;side effect
+   (cube-spin-scene/init)
+   db))
+
+(re-frame/reg-event-db
+  :run-cube-spin-scene
+  (fn [db [_]]
+    (cube-spin-scene/run-scene)
+    db))
+;;
+;; face-slot scene
+(re-frame/reg-event-db
+ :init-face-slot-scene
+ (fn [db _]
+   ;side effect
+   (face-slot-scene/init)
+   db))
+
+(re-frame/reg-event-db
+  :run-face-slot-scene
+  (fn [db [_]]
+    (face-slot-scene/run-scene)
+    db))
 ;; cube-fx
 (re-frame/reg-event-db
  :init-cube-fx

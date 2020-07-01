@@ -23,7 +23,7 @@
 (def projectile-vel (.clone projectile-idle-vel))
 ; (def projectile-lifespan 5)
 ; (def projectiles (atom []))
-(def projectile-idx (atom 0))
+(def ^:dynamic *projectile-idx* (atom 0))
 (def projectiles (atom {}))
 (def projectiles-js (js-obj))
 (def pause-projectiles false)
@@ -38,7 +38,7 @@
     (set! (.-wireframe main-scene/green-mat) true))
   (prn "cube-fx.init: projectile=" (create-projectile-old 0 (bjs/Vector3. 2 1 0)))
   ; (reset! projectiles (conj @projectiles (atom (projectile/create (.-position spin-cube) (bjs/Vector3. -0.1 0 0))))))
-  ; (let [idx (reset! projectile-idx (+ @projectile-idx 1))
+  ; (let [idx (reset! *projectile-idx* (+ @*projectile-idx* 1))
   ;       prj (projectile/create idx (.-position spin-cube) (bjs/Vector3. -0.1 0 0))
   ;       key (keyword (str "prj-" idx))]
   ;   (reset! projectiles (assoc @projectiles key prj))))
@@ -101,25 +101,25 @@
     (reset-projectile idx)))
 
 (defn create-projectile-js [pos vel]
-  (let [idx (swap! projectile-idx inc)
+  (let [idx (swap! *projectile-idx* inc)
         prj (projectile/create-js idx pos vel)
         key-str (str "prj-" idx)
         key (keyword key-str)]
-    (print "create-projectile: creating " key)
-    (aset projectiles-js key-str prj)
-    (println "projectile-count=" (count (js-keys projectiles-js)))))
+    ; (print "create-projectile: creating " key)
+    (aset projectiles-js key-str prj)))
+    ; (println "projectile-count=" (count (js-keys projectiles-js)))))
     ; (reset! projectiles (assoc @projectiles key prj))))
 
 (defn create-projectile [pos vel]
-  ; (let [idx (reset! projectile-idx (+ @projectile-idx 1))])
-  (let [idx (swap! projectile-idx inc)
+  ; (let [idx (reset! *projectile-idx* (+ @*projectile-idx* 1))])
+  (let [idx (swap! *projectile-idx* inc)
         prj (projectile/create idx pos vel)
         key (keyword (str "prj-" idx))]
-    (print "create-projectile: creating " key)
-    (reset! projectiles (assoc @projectiles key prj)))
+    ; (print "create-projectile: creating " key)
+    (reset! projectiles (assoc @projectiles key prj))))
   ;; reset the timer pop, so we can run again
   ; (set! create-projectile-timer-id nil)
-  (println "projectile count=" (count @projectiles)))
+  ; (println "projectile count=" (count @projectiles)))
 
 (defn create-projectiles-js []
   (print "create-projectiles: entered")
@@ -137,7 +137,7 @@
   (set! create-projectiles-timer-id nil))
 
 (defn create-projectiles []
-  (print "create-projectiles: entered")
+  ; (print "create-projectiles: entered")
   (let [pos (.-position spin-cube)
         rot (.-rotation spin-cube)
         vel (bjs/Vector3. 0.2 0 0)
@@ -179,7 +179,7 @@
       ; (reset! projectiles (assoc-in @projectiles [key :life] (dec old-life)))
       (aset projectiles-js key-str "life" (dec old-life))
       (when (< old-life 0)
-        (println "update-projectils-js: now deleting key=" key)
+        ; (println "update-projectils-js: now deleting key=" key)
         ; (reset! projectiles (dissoc @projectiles key))
         (js-delete projectiles-js key-str)
         (.dispose prj-phys)))
@@ -227,10 +227,11 @@
       (reset! projectiles (assoc-in @projectiles [key :life] (dec old-life)))
       ; (println "update: prl-logicial.life for key " key-str ",old-life=" old-life ", new-life=" (get-in @projectiles [key :life]))
       (when (< old-life 0)
-        (println "now deleting key=" key)
+        ; (println "now deleting key=" key)
         ; (assoc projectiles (dissoc @projectiles key))
         ; (js-debugger)
         (reset! projectiles (dissoc @projectiles key))
+        ; (swap! projectiles (dissoc @projectiles key))
         ; (println "projectiles=" @projectiles)
         (.dispose prj-phys)))
     (catch js/Error e
@@ -301,5 +302,5 @@
                  (create-projectiles))]
                  ; (create-projectiles-js))]
         ; (prn "now setting create-projectile-timer-id")
-        (set! create-projectiles-timer-id (js/setTimeout cb 2000 0))))))
+        (set! create-projectiles-timer-id (js/setTimeout cb 100 0))))))
         ; (prn "create-projectile-timer-id=" create-projectile-timer-id)))))
