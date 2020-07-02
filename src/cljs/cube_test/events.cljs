@@ -116,6 +116,20 @@
   (fn [db [_]]
     (face-slot-scene/run-scene)
     db))
+
+(re-frame/reg-event-db
+  :rotor-anim-bwd
+ (fn [db [_ delta-vec]]
+   ; (println "init-cube-fx event handler")
+   ;side effect
+   (face-slot-scene/rotor-anim-bwd)
+   db))
+; (re-frame/reg-event-db
+;  :load-rotor
+;  (fn [db [_ path fn]]
+;    ; non-rf side effect
+;    (face-slot-scene/load-rotor db path fn)
+;    db))
 ;; cube-fx
 (re-frame/reg-event-db
  :init-cube-fx

@@ -556,3 +556,5 @@
 ;     (set! (.-width cb) "100px")
 ;     (set! (.-height cb) "100px")
 ;     (.addControl panel-2 cb)))
+
+(defn tick [])

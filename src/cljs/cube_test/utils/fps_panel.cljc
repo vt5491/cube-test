@@ -30,6 +30,12 @@
 
     ; (js-obj  (int (.getFps engine)) 50 50 "60px green" "white" "blue" true true))))
           ; 69 50 50 "60px green" "white" "blue" true true)))
+
+  ; (.drawText
+  ;  (-> fps-pnl .-material .-diffuseTexture
+  ;      (int (.getFps engine))) 50 50 "60px green" "white" "blue" true true)
+
   (.drawText
    (-> fps-pnl .-material .-diffuseTexture)
    (int (.getFps engine)) 50 50 "60px green" "white" "blue" true true))
+  ; (.drawText fps-pnl (int (.getFps engine) 50 50 "60px green" "white" "blue" true true)))
