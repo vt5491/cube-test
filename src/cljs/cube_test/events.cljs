@@ -10,7 +10,8 @@
    [cube-test.projectile :as projectile]
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.scenes.cube-spin-scene :as cube-spin-scene]
-   [cube-test.scenes.face-slot-scene :as face-slot-scene]))
+   [cube-test.scenes.face-slot-scene :as face-slot-scene]
+   [cube-test.face-slot.rotor :as rotor]))
 
 
 (re-frame/reg-event-db
@@ -118,12 +119,42 @@
     db))
 
 (re-frame/reg-event-db
-  :rotor-anim-bwd
- (fn [db [_ delta-vec]]
+  ; :rotor-anim-bwd
+  :face-slot-anim-bwd
+ (fn [db [_]]
    ; (println "init-cube-fx event handler")
    ;side effect
-   (face-slot-scene/rotor-anim-bwd)
+   (face-slot-scene/anim-bwd)
    db))
+
+(re-frame/reg-event-db
+ :init-top-rotor
+ (fn [db [_]]
+   (println "events: init-top-rotor")
+   (face-slot-scene/init-top-rotor)
+   db))
+
+(re-frame/reg-event-db
+ :init-mid-rotor
+ (fn [db [_]]
+   (println "events: init-mid-rotor")
+   (face-slot-scene/init-mid-rotor)
+   db))
+;;
+;; rotor
+;;
+(re-frame/reg-event-db
+ :load-rotor
+ (fn [db [_ path file hlq user-cb]]
+   ;side effect
+   (rotor/load-rotor path file hlq user-cb)
+   db))
+
+(re-frame/reg-event-db
+ :rotor-anim-bwd
+ (fn [db [_ hlq start-face]]
+   (rotor/anim-bwd hlq start-face)))
+
 ; (re-frame/reg-event-db
 ;  :load-rotor
 ;  (fn [db [_ path fn]]
