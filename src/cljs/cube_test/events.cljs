@@ -121,10 +121,10 @@
 (re-frame/reg-event-db
   ; :rotor-anim-bwd
   :face-slot-anim-bwd
- (fn [db [_]]
+ (fn [db [_ hlq]]
    ; (println "init-cube-fx event handler")
    ;side effect
-   (face-slot-scene/anim-bwd)
+   (face-slot-scene/anim-bwd hlq)
    db))
 
 (re-frame/reg-event-db
@@ -140,6 +140,13 @@
    (println "events: init-mid-rotor")
    (face-slot-scene/init-mid-rotor)
    db))
+
+(re-frame/reg-event-db
+ :init-bottom-rotor
+ (fn [db [_]]
+   (println "events: init-bottom-rotor")
+   (face-slot-scene/init-bottom-rotor)
+   db))
 ;;
 ;; rotor
 ;;
@@ -153,7 +160,9 @@
 (re-frame/reg-event-db
  :rotor-anim-bwd
  (fn [db [_ hlq start-face]]
-   (rotor/anim-bwd hlq start-face)))
+   ; (println "event: rotor-anim-bwd")
+   (rotor/anim-bwd hlq start-face)
+   db))
 
 ; (re-frame/reg-event-db
 ;  :load-rotor
