@@ -128,6 +128,14 @@
    db))
 
 (re-frame/reg-event-db
+  :face-slot-anim-fwd
+ (fn [db [_ hlq]]
+   ; (println "init-cube-fx event handler")
+   ;side effect
+   (face-slot-scene/anim-fwd hlq)
+   db))
+
+(re-frame/reg-event-db
  :init-top-rotor
  (fn [db [_]]
    (println "events: init-top-rotor")
@@ -164,6 +172,11 @@
    (rotor/anim-bwd hlq start-face)
    db))
 
+(re-frame/reg-event-db
+ :rotor-anim-fwd
+ (fn [db [_ hlq start-face]]
+   (rotor/anim-fwd hlq start-face)
+   db))
 ; (re-frame/reg-event-db
 ;  :load-rotor
 ;  (fn [db [_ path fn]]

@@ -112,7 +112,14 @@
   (set! (.-diffuseColor green-mat) (bjs/Color3. 0 1 0))
   (set! blue-mat (bjs/StandardMaterial. "blue-mat" scene))
   (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1))
-  (js/BABYLON.Debug.AxesViewer.)
+  ; (js/BABYLON.Debug.AxesViewer. scene)
+  ; (-> (bjs/Debug.AxesViewer. scene) (.update (bjs/Vector3. 5 0 0)))
+  (let [av (bjs/Debug.AxesViewer. scene)]
+  ; (let [av bjs/Debug.AxesViewer.createInstance])
+  ; (let [av (.createInstance bjs/Debug.AxesViewer.)]
+  ;   (js-debugger)
+    ; (.update av (bjs/Vector3. 0 0 0) (.-xAxis av) (.-yAxis av) (.-zAxis av))
+    (.update av (bjs/Vector3. 5 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
   (setup-skybox)
   ; (set! physics-plugin (bjs/AmmoJSPlugin. true "Ammo"))
   ; (set! physics-plugin (ammo/AmmoJSPlugin. true "Ammo"))
