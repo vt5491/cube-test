@@ -10,9 +10,9 @@
    [cube-test.utils.fps-panel :as fps-panel]))
 
 ; (def ^:dynamic *top-face* (atom 5))
-(def ^:dynamic *top-rotor-face* (atom 5))
-(def ^:dynamic *mid-rotor-face* (atom 5))
-(def ^:dynamic *bottom-rotor-face* (atom 5))
+(def ^:dynamic *top-rotor-face* (atom 0))
+(def ^:dynamic *mid-rotor-face* (atom 0))
+(def ^:dynamic *bottom-rotor-face* (atom 0))
 (def top-rotor-uniq-id)
 (def mid-rotor-uniq-id)
 (def bottom-rotor-uniq-id)
@@ -200,14 +200,16 @@
   (re-frame/dispatch [:load-rotor
                       "models/slot_rotor/"
                       ; "slot_rotor.gltf"
-                      "eyes_rotor.gltf"
+                      ; "eyes_rotor.gltf"
+                      "eyes_rotor_n1.gltf"
                       :top
                       (fn []
                         ; (println "hi"))])
                         (re-frame/dispatch [:init-top-rotor]))])
   (re-frame/dispatch [:load-rotor
                       "models/slot_rotor/"
-                      "noses_rotor.gltf"
+                      ; "noses_rotor.gltf"
+                      "noses_rotor_n1.gltf"
                       :mid
                       (fn []
                         ; (println "hi"))])
@@ -215,7 +217,7 @@
   (re-frame/dispatch [:load-rotor
                       "models/slot_rotor/"
                       ; "slot_rotor.gltf"
-                      "mouths_rotor.gltf"
+                      "mouths_rotor_n1.gltf"
                       :bottom
                       (fn []
                         ; (println "hi"))])
