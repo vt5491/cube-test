@@ -35,7 +35,7 @@
                        (let [re (re-pattern (str "^(" rot-action-stem ")(\\.\\d-\\d)\\.(.*)"))
                              match-array (re-matches re ag-name)
                              new-name (str (get match-array 1) (get match-array 2))]
-                         (println "new-name=" new-name)
+                         ; (println "new-name=" new-name)
                          (set! (.-name %1) new-name)))))
                        ; (-> (.-onAnimationEndObservable %1) (.add (fn [] (println "animation " (.-name %1) " ended"))))
                        ; (-> (.-onAnimationGroupEndObservable %1) (.add (fn [] (println "animation group " (.-name %1) " ended"))))
@@ -126,8 +126,9 @@
                main-scene/scene
                #(slot-rotor-loaded %1 %2 %3 %4 hlq user-cb)))
 
+
 (defn anim-bwd [hlq start-face]
-  (println "anim-bwd: start-face=" start-face)
+  ; (println "anim-bwd: start-face=" start-face)
   (let [hlq-str (name hlq)]
     (condp = start-face
       ; 0 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.0-7"))))
@@ -149,7 +150,7 @@
 
 (defn anim-fwd [hlq start-face]
   (let [hlq-str (name hlq)]
-    (println "anim-fwd: start-face=" start-face)
+    ; (println "anim-fwd: start-face=" start-face)
     (condp = start-face
       0 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".0-1"))))
       1 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".1-2"))))

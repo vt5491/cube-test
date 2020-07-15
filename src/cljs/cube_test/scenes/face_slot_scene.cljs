@@ -95,9 +95,99 @@
                                                   (re-frame/dispatch [:face-slot-anim-fwd :bottom]))))
     (.addControl right-pnl cb-bottom)))
 
+    ; var button = BABYLON.GUI.Button.CreateImageButton()
+    ;   "but",
+    ;   "Click Me",
+    ;   "textures/grass.png"))
+    ;
+(defn init-bottom-gui []
+  (println "init-bottom-gui entered")
+  (let [bottom-plane (bjs/Mesh.CreatePlane. "bottom-plane" 2)
+        bottom-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. bottom-plane 1024 1024)
+        ; bottom-pnl (bjs-gui/StackPanel.)
+        bottom-pnl (bjs-gui/Grid.)
+        bottom-hdr (bjs-gui/TextBlock.)
+        ; bwd-btn (bjs-gui/Button.CreateImageButton. "super-bwd-btn" "bwd" "imgs/left_arrow_fat.png")
+        bwd-btn (bjs-gui/Button.CreateImageButton. "super-bwd-btn" "bwd" "imgs/left_arrow_fat_small.png")
+        bwd-btn-img (.-image bwd-btn)
+        ; bwd-btn (bjs-gui/Button.CreateImageWithCenterTextButton. "super-bwd-btn" "bwd" "imgs/left_arrow_fat.png")
+        ; fwd-btn (bjs-gui/Button.CreateImageButton. "super-fwd-btn" "fwd" "imgs/right_arrow_fat.png")
+        fwd-btn (bjs-gui/Button.CreateImageButton. "super-fwd-btn" "fwd" "imgs/right_arrow_fat_small.png")
+        fwd-btn-img (.-image fwd-btn)
+        cb-frame (bjs-gui/Checkbox.)
+        cb-rnd (bjs-gui/Checkbox.)
+        cb-bottom (bjs-gui/Checkbox.)
+        frame-txt (bjs-gui/TextBlock.)
+        rnd-txt (bjs-gui/TextBlock.)]
+    ; (set! (.-position))
+    ; (set! (.-position bottom-plane) (bjs/Vector3. 0 4.0 0.4))
+    (set! (.-position bottom-plane) (bjs/Vector3. 0.2 4.0 0.4))
+    ; (set! (.-isVertical bottom-pnl) false)
+    (.addRowDefinition bottom-pnl 0.25 false)
+    (.addRowDefinition bottom-pnl 0.25)
+    (.addRowDefinition bottom-pnl 0.25)
+    (.addRowDefinition bottom-pnl 0.25)
+    (.addColumnDefinition bottom-pnl 0.5)
+    (.addColumnDefinition bottom-pnl 0.5)
+    ; (.addColumnDefinition bottom-pnl 0.33)
+    (.addControl bottom-adv-texture bottom-pnl)
+    (set! (.-text bottom-hdr) "Super Rotate")
+    (set! (.-height bottom-hdr) "100px")
+    (set! (.-color bottom-hdr) "white")
+    (set! (.-textHorizontalAlignment bottom-hdr) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
+    (set! (.-fontSize bottom-hdr) "80")
+    (set! (.-horizontalAlignment bottom-pnl) bjs-gui/StackPanel.HORIZONTAL_ALIGNMENT_CENTER)
+    (set! (.-verticalAlignment bottom-pnl) bjs-gui/StackPanel.VERTICAL_ALIGNMENT_CENTER)
+    (.addControl bottom-pnl bottom-hdr 0 0)
+    ;; bwd-btn
+    ; (set! (.-width bwd-btn) 100)
+    ; (set! (.-height bwd-btn) 100)
+    (set! (.-autoScale bwd-btn-img) true)
+    ; (set! (.-left bwd-btn) "50px")))
+    (set! (.-horizontalAlignment bwd-btn) bjs-gui/Control.HORIZONTAL_ALIGNMENT_LEFT)
+    (set! (.-verticalAlignment bwd-btn) bjs-gui/Control.VERTICAL_ALIGNMENT_TOP)
+    (-> bwd-btn .-onPointerUpObservable (.add (fn [value]
+                                                  ; (println "super backward")
+                                                  (re-frame/dispatch [:face-slot-super-anim-bwd]))))
+    (.addControl bottom-pnl bwd-btn 1 0)
+    ; (println "descendents=" (.getDescendents bwd-btn))
+    ; (.addControl bottom-adv-texture bwd-btn)
+    (set! (.-horizontalAlignment fwd-btn) bjs-gui/Control.HORIZONTAL_ALIGNMENT_RIGHT)
+    (set! (.-verticalAlignment fwd-btn) bjs-gui/Control.VERTICAL_ALIGNMENT_TOP)
+    (set! (.-autoScale fwd-btn-img) true)
+    (-> fwd-btn .-onPointerUpObservable (.add (fn [value]
+                                                  ; (println "super backward")
+                                                  (re-frame/dispatch [:face-slot-super-anim-fwd]))))
+    (.addControl bottom-pnl fwd-btn 1 2)
+    ; (.addControl bottom-adv-texture fwd-btn)))
+    ;; cb-frame
+    (set! (.-width cb-frame) "100px")
+    (set! (.-height cb-frame) "100px")
+    (-> cb-frame .-onPointerUpObservable (.add (fn [value]
+                                                  ; (println "super backward")
+                                                  (re-frame/dispatch [:toggle-rotor-frame]))))
+    (.addControl bottom-pnl cb-frame 2 0)
+    (set! (.-text frame-txt) "Toggle Frame")
+    (set! (.-fontSize frame-txt) "80")
+    (set! (.-color frame-txt) "white")
+    (.addControl bottom-pnl frame-txt 2 1)
+
+    ;; cb-rnd
+    (set! (.-width cb-rnd) "100px")
+    (set! (.-height cb-rnd) "100px")
+    (-> cb-rnd .-onPointerUpObservable (.add (fn [value]
+                                               (re-frame/dispatch [:randomize-rotor]))))
+    (.addControl bottom-pnl cb-rnd 3 0)
+    (set! (.-text rnd-txt) "Randomize")
+    (set! (.-fontSize rnd-txt) "80")
+    (set! (.-color rnd-txt) "white")
+    (.addControl bottom-pnl rnd-txt 3 1)))
+
+
 (defn init-gui []
   (init-left-gui)
-  (init-right-gui))
+  (init-right-gui)
+  (init-bottom-gui))
 
 ; (defn anim-bwd [hlq]
 ;   ; (println "face-slot-scene: anim-bwd entered")
@@ -106,6 +196,56 @@
 ;   (when (< @*top-rotor-face* 0)
 ;     (swap! *top-rotor-face* (fn [x] 7)))
 ;   (println "*top-rotor-face=" *top-rotor-face*))
+(defn rotor-frame-loaded [new-meshes particle-systems skeletons anim-groups user-cb]
+  ; (js-debugger)
+  (println "slot-rotor-loaded: new-meshes=" new-meshes)
+  (doall (map #(do
+                 (when (= (.-name %1) "frame")
+                   (set! (.-position %1) (bjs/Vector3. 0 2.55 -1))
+                   (.setEnabled %1 false)))
+              new-meshes)))
+
+(defn load-rotor-frame [path file user-cb]
+  (println "face-slot-scene.load-rotor-frame: path=" path ", file=" file)
+  (.ImportMesh bjs/SceneLoader ""
+               path
+               file
+               main-scene/scene
+               #(rotor-frame-loaded %1 %2 %3 %4 user-cb)))
+
+(defn toggle-rotor-frame []
+  (println "now toggling rotor-frame")
+  (let [frame (-> main-scene/scene (.getMeshByName "frame"))]
+    (if (.isEnabled frame)
+      (.setEnabled frame false)
+      (.setEnabled frame true))))
+
+(defn delayed-rot-fwd [n hlq]
+  (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd hlq])) (* n 500)))
+
+(defn delayed-rot-bwd [n hlq]
+  (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-bwd hlq])) (* n 500)))
+
+(defn randomize-rotor []
+  (println "face-slot-scene: randomize-rotor")
+  (let [r (for [i (range (rand 8))] [i])
+        rots (reduce into [] r)]
+    (doall (for [i rots]
+             (delayed-rot-fwd i :top))))
+  (let [r (for [i (range (rand 8))] [i])
+        rots (reduce into [] r)]
+    (doall (for [i rots]
+             (delayed-rot-bwd i :mid))))
+  (let [r (for [i (range (rand 8))] [i])
+        rots (reduce into [] r)]
+    (doall (for [i rots]
+             (delayed-rot-fwd i :bottom)))))
+  ; (re-frame/dispatch [:face-slot-anim-fwd :top])
+  ; (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd :top])) 500)
+  ; (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd :top])) 1000))
+  ; (doall (for [i [0 1]]
+  ;          ; (println "hi, i=" i)
+  ;          (re-frame/dispatch [:face-slot-anim-fwd :top]))))
 
 (defn anim-bwd [hlq]
   ; (println "face-slot-scene: anim-bwd entered")
@@ -145,6 +285,18 @@
               (swap! *bottom-rotor-face* inc)
               (when (> @*bottom-rotor-face* 7)
                 (swap! *bottom-rotor-face* (fn [x] 0))))))
+
+(defn super-anim-bwd []
+  (println "event: super-anim-bwd")
+  (re-frame/dispatch [:face-slot-anim-bwd :top])
+  (re-frame/dispatch [:face-slot-anim-bwd :mid])
+  (re-frame/dispatch [:face-slot-anim-bwd :bottom]))
+
+(defn super-anim-fwd []
+  (println "event: super-anim-fwd")
+  (re-frame/dispatch [:face-slot-anim-fwd :top])
+  (re-frame/dispatch [:face-slot-anim-fwd :mid])
+  (re-frame/dispatch [:face-slot-anim-fwd :bottom]))
 
 ;;
 ;; run-time methods
@@ -222,4 +374,10 @@
                       (fn []
                         ; (println "hi"))])
                         (re-frame/dispatch [:init-bottom-rotor]))])
+  (re-frame/dispatch [:load-rotor-frame
+                      "models/slot_rotor/"
+                      "rotor_frame.gltf"
+                      (fn []
+                        (println "hi from load-rotor-frame cb"))])
+                        ; (re-frame/dispatch [:init-bottom-rotor]))])
   (init-gui))

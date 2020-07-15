@@ -105,6 +105,7 @@
     db))
 ;;
 ;; face-slot scene
+;;
 (re-frame/reg-event-db
  :init-face-slot-scene
  (fn [db _]
@@ -128,11 +129,27 @@
    db))
 
 (re-frame/reg-event-db
+  :face-slot-super-anim-bwd
+ (fn [db [_]]
+   ; (println "init-cube-fx event handler")
+   ;side effect
+   (face-slot-scene/super-anim-bwd)
+   db))
+
+(re-frame/reg-event-db
   :face-slot-anim-fwd
  (fn [db [_ hlq]]
    ; (println "init-cube-fx event handler")
    ;side effect
    (face-slot-scene/anim-fwd hlq)
+   db))
+
+(re-frame/reg-event-db
+  :face-slot-super-anim-fwd
+ (fn [db [_]]
+   ; (println "init-cube-fx event handler")
+   ;side effect
+   (face-slot-scene/super-anim-fwd)
    db))
 
 (re-frame/reg-event-db
@@ -154,6 +171,24 @@
  (fn [db [_]]
    (println "events: init-bottom-rotor")
    (face-slot-scene/init-bottom-rotor)
+   db))
+
+(re-frame/reg-event-db
+ :load-rotor-frame
+ (fn [db [_ path file user-cb]]
+   (face-slot-scene/load-rotor-frame path file user-cb)
+   db))
+
+(re-frame/reg-event-db
+ :toggle-rotor-frame
+ (fn [db [_]]
+   (face-slot-scene/toggle-rotor-frame)
+   db))
+
+(re-frame/reg-event-db
+ :randomize-rotor
+ (fn [db [_]]
+   (face-slot-scene/randomize-rotor)
    db))
 ;;
 ;; rotor
