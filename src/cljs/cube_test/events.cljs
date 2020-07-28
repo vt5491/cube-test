@@ -212,6 +212,24 @@
  (fn [db [_ hlq start-face]]
    (rotor/anim-fwd hlq start-face)
    db))
+
+(re-frame/reg-event-db
+ :rotor-init-snd
+ (fn [db [_]]
+   (rotor/init-snd)
+   db))
+
+(re-frame/reg-event-db
+ :rotor-play-rot-snd
+ (fn [db [_]]
+   (rotor/rotor-play-rot-snd)
+   db))
+
+(re-frame/reg-event-db
+ :rotor-stop-rot-snd
+ (fn [db [_]]
+   (rotor/rotor-stop-rot-snd)
+   db))
 ; (re-frame/reg-event-db
 ;  :load-rotor
 ;  (fn [db [_ path fn]]

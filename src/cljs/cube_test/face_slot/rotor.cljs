@@ -6,7 +6,8 @@
    [cube-test.scenes.face-slot-scene :as face-slot-scene]))
 
 (def rot-action-stem "rot_n1")
-
+(def rotor-rot-snd)
+(declare stop-rotor-rot-snd)
 ; "rot_n1.2-3.eyes"
 ; (re-pattern (str "^(" stm ")(\\d-\\d)\\.(.*)"))
 (defn slot-rotor-loaded [new-meshes particle-systems skeletons anim-groups hlq user-cb]
@@ -36,14 +37,18 @@
                              match-array (re-matches re ag-name)
                              new-name (str (get match-array 1) (get match-array 2))]
                          ; (println "new-name=" new-name)
-                         (set! (.-name %1) new-name)))))
+                         (set! (.-name %1) new-name))
                        ; (-> (.-onAnimationEndObservable %1) (.add (fn [] (println "animation " (.-name %1) " ended"))))
-                       ; (-> (.-onAnimationGroupEndObservable %1) (.add (fn [] (println "animation group " (.-name %1) " ended"))))
+                       (-> (.-onAnimationGroupEndObservable %1)
+                           (.add (fn []
+                                   (println "animation group " (.-name %1) " ended")))))))
+                                   ; (stop-rotor-rot-snd)))))))
                        ; (-> (.-onAnimationGroupLoopObservable %1)
                        ;     (.add
                        ;      (fn []
                        ;        (println "animation group loop" (.-name %1) " ended")
-                       ;        (.stop %1)))))))
+                       ;        ; (.stop %1)
+                       ;        (stop-rotor-rot-snd)))))))
                 ; (.-animationGroups main-scene/scene)
                 anim-groups))
     ; (let [rotor-anim-0-7 (-> main-scene/scene (.getAnimationGroupByName (str rot-action-stem ".0-7")))
@@ -126,6 +131,13 @@
                main-scene/scene
                #(slot-rotor-loaded %1 %2 %3 %4 hlq user-cb)))
 
+(defn rotor-play-rot-snd []
+  (println "play-rotor-rot-snd")
+  (.play rotor-rot-snd))
+
+(defn rotor-stop-rot-snd []
+  (println "stop-rotor-rot-snd")
+  (.stop rotor-rot-snd))
 
 (defn anim-bwd [hlq start-face]
   ; (println "anim-bwd: start-face=" start-face)
@@ -147,6 +159,7 @@
       3 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".3-2"))))
       2 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".2-1"))))
       1 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".1-0")))))))
+    ; (play-rotor-rot-snd)))
 
 (defn anim-fwd [hlq start-face]
   (let [hlq-str (name hlq)]
@@ -160,3 +173,11 @@
       5 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".5-6"))))
       6 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".6-7"))))
       7 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".7-0")))))))
+    ; (play-rotor-rot-snd)))
+
+
+(defn init-snd []
+  (set! rotor-rot-snd (bjs/Sound.
+                           "rotor-rot"
+                           "sounds/bicycle-rotating.ogg"
+                           main-scene/scene)))

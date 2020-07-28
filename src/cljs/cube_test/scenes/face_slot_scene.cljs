@@ -16,8 +16,11 @@
 (def top-rotor-uniq-id)
 (def mid-rotor-uniq-id)
 (def bottom-rotor-uniq-id)
-(def ^:const rotor-width 0.4)
-(def ^:const rotor-top-pos (bjs/Vector3. 0 2 0))
+; (def ^:const rotor-width 0.4)
+(def rotor-width 0.4)
+; (def ^:const rotor-top-pos (bjs/Vector3. 0 2 0))
+(def rotor-top-pos (bjs/Vector3. 0 2 0))
+(def rotor-rot-snd)
 
 (defn init-left-gui []
   (let [left-plane (bjs/Mesh.CreatePlane. "left-plane" 2)
@@ -228,18 +231,32 @@
 
 (defn randomize-rotor []
   (println "face-slot-scene: randomize-rotor")
-  (let [r (for [i (range (rand 8))] [i])
-        rots (reduce into [] r)]
-    (doall (for [i rots]
-             (delayed-rot-fwd i :top))))
-  (let [r (for [i (range (rand 8))] [i])
-        rots (reduce into [] r)]
-    (doall (for [i rots]
-             (delayed-rot-bwd i :mid))))
-  (let [r (for [i (range (rand 8))] [i])
-        rots (reduce into [] r)]
-    (doall (for [i rots]
-             (delayed-rot-fwd i :bottom)))))
+  (let [*max-rot* (atom 0)]
+    (let [r (for [i (range (rand 8))] [i])
+          rots (reduce into [] r)]
+      ; (re-frame/dispatch [:rotor-play-rot-snd])
+      (doall (for [i rots]
+               (delayed-rot-fwd i :top)))
+      (if (> (count rots) @*max-rot*) (swap! *max-rot* (fn [x] (count rots)))))
+
+    ; (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) (* (count rots) 500)))
+    (let [r (for [i (range (rand 8))] [i])
+          rots (reduce into [] r)]
+      ; (re-frame/dispatch [:rotor-play-rot-snd])
+      (doall (for [i rots]
+               (delayed-rot-bwd i :mid)))
+      (if (> (count rots) @*max-rot*) (swap! *max-rot* (fn [x] (count rots)))))
+      ; (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) (* (count rots) 500)))
+    (let [r (for [i (range (rand 8))] [i])
+          rots (reduce into [] r)]
+      ; (re-frame/dispatch [:rotor-play-rot-snd])
+      (doall (for [i rots]
+               (delayed-rot-fwd i :bottom)))
+      (if (> (count rots) @*max-rot*) (swap! *max-rot* (fn [x] (count rots)))))
+    ; (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) (* (count rots) 500))))
+    (println "randomize-rotor: *max-rot*=" @*max-rot*)
+    (re-frame/dispatch [:rotor-play-rot-snd])
+    (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) (* @*max-rot* 500))))
   ; (re-frame/dispatch [:face-slot-anim-fwd :top])
   ; (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd :top])) 500)
   ; (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd :top])) 1000))
@@ -341,6 +358,14 @@
     ; (set! (.-position rotor) (.add rotor-pos (bjs/Vector3. 0 0 0)))
     (set! (.-position rotor) (.subtract rotor-top-pos (bjs/Vector3. 0 (* 2 rotor-width) 0)))))
 
+(defn init-snd []
+  (re-frame/dispatch [:rotor-init-snd]))
+  ; (set! rotor-rot-snd (bjs/Sound.
+  ;                          "tile-selected"
+  ;                          ; "sounds/104532__skyumori__door-open-01.wav"
+  ;                          "sounds/bicycle-rotating.ogg"
+  ;                          main-scene/scene)))
+
 (defn init []
   (println "face-slot-scene.init: entered")
   (let [light (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
@@ -380,4 +405,5 @@
                       (fn []
                         (println "hi from load-rotor-frame cb"))])
                         ; (re-frame/dispatch [:init-bottom-rotor]))])
-  (init-gui))
+  (init-gui)
+  (init-snd))

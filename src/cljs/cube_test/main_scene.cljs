@@ -251,7 +251,9 @@
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [ quat (-> camera .-rotationQuaternion)]
       ; cur-angles (.toEulerAngles quat)]
-      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
+      ;; Note: do runtime vr camera rotation here
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
+      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
 
