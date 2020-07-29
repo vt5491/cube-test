@@ -7,7 +7,8 @@
 
 (def rot-action-stem "rot_n1")
 (def rotor-rot-snd)
-(declare stop-rotor-rot-snd)
+(def ^:dynamic *auto-stop-rotor-snds* (atom true))
+(declare rotor-stop-rot-snd)
 ; "rot_n1.2-3.eyes"
 ; (re-pattern (str "^(" stm ")(\\d-\\d)\\.(.*)"))
 (defn slot-rotor-loaded [new-meshes particle-systems skeletons anim-groups hlq user-cb]
@@ -41,7 +42,9 @@
                        ; (-> (.-onAnimationEndObservable %1) (.add (fn [] (println "animation " (.-name %1) " ended"))))
                        (-> (.-onAnimationGroupEndObservable %1)
                            (.add (fn []
-                                   (println "animation group " (.-name %1) " ended")))))))
+                                   (println "animation group " (.-name %1) " ended")
+                                   (when @*auto-stop-rotor-snds*
+                                     (rotor-stop-rot-snd))))))))
                                    ; (stop-rotor-rot-snd)))))))
                        ; (-> (.-onAnimationGroupLoopObservable %1)
                        ;     (.add
@@ -51,23 +54,6 @@
                        ;        (stop-rotor-rot-snd)))))))
                 ; (.-animationGroups main-scene/scene)
                 anim-groups))
-    ; (let [rotor-anim-0-7 (-> main-scene/scene (.getAnimationGroupByName (str rot-action-stem ".0-7")))
-    ;       rotor-anim-7-6 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.7-6"))
-    ;       rotor-anim-6-5 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.6-5"))
-    ;       rotor-anim-5-4 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.5-4"))
-    ;       rotor-anim-4-3 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.4-3"))
-    ;       rotor-anim-3-2 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.3-2"))
-    ;       rotor-anim-2-1 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.2-1"))
-    ;       rotor-anim-1-0 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.1-0"))
-    ;       ;; fwd anims
-    ;       rotor-anim-7-0 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.7-0"))
-    ;       rotor-anim-0-1 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.0-1"))
-    ;       rotor-anim-1-2 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.1-2"))
-    ;       rotor-anim-2-3 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.2-3"))
-    ;       rotor-anim-3-4 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.3-4"))
-    ;       rotor-anim-4-5 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.4-5"))
-    ;       rotor-anim-5-6 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.5-6"))
-    ;       rotor-anim-6-7 (-> main-scene/scene (.getAnimationGroupByName "rotorAction.6-7"))])
     (let [rotor-anim-0-7 (-> main-scene/scene (.getAnimationGroupByName (str rot-action-stem ".0-7")))
           rotor-anim-7-6 (-> main-scene/scene (.getAnimationGroupByName (str rot-action-stem ".7-6")))
           rotor-anim-6-5 (-> main-scene/scene (.getAnimationGroupByName (str rot-action-stem ".6-5")))
@@ -139,42 +125,51 @@
   (println "stop-rotor-rot-snd")
   (.stop rotor-rot-snd))
 
-(defn anim-bwd [hlq start-face]
-  ; (println "anim-bwd: start-face=" start-face)
-  (let [hlq-str (name hlq)]
-    (condp = start-face
-      ; 0 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.0-7"))))
-      ; 7 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.7-6"))))
-      ; 6 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.6-5"))))
-      ; 5 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.5-4"))))
-      ; 4 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.4-3"))))
-      ; 3 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.3-2"))))
-      ; 2 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.2-1"))))
-      ; 1 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" "rotorAction.1-0"))))
-      0 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".0-7"))))
-      7 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".7-6"))))
-      6 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".6-5"))))
-      5 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".5-4"))))
-      4 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".4-3"))))
-      3 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".3-2"))))
-      2 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".2-1"))))
-      1 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".1-0")))))))
-    ; (play-rotor-rot-snd)))
+(defn anim-bwd
+  ([hlq start-face]
+   ; (println "anim-bwd: 2-arg path")
+   (anim-bwd hlq start-face nil))
+  ([hlq start-face mute]
+   ; (println "anim-bwd: mute=" mute)
+   ; (when (not mute)
+   ;   (js-debugger))
+   (let [hlq-str (name hlq)]
+     (condp = start-face
+       0 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".0-7"))))
+       7 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".7-6"))))
+       6 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".6-5"))))
+       5 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".5-4"))))
+       4 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".4-3"))))
+       3 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".3-2"))))
+       2 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".2-1"))))
+       1 (.play (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".1-0")))))
+     (when (not mute)
+       (rotor-play-rot-snd)))))
 
-(defn anim-fwd [hlq start-face]
-  (let [hlq-str (name hlq)]
-    ; (println "anim-fwd: start-face=" start-face)
-    (condp = start-face
-      0 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".0-1"))))
-      1 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".1-2"))))
-      2 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".2-3"))))
-      3 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".3-4"))))
-      4 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".4-5"))))
-      5 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".5-6"))))
-      6 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".6-7"))))
-      7 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".7-0")))))))
-    ; (play-rotor-rot-snd)))
+(defn anim-fwd
+  ([hlq start-face]
+   (anim-fwd hlq start-face nil))
+  ([hlq start-face mute]
+   ; (println "anim-fwd: mute=" mute)
+   (let [hlq-str (name hlq)]
+     ; (println "anim-fwd: start-face=" start-face)
+     (condp = start-face
+       0 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".0-1"))))
+       1 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".1-2"))))
+       2 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".2-3"))))
+       3 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".3-4"))))
+       4 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".4-5"))))
+       5 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".5-6"))))
+       6 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".6-7"))))
+       7 (.start (-> main-scene/scene (.getAnimationGroupByName (str hlq-str "-" rot-action-stem ".7-0")))))
+     (when (not mute)
+       (rotor-play-rot-snd)))))
 
+(defn auto-stop-rotor-snds
+  ([]
+   @auto-stop-rotor-snds)
+  ([val]
+   (swap! *auto-stop-rotor-snds* (fn [x] val))))
 
 (defn init-snd []
   (set! rotor-rot-snd (bjs/Sound.

@@ -39,3 +39,25 @@
 
 (reduce #(cons %2 %1) [1 2 3] [4 5 6] [8 9])
 (reduce into [] a)
+
+(def a [1 2 3])
+(def mr 0)
+
+(if (> (count a) @*mr*) (swap! *mr* (fn [x] (count a))))
+
+(set! mr 1)
+(def ^:dynamic *mr* (atom 0))
+(swap! *mr* #(1))
+(swap! *mr* (fn [x] 1))
+
+(not nil)
+
+(def a (atom false))
+
+(prn "a=" @a)
+
+(defn setit [val]
+  (swap! a (fn [x] val)))
+
+(setit true)
+(setit false)

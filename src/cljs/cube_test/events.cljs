@@ -122,35 +122,35 @@
 (re-frame/reg-event-db
   ; :rotor-anim-bwd
   :face-slot-anim-bwd
- (fn [db [_ hlq]]
-   ; (println "init-cube-fx event handler")
+ (fn [db [_ hlq mute]]
+   ; (println "events.face-slot-anim-bwd: mute=" mute)
    ;side effect
-   (face-slot-scene/anim-bwd hlq)
+   (face-slot-scene/anim-bwd hlq mute)
    db))
 
-(re-frame/reg-event-db
-  :face-slot-super-anim-bwd
- (fn [db [_]]
-   ; (println "init-cube-fx event handler")
-   ;side effect
-   (face-slot-scene/super-anim-bwd)
-   db))
+; (re-frame/reg-event-db
+;   :face-slot-super-anim-bwd
+;  (fn [db [_]]
+;    ; (println "init-cube-fx event handler")
+;    ;side effect
+;    (face-slot-scene/super-anim-bwd)
+;    db))
 
 (re-frame/reg-event-db
   :face-slot-anim-fwd
- (fn [db [_ hlq]]
+ (fn [db [_ hlq mute]]
    ; (println "init-cube-fx event handler")
    ;side effect
-   (face-slot-scene/anim-fwd hlq)
+   (face-slot-scene/anim-fwd hlq mute)
    db))
-
-(re-frame/reg-event-db
-  :face-slot-super-anim-fwd
- (fn [db [_]]
-   ; (println "init-cube-fx event handler")
-   ;side effect
-   (face-slot-scene/super-anim-fwd)
-   db))
+;
+; (re-frame/reg-event-db
+;   :face-slot-super-anim-fwd
+;  (fn [db [_]]
+;    ; (println "init-cube-fx event handler")
+;    ;side effect
+;    (face-slot-scene/super-anim-fwd)
+;    db))
 
 (re-frame/reg-event-db
  :init-top-rotor
@@ -202,15 +202,15 @@
 
 (re-frame/reg-event-db
  :rotor-anim-bwd
- (fn [db [_ hlq start-face]]
-   ; (println "event: rotor-anim-bwd")
-   (rotor/anim-bwd hlq start-face)
+ (fn [db [_ hlq start-face mute]]
+   ; (println "event: rotor-anim-bwd: mute=" mute)
+   (rotor/anim-bwd hlq start-face mute)
    db))
 
 (re-frame/reg-event-db
  :rotor-anim-fwd
- (fn [db [_ hlq start-face]]
-   (rotor/anim-fwd hlq start-face)
+ (fn [db [_ hlq start-face mute]]
+   (rotor/anim-fwd hlq start-face mute)
    db))
 
 (re-frame/reg-event-db
@@ -230,6 +230,13 @@
  (fn [db [_]]
    (rotor/rotor-stop-rot-snd)
    db))
+
+(re-frame/reg-event-db
+ :rotor-auto-stop-rotor-snds
+ (fn [db [_ val]]
+   (rotor/auto-stop-rotor-snds val)
+   db))
+
 ; (re-frame/reg-event-db
 ;  :load-rotor
 ;  (fn [db [_ path fn]]

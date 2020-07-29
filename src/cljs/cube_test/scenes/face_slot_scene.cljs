@@ -8,6 +8,7 @@
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]))
+   ; [cube-test.face-slot.rotor :as rotor]))
 
 ; (def ^:dynamic *top-face* (atom 5))
 (def ^:dynamic *top-rotor-face* (atom 0))
@@ -224,10 +225,10 @@
       (.setEnabled frame true))))
 
 (defn delayed-rot-fwd [n hlq]
-  (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd hlq])) (* n 500)))
+  (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd hlq true])) (* n 500)))
 
 (defn delayed-rot-bwd [n hlq]
-  (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-bwd hlq])) (* n 500)))
+  (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-bwd hlq true])) (* n 500)))
 
 (defn randomize-rotor []
   (println "face-slot-scene: randomize-rotor")
@@ -255,8 +256,14 @@
       (if (> (count rots) @*max-rot*) (swap! *max-rot* (fn [x] (count rots)))))
     ; (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) (* (count rots) 500))))
     (println "randomize-rotor: *max-rot*=" @*max-rot*)
+    ; (swap! rotor/*auto-stop-rotor-snds* false)
+    ;; turn off auto stopping of sound on individual rotor anims.
+    (re-frame/dispatch [:rotor-auto-stop-rotor-snds false])
     (re-frame/dispatch [:rotor-play-rot-snd])
-    (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) (* @*max-rot* 500))))
+    (let [timer-pop (* @*max-rot* 500)]
+      (js/setTimeout #(do (re-frame/dispatch [:rotor-stop-rot-snd])) timer-pop)
+      ;; turn auto-stopping back on at end of the collective animation
+      (js/setTimeout #(re-frame/dispatch [:rotor-auto-stop-rotor-snds true]) timer-pop))))
   ; (re-frame/dispatch [:face-slot-anim-fwd :top])
   ; (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd :top])) 500)
   ; (js/setTimeout #(do (re-frame/dispatch [:face-slot-anim-fwd :top])) 1000))
@@ -264,56 +271,61 @@
   ;          ; (println "hi, i=" i)
   ;          (re-frame/dispatch [:face-slot-anim-fwd :top]))))
 
-(defn anim-bwd [hlq]
-  ; (println "face-slot-scene: anim-bwd entered")
-  (condp = hlq
-    :top (do
-           (re-frame/dispatch [:rotor-anim-bwd hlq @*top-rotor-face*])
-           (swap! *top-rotor-face* dec)
-           (when (< @*top-rotor-face* 0)
-             (swap! *top-rotor-face* (fn [x] 7))))
-    :mid (do
-           (re-frame/dispatch [:rotor-anim-bwd hlq @*mid-rotor-face*])
-           (swap! *mid-rotor-face* dec)
-           (when (< @*mid-rotor-face* 0)
-             (swap! *mid-rotor-face* (fn [x] 7))))
-    :bottom (do
-              (re-frame/dispatch [:rotor-anim-bwd hlq @*bottom-rotor-face*])
-              (swap! *bottom-rotor-face* dec)
-              (when (< @*bottom-rotor-face* 0)
-                (swap! *bottom-rotor-face* (fn [x] 7))))))
+(defn anim-bwd
+  ([hlq]
+   (anim-bwd hlq nil))
+  ([hlq mute]
+   ; (println "face-slot-scene.anim-bwd: mute=" mute)
+   (condp = hlq
+     :top (do
+            (re-frame/dispatch [:rotor-anim-bwd hlq @*top-rotor-face* mute])
+            (swap! *top-rotor-face* dec)
+            (when (< @*top-rotor-face* 0)
+              (swap! *top-rotor-face* (fn [x] 7))))
+     :mid (do
+            (re-frame/dispatch [:rotor-anim-bwd hlq @*mid-rotor-face* mute])
+            (swap! *mid-rotor-face* dec)
+            (when (< @*mid-rotor-face* 0)
+              (swap! *mid-rotor-face* (fn [x] 7))))
+     :bottom (do
+               (re-frame/dispatch [:rotor-anim-bwd hlq @*bottom-rotor-face* mute])
+               (swap! *bottom-rotor-face* dec)
+               (when (< @*bottom-rotor-face* 0)
+                 (swap! *bottom-rotor-face* (fn [x] 7)))))))
 
-(defn anim-fwd [hlq]
-  ; (println "face-slot-scene: anim-bwd entered")
-  (condp = hlq
-    :top (do
-           (println "*top-rotor-face=" *top-rotor-face*)
-           (re-frame/dispatch [:rotor-anim-fwd hlq @*top-rotor-face*])
-           (swap! *top-rotor-face* inc)
-           (when (> @*top-rotor-face* 7)
-             (swap! *top-rotor-face* (fn [x] 0))))
-    :mid (do
-           (re-frame/dispatch [:rotor-anim-fwd hlq @*mid-rotor-face*])
-           (swap! *mid-rotor-face* inc)
-           (when (> @*mid-rotor-face* 7)
-             (swap! *mid-rotor-face* (fn [x] 0))))
-    :bottom (do
-              (re-frame/dispatch [:rotor-anim-fwd hlq @*bottom-rotor-face*])
-              (swap! *bottom-rotor-face* inc)
-              (when (> @*bottom-rotor-face* 7)
-                (swap! *bottom-rotor-face* (fn [x] 0))))))
+(defn anim-fwd
+  ([hlq]
+   (anim-fwd hlq nil))
+  ([hlq mute]
+   (condp = hlq
+     :top (do
+            (println "*top-rotor-face=" *top-rotor-face* ",mute=" mute)
+            (re-frame/dispatch [:rotor-anim-fwd hlq @*top-rotor-face* mute])
+            (swap! *top-rotor-face* inc)
+            (when (> @*top-rotor-face* 7)
+              (swap! *top-rotor-face* (fn [x] 0))))
+     :mid (do
+            (re-frame/dispatch [:rotor-anim-fwd hlq @*mid-rotor-face*] mute)
+            (swap! *mid-rotor-face* inc)
+            (when (> @*mid-rotor-face* 7)
+              (swap! *mid-rotor-face* (fn [x] 0))))
+     :bottom (do
+               (re-frame/dispatch [:rotor-anim-fwd hlq @*bottom-rotor-face* mute])
+               (swap! *bottom-rotor-face* inc)
+               (when (> @*bottom-rotor-face* 7)
+                 (swap! *bottom-rotor-face* (fn [x] 0)))))))
 
-(defn super-anim-bwd []
-  (println "event: super-anim-bwd")
-  (re-frame/dispatch [:face-slot-anim-bwd :top])
-  (re-frame/dispatch [:face-slot-anim-bwd :mid])
-  (re-frame/dispatch [:face-slot-anim-bwd :bottom]))
-
-(defn super-anim-fwd []
-  (println "event: super-anim-fwd")
-  (re-frame/dispatch [:face-slot-anim-fwd :top])
-  (re-frame/dispatch [:face-slot-anim-fwd :mid])
-  (re-frame/dispatch [:face-slot-anim-fwd :bottom]))
+; (defn super-anim-bwd []
+;   (println "event: super-anim-bwd")
+;   (re-frame/dispatch [:face-slot-anim-bwd :top])
+;   (re-frame/dispatch [:face-slot-anim-bwd :mid])
+;   (re-frame/dispatch [:face-slot-anim-bwd :bottom]))
+;
+; (defn super-anim-fwd []
+;   (println "event: super-anim-fwd")
+;   (re-frame/dispatch [:face-slot-anim-fwd :top])
+;   (re-frame/dispatch [:face-slot-anim-fwd :mid])
+;   (re-frame/dispatch [:face-slot-anim-fwd :bottom]))
 
 ;;
 ;; run-time methods
