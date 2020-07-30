@@ -118,11 +118,11 @@
                #(slot-rotor-loaded %1 %2 %3 %4 hlq user-cb)))
 
 (defn rotor-play-rot-snd []
-  (println "play-rotor-rot-snd")
+  ; (println "play-rotor-rot-snd")
   (.play rotor-rot-snd))
 
 (defn rotor-stop-rot-snd []
-  (println "stop-rotor-rot-snd")
+  ; (println "stop-rotor-rot-snd")
   (.stop rotor-rot-snd))
 
 (defn anim-bwd

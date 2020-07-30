@@ -11,6 +11,7 @@
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.scenes.cube-spin-scene :as cube-spin-scene]
    [cube-test.scenes.face-slot-scene :as face-slot-scene]
+   [cube-test.scenes.tic-tac-attack-scene :as tta-scene]
    [cube-test.face-slot.rotor :as rotor]))
 
 
@@ -90,7 +91,8 @@
    db))
 
 ;;
-;; cube-spin scene
+;; scene initialization
+;;
 (re-frame/reg-event-db
  :init-cube-spin-scene
  (fn [db _]
@@ -103,6 +105,13 @@
   (fn [db [_]]
     (cube-spin-scene/run-scene)
     db))
+
+(re-frame/reg-event-db
+ :init-tic-tac-attack-scene
+ (fn [db _]
+   ;side effect
+   (tta-scene/init)
+   db))
 ;;
 ;; face-slot scene
 ;;
@@ -312,3 +321,22 @@
    ; (js-debugger)
    (-> main-scene/scene (.-debugLayer) (.show))
    db))
+
+;;
+;; tic-tac-attack scene
+;;
+(re-frame/reg-event-db
+  :run-tic-tac-attack-scene
+  (fn [db [_]]
+    (tta-scene/run-scene)
+    db))
+
+(re-frame/reg-event-db
+ :init-cross
+ (fn [db [_]]
+   (tta-scene/init-cross)))
+
+(re-frame/reg-event-db
+ :init-ring-plex
+ (fn [db [_]]
+   (tta-scene/init-ring-plex)))
