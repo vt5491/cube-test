@@ -340,3 +340,23 @@
  :init-ring-plex
  (fn [db [_]]
    (tta-scene/init-ring-plex)))
+
+(re-frame/reg-event-db
+ :init-rubiks-cube
+ (fn [db [_]]
+   (tta-scene/init-rubiks-cube)))
+
+(re-frame/reg-event-db
+ :tta-rot-cube
+ (fn [db [_]]
+   (tta-scene/rot-cube)))
+
+(re-frame/reg-event-db
+ :tta-rot-cube-2
+ (fn [db [_]]
+   (tta-scene/rot-cube-2)))
+
+(re-frame/reg-event-db
+ :tta-rot-cube-3
+ (fn [db [_]]
+   (tta-scene/rot-cube-3)))
