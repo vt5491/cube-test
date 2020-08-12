@@ -12,7 +12,8 @@
    [cube-test.scenes.cube-spin-scene :as cube-spin-scene]
    [cube-test.scenes.face-slot-scene :as face-slot-scene]
    [cube-test.scenes.tic-tac-attack-scene :as tta-scene]
-   [cube-test.face-slot.rotor :as rotor]))
+   [cube-test.face-slot.rotor :as rotor]
+   [cube-test.tic-tac-attack.box-grid :as box-grid]))
 
 
 (re-frame/reg-event-db
@@ -334,29 +335,102 @@
 (re-frame/reg-event-db
  :init-cross
  (fn [db [_]]
-   (tta-scene/init-cross)))
+   (tta-scene/init-cross)
+   db))
 
 (re-frame/reg-event-db
  :init-ring-plex
  (fn [db [_]]
-   (tta-scene/init-ring-plex)))
+   (tta-scene/init-ring-plex)
+   db))
 
 (re-frame/reg-event-db
  :init-rubiks-cube
  (fn [db [_]]
-   (tta-scene/init-rubiks-cube)))
+   (tta-scene/init-rubiks-cube)
+   db))
 
 (re-frame/reg-event-db
  :tta-rot-cube
  (fn [db [_]]
-   (tta-scene/rot-cube)))
+   (tta-scene/rot-cube)
+   db))
 
 (re-frame/reg-event-db
  :tta-rot-cube-2
  (fn [db [_]]
-   (tta-scene/rot-cube-2)))
+   (tta-scene/rot-cube-2)
+   db))
 
 (re-frame/reg-event-db
  :tta-rot-cube-3
  (fn [db [_]]
-   (tta-scene/rot-cube-3)))
+   (tta-scene/rot-cube-3)
+   db))
+
+(re-frame/reg-event-db
+ :tta-left-side-anim
+ (fn [db [_]]
+   (tta-scene/rubiks-cube-left-side-anim (db :rubiks-grid))
+   db))
+
+(re-frame/reg-event-db
+ :tta-left-side-rot
+ (fn [db [_]]
+   (tta-scene/rubiks-cube-left-side-rot (db :rubiks-grid))
+   db))
+
+;;
+;; tic-tac-attack/box-grid
+;;
+
+;; not currently used
+(re-frame/reg-event-db
+ :init-grid
+ (fn [db [_ grid-key]]
+   (box-grid/init-grid db grid-key)
+   db))
+
+(re-frame/reg-event-db
+ :init-rubiks-grid
+ (fn [db [_]]
+   ; (let [r (box-grid/init-rubiks-grid db)]
+   ;   (println "events.init-rubiks-grid: result=" db))
+   ; db
+   ; (box-grid/init-rubiks-grid db)
+   ; (assoc db :rubiks-grid (box-grid/init-rubiks-grid db))
+   ; (let [r (assoc db :abc 7)]
+   ;   (println "events: r=" r)
+   ;   r)
+   (let [r (assoc db :rubiks-grid (box-grid/init-rubiks-grid))]
+     ; (println "events: r=" r)
+     r)))
+     ; (doall r))))
+     ; (js-debugger))))
+   ; (assoc db :abc 7)))
+
+;; event utils
+(re-frame/reg-event-db
+ :print-db
+ (fn [db [_]]
+   (println "events.print-db: db=" db)
+   db))
+
+;; the following two methods are if something you added to the db are lazy
+;; and haven't been evaluated yet.
+(re-frame/reg-event-db
+ :unlazy-db
+ (fn [db [_]]
+   ; (doall db)
+   db))
+
+(re-frame/reg-event-db
+ :trampoline-db
+ (fn [db [_]]
+   db))
+
+(re-frame/reg-event-db
+ :call-doit-with-db
+ (fn [db [_]]
+   (tta-scene/do-it db)
+   db))

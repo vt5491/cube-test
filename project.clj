@@ -17,6 +17,12 @@
 
   :source-paths ["src/clj" "src/cljs"]
 
+  ;;vt add for re-frame-10x
+  ; :compiler    {
+  ;                :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+  ;                :preloads             [day8.re-frame-10x.preload]
+  ;                :main                 "re-con.core"}
+  ;;vt end
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
 
@@ -35,8 +41,14 @@
                                :output-dir "resources/public/js/compiled"
                                :asset-path "/js/compiled"
                                :modules {:app {:init-fn cube-test.core/init
-                                               :preloads [devtools.preload]}}
-
+                                               :preloads [devtools.preload
+                                                          ;;vt add
+                                                          day8.re-frame-10x.preload]}}
+                                ;;vt add
+                               :dev {:compiler-options {
+                                                        :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                        :preloads             [day8.re-frame-10x.preload]}}
+                                ;;vt end
                                :devtools {:http-root "resources/public"
                                           :http-port 8281}}}}
 
@@ -54,8 +66,18 @@
 
   :profiles
   {:dev
-   {:dependencies [[binaryage/devtools "1.0.0"]]
+   {:dependencies [[binaryage/devtools "1.0.0"]
+                   ;;vt add
+                   [day8.re-frame/re-frame-10x "0.7.0"]]
+                   ; [day8.re-frame/re-frame-10x "0.4.7"]]
+                   ; [day8.re-frame/tracing "0.5.3"]]
+                   ;;vt end
     :source-paths ["dev"]}
+    ;; vt add for re-frame-10x
+                ; [day8.re-frame/re-frame-10x "0.7.0"]}
+                ; [day8.re-frame/tracing "0.5.3"]}
+    ;;vt end
+
 
    :prod {}}
 

@@ -7,10 +7,12 @@
 		"babylonjs-loaders": "^4.1.0",
 		"babylonjs-materials": "^4.1.0",
 		"cannon": "^0.6.2",
+		"highlight.js": "9.18.1",
 		"oimo": "^1.0.9",
 		"pepjs": "^0.5.2",
 		"react": "16.13.0",
 		"react-dom": "16.13.0",
+		"react-highlight.js": "1.0.7",
 		"webxr-polyfill": "^2.0.3"
 	},
 	"devDependencies": {

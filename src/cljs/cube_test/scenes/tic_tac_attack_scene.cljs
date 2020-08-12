@@ -13,6 +13,7 @@
 (def cross2)
 (def ring-plex2)
 (def cube-anim)
+; (def rubiks-cube-grid)
 ;;
 ;; load models
 ;;
@@ -85,7 +86,8 @@
         top-hdr (bjs-gui/TextBlock.)
         rot-btn (bjs-gui/Button.CreateSimpleButton. "rot-btn" "rotate")
         rot-btn-2 (bjs-gui/Button.CreateSimpleButton. "rot-btn-2" "rotate2")
-        rot-btn-3 (bjs-gui/Button.CreateSimpleButton. "rot-btn-3" "rotate3")]
+        rot-btn-3 (bjs-gui/Button.CreateSimpleButton. "rot-btn-3" "rotate3")
+        left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")]
     (set! (.-position top-plane)(bjs/Vector3. 0 6 -2))
     (.addControl top-adv-texture top-pnl)
     (set! (.-text top-hdr) "commands")
@@ -93,10 +95,11 @@
     (set! (.-fontSize top-hdr) "80")
     (set! (.-color top-hdr) "white")
     ;; create 4 rows and 2 cols
-    (.addRowDefinition top-pnl 0.25 false)
-    (.addRowDefinition top-pnl 0.25)
-    (.addRowDefinition top-pnl 0.25)
-    (.addRowDefinition top-pnl 0.25)
+    (.addRowDefinition top-pnl 0.20 false)
+    (.addRowDefinition top-pnl 0.20)
+    (.addRowDefinition top-pnl 0.20)
+    (.addRowDefinition top-pnl 0.20)
+    (.addRowDefinition top-pnl 0.20)
     (.addColumnDefinition top-pnl 0.5)
     (.addColumnDefinition top-pnl 0.5)
     ; (.addControl top-pnl top-hdr)
@@ -128,7 +131,17 @@
     (-> rot-btn-3 .-onPointerUpObservable (.add (fn [value]
                                                   (println "rot-btn-3 pressed")
                                                   (re-frame/dispatch [:tta-rot-cube-3]))))
-    (.addControl top-pnl rot-btn-3 3 0)))
+    (.addControl top-pnl rot-btn-3 3 0)
+
+    ;; left-side-rot-btn
+    (set! (.-autoScale left-side-rot-btn) true)
+    (set! (.-fontSize left-side-rot-btn) "100")
+    (set! (.-color left-side-rot-btn) "white")
+    (-> left-side-rot-btn .-onPointerUpObservable (.add (fn [value]
+                                                          (println "left-side-rot-btn pressed")
+                                                          (re-frame/dispatch [:tta-left-side-anim])
+                                                          (re-frame/dispatch [:tta-left-side-rot]))))
+    (.addControl top-pnl left-side-rot-btn 4 0)))
 
 (defn rot-cube []
   (println "now in rot-cube")
@@ -188,6 +201,9 @@
 ;;
 ;; init
 ;;
+
+;; These are application level callback handlers when a mesh is loaded.  We just logically separate
+;; them from the physical level handlers, which is handled by babylonjs' 'importMesh'
 (defn init-cross []
   (let [cross-arch (-> main-scene/scene (.getNodeByName "cross-arch"))]
     (set! (.-position cross-arch)(bjs/Vector3. -1 1 0))
@@ -248,6 +264,88 @@
     (.setKeys cube-anim keys))
   (let [red-cube-1 (.getMeshByID main-scene/scene "red_cube_1")]
     (set! (.-animations red-cube-1) (array cube-anim))))
+;; end mesh load application level handlers
+
+(defn rubiks-cube-left-side-anim [rubiks-grid]
+  (let [anim (bjs/Animation. "anim" "rotationQuaternion" 30 bjs/Animation.ANIMATIONTYPE_QUATERNION bjs/Animation.ANIMATIONLOOPMODE_CONSTANT)
+        keys (array)
+        quat90 (bjs/Quaternion.RotationAxis bjs/Axis.X (* base/ONE-DEG 90))]
+        ; quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))
+        ; quat360 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 360))]
+    (.push keys (js-obj "frame" 0 "value" (bjs/Quaternion.Identity)))
+    (.push keys (js-obj "frame" 30 "value" quat90))
+    (.setKeys anim keys)
+    (let [;;top row
+          ; left-top-rear-cube (get-in rubiks-grid [:rear :1])
+          left-top-mid-cube (get-in rubiks-grid [:mid :1])
+          left-top-front-cube (get-in rubiks-grid [:front :1])
+          ;; front row
+          ; left-front-top-cube (get-in rubiks-grid [:front :1])
+          left-front-mid-cube (get-in rubiks-grid [:front :4])
+          left-front-bottom-cube (get-in rubiks-grid [:front :7])
+          ;; bottom row
+          left-bottom-mid-cube (get-in rubiks-grid [:mid :7])
+          left-bottom-rear-cube (get-in rubiks-grid [:rear :7])
+          ;; rear row
+          left-rear-mid-cube (get-in rubiks-grid [:rear :4])
+          left-rear-top-cube (get-in rubiks-grid [:rear :1])
+          ;; center
+          left-center-cube (get-in rubiks-grid [:mid :4])]
+      ;; top row
+      ; (set! (.-animations left-top-rear-cube) (array anim))
+      (set! (.-animations left-top-mid-cube) (array anim))
+      (set! (.-animations left-top-front-cube) (array anim))
+      ;; front row
+      ; (set! (.-animations left-front-top-cube) (array anim))
+      (set! (.-animations left-front-mid-cube) (array anim))
+      (set! (.-animations left-front-bottom-cube) (array anim))
+      ;; bottom row
+      (set! (.-animations left-bottom-mid-cube) (array anim))
+      (set! (.-animations left-bottom-rear-cube) (array anim))
+      ;; rear row
+      (set! (.-animations left-rear-mid-cube) (array anim))
+      (set! (.-animations left-rear-top-cube) (array anim))
+      ;; center
+      (set! (.-animations left-center-cube) (array anim)))))
+
+(defn rubiks-cube-left-side-rot [rubiks-grid]
+  (let [scene main-scene/scene
+        ;; top row
+        ; left-top-rear-cube (get-in rubiks-grid [:rear :1])
+        left-top-mid-cube (get-in rubiks-grid [:mid :1])
+        left-top-front-cube (get-in rubiks-grid [:front :1])
+        ;; front row
+        ; left-front-top-cube (get-in rubiks-grid [:front :1])
+        left-front-mid-cube (get-in rubiks-grid [:front :4])
+        left-front-bottom-cube (get-in rubiks-grid [:front :7])
+        ;; bottom row
+        left-bottom-mid-cube (get-in rubiks-grid [:mid :7])
+        left-bottom-rear-cube (get-in rubiks-grid [:rear :7])
+        ;; rear row
+        left-rear-mid-cube (get-in rubiks-grid [:rear :4])
+        left-rear-top-cube (get-in rubiks-grid [:rear :1])
+        ;; center
+        left-center-cube (get-in rubiks-grid [:mid :4])]
+    ;; top row
+    ; (.beginAnimation scene left-top-rear-cube 0 30 true)
+    (.beginAnimation scene left-top-mid-cube 0 30 true)
+    (.beginAnimation scene left-top-front-cube 0 30 true)
+    ;; front row
+    ; (.beginAnimation scene left-front-top-cube 0 30 true)
+    (.beginAnimation scene left-front-mid-cube 0 30 true)
+    (.beginAnimation scene left-front-bottom-cube 0 30 true)
+    ;; bottom row
+    (.beginAnimation scene left-bottom-mid-cube 0 30 true)
+    (.beginAnimation scene left-bottom-rear-cube 0 30 true)
+    ;; rear row
+    (.beginAnimation scene left-rear-mid-cube 0 30 true)
+    (.beginAnimation scene left-rear-top-cube 0 30 true)
+    ;; center
+    (.beginAnimation scene left-center-cube 0 30 true)
+    ;; timer-pop
+    (js/setTimeout
+     #(do (println "timer-pop: rubiks-grid=" rubiks-grid))
+     1000)))
 
 (defn init []
   (println "tic-tac-attack.init: entered")
@@ -265,5 +363,22 @@
   (load-rubiks-cube
    "models/rubiks_cube/"
    "rubiks_cube.glb"
-   (fn [] (re-frame/dispatch [:init-rubiks-cube])))
-  (init-top-gui))
+   (fn [] (do
+            (re-frame/dispatch [:init-rubiks-cube])
+            (println "rubiks-grid=" (re-frame/dispatch [:init-rubiks-grid]))
+            ; (re-frame/dispatch [:print-db])
+            (re-frame/dispatch [:unlazy-db])
+            (let [s (re-frame/dispatch [:get-main-scene])]
+              (println "s=" s))
+            (let [db (re-frame/dispatch [:unlazy-db])]
+              (println "db=" db)
+              (println "db.main-scene=" (db :main-scene))))))
+            ; (re-frame/dispatch [:trampoline-db]))))
+            ; (js-debugger))))
+  (init-top-gui)
+  (println "now dispatching do-it")
+  (re-frame/dispatch [:call-doit-with-db]))
+
+(defn do-it [db]
+  (println "do-it: db=" db)
+  (println "do-it: db.main-scene=" (db :main-scene)))

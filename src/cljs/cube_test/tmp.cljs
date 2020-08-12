@@ -54,10 +54,55 @@
 
 (def a (atom false))
 
-(prn "a=" @a)
+(def s "red-cube-1")
 
-(defn setit [val]
-  (swap! a (fn [x] val)))
+; (re-matches #"hello, (.*)" "hello, world")
+(re-matches #"^([a-z]*)-(cube)-(\d)" s)
+(def r (re-matches #"^([a-z]*)-(cube)-(\d)" s))
 
-(setit true)
-(setit false)
+(get r 3)
+(keyword "1")
+
+#f, val coll
+(reduce #(do
+           (prn "1=" %1 ",2=" %2)
+           (conj %1 %2))
+        []
+        [1 2 3])
+
+(conj [] 1)
+
+(assoc {} :a 1)
+(reduce #(do
+           ; (prn "1=" %1 ",2=" %2)
+           (assoc %1 (get %2 0) (get %2 1)))
+        {} {:a 1 :b 2})
+           ; (assoc %1)))
+
+(map key {:a 1 :b 2})
+(key 1)
+
+(get [:a 1] 1)
+
+(assoc-in {} [:a :b] 1)
+
+(defn f []
+  (let [a 1]
+    [1 2 3]))
+
+(f)
+
+(do (let [r 7]
+      r))
+
+(def nest-map {})
+
+(def nest-map (assoc-in nest-map [:front :1] "abc"))
+
+(nest-map :front)
+
+(:front nest-map)
+
+(nest-map :front :1)
+
+(get-in nest-map [:front :1])
