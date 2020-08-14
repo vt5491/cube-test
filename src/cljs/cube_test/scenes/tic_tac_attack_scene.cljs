@@ -342,10 +342,71 @@
     (.beginAnimation scene left-rear-top-cube 0 30 true)
     ;; center
     (.beginAnimation scene left-center-cube 0 30 true)
+    (re-frame/dispatch [:tta-print-rubiks-grid])
     ;; timer-pop
     (js/setTimeout
-     #(do (println "timer-pop: rubiks-grid=" rubiks-grid))
+     #(do
+        ; (println "timer-pop: rubiks-grid=" rubiks-grid)
+        (re-frame/dispatch [:tta-left-side-rot-grid]))
      1000)))
+
+;; update rubiks grid to be in the state after a forward rot of the left side.
+(defn rubiks-cube-left-side-rot-grid [rubiks-grid]
+  (let [result (doall (reduce (fn [accum tier-vec]
+                                (let [def 17
+                                       ;; note: don't have addressability to accum in inner map for
+                                       ;; some reason, thus we need a user-accum
+                                       accum-usr {:ghi 8}]
+                                  (println "first tier-vec=" (first tier-vec))
+                                  (println "second tier-vec=" (second tier-vec))
+                                  (println "count second tier-vec=" (count (second tier-vec)))
+                                  (println "outer-level accum=" accum)
+                                  (condp = (first tier-vec)
+                                    :front accum
+                                    :mid (do
+                                           (println "mid processing")
+                                           (doall (map (fn [box-data]
+                                                         (println "box-data=" box-data)
+                                                         (println "second box-data=" (second box-data))
+                                                         (println "inner level accum=" accum)
+                                                         (println "inner level accum-usr=" accum-usr)
+                                                         (println "inner level def=" def)
+                                                         (let [box-num (first box-data)]
+                                                           (println "box-num=" box-num)
+                                                           (condp = box-num
+                                                             :1 (assoc-in accum [:front :4] (second box-data))
+                                                             ; :1 (assoc-in accum [:mid :1] (second box-data))
+                                                             ; :1 (assoc-in accum-usr [:front :4] 7)
+                                                             ; (assoc-in accum [:mid box-num] (second box-data))
+                                                             (do
+                                                               (assoc-in accum [:mid box-num] (second box-data))))))
+                                                               ; (println "box-num " box-num "not matched")
+                                                               ; (assoc-in accum-usr [:mid box-num] 1)))))
+                                                       (second tier-vec))))
+                                    :rear accum
+                                    (println "unknown level " tier-vec))))
+                              ; {:abc 7}
+                              {}
+                              rubiks-grid))]
+    (println "rot-grid: rubiks-grid=" rubiks-grid)
+    (println "rot-grid: result=" result)
+    (re-frame/dispatch [:tta-print-rubiks-grid])
+    result))
+  ; (let [left-top-mid-cube (get-in rubiks-grid [:mid :1])
+  ;       result rubiks-grid]
+  ;   (println "rot-grid: rubiks-grid=" rubiks-grid)
+  ;   (re-frame/dispatch [:tta-print-rubiks-grid])
+  ;   result))
+
+(defn print-rubiks-grid [rubiks-grid]
+  ; (let [formatted (doall (reduce #(do)))])
+  (let [formatted (reduce #(do
+                             (let [level (first %2)]
+                               (assoc %1 level (reduce (fn [a b] (assoc a (first b) (.-name (second b)))) {} (second %2)))))
+                          {}
+                          rubiks-grid)]
+    (print "formatted=" formatted)
+    rubiks-grid))
 
 (defn init []
   (println "tic-tac-attack.init: entered")

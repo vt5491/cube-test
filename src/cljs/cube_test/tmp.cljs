@@ -106,3 +106,88 @@
 (nest-map :front :1)
 
 (get-in nest-map [:front :1])
+
+(def m (assoc-in {} [:top :a] 1))
+
+(def m2 (assoc-in m [:top :b] 2))
+
+(def m3 (assoc-in m2 [:bottom :a] 11))
+
+(def m4 (assoc-in m3 [:bottom :b] 12))
+
+(reduce #(do (assoc %2 :val %1)) {} m4)
+(assoc m4 :c 7)
+
+(reduce #(do (prn "1=" %1 ",2=" %2)) {} m4)
+
+(reduce #(do (assoc %1 (first %2) (second %2))) {} m4)
+
+(key [:top])
+(def a [:top {:a 1, :b 2}])
+(type a)
+(first a)
+(count a)
+(count (second a))
+
+(reduce #(do (prn "hi")
+           (assoc %1 (first %2) 1)) {} m4)
+
+(reduce #(prn "hi"
+           (assoc %1 (first %2) 1)) {} m4)
+
+(def b {:a (js-obj "a" 7 "b" 8)})
+(second [:top {:a 1, :b 2}])
+
+(= :rear (first [:mid]))
+
+(assoc-in {} [:front :1] 7)
+
+(type {})
+(type ())
+(type (1 2))
+(def l (list 1 2 3))
+(count l)
+(first l)
+({:mid {:4 #object[t$jscomp$0 Name: blue_cube_4, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube, animation[0]: Name: anim, property: rotationQuaternion, datatype: Quaternion, nKeys: 2, nRanges: 0]}} {:mid {:7 #object[t$jscomp$0 Name: blue_cube_7, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube, animation[0]: Name: anim, property: rotationQuaternion, datatype: Quaternion, nKeys: 2, nRanges: 0]}} {:front {:4 #object[t$jscomp$0 Name: blue_cube_1, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube, animation[0]: Name: anim, property: rotationQuaternion, datatype: Quaternion, nKeys: 2, nRanges: 0]}})
+
+(def r {:mid {:4 #object[t$jscomp$0 Name: blue_cube_4, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube, animation[0]: Name: anim, property: rotationQuaternion, datatype: Quaternion, nKeys: 2, nRanges: 0]}}) {:mid {:7 #object[t$jscomp$0 Name: blue_cube_7, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube, animation[0]: Name: anim, property: rotationQuaternion, datatype: Quaternion, nKeys: 2, nRanges: 0]}} {:front {:4 #object[t$jscomp$0 Name: blue_cube_1, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube, animation[0]: Name: anim, property: rotationQuaternion, datatype: Quaternion, nKeys: 2, nRanges: 0]}} {:mid {:8 #object[t$jscomp$0 Name: blue_cube_8, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube]}} {:mid {:9 #object[t$jscomp$0 Name: blue_cube_9, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube]}} {:mid {:2 #object[t$jscomp$0 Name: blue_cube_2, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube]}} {:mid {:5 #object[t$jscomp$0 Name: blue_cube_5, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube]}} {:mid {:3 #object[t$jscomp$0 Name: blue_cube_3, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube]}} {:mid {:6 #object[t$jscomp$0 Name: blue_cube_6, isInstance: YES, # of submeshes: 1, n vertices: 24, parent: rubiks-cube]}}
+
+(count r)
+(def r {})
+
+(def s (assoc-in r [:front :1] "hi"))
+(def s2 (assoc-in s [:front :2] "hi2"))
+
+(def m {:a 1 :b 2})
+
+(def r (map (fn [x]
+              (println "x=" x))
+            m))
+
+(count r)
+
+(doseq m (fn [x]
+           (println "x=" x)))
+(doseq [x m] (println "x=" x))
+
+(def a 7)
+(condp = a
+  ;6 (println "hi")
+  (println "bye"))
+
+(def a {:a 1 :b 2})
+
+(reduce (fn [accum b]
+          (-> (assoc-in accum [:abc (first b)] (second b))
+              (assoc-in [:def (first b)] (second b))
+              (assoc-in [:abc :ghi] 7)
+              (assoc-in [:abc :b] 12)
+              {:z 8}))
+        {} a)
+(reduce (fn [accum b]
+          (println "b=" b))
+        {} a)
+(assoc {} :a 7)
+
+(map :a 1)
+{:a 1}

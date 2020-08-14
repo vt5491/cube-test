@@ -11,4 +11,5 @@
 
 ; (def top-level-scene :cube-spin-scene)
 ; (def top-level-scene :face-slot-scene)
-(def top-level-scene :tic-tac-attack-scene)
+; (def top-level-scene :tic-tac-attack-scene)
+(def top-level-scene :vrubik-scene)

@@ -26,7 +26,12 @@
                             (println "top-level-scene= tic-tac-attack-scene")
                             (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-tic-tac-attack-scene]))])
                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                            (re-frame/dispatch [:run-tic-tac-attack-scene]))))
+                            (re-frame/dispatch [:run-tic-tac-attack-scene]))
+    :vrubik-scene (do
+                            (println "top-level-scene= vrubik-scene")
+                            (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-vrubik-scene]))])
+                            (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                            (re-frame/dispatch [:run-vrubik-scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

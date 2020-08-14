@@ -12,6 +12,7 @@
    [cube-test.scenes.cube-spin-scene :as cube-spin-scene]
    [cube-test.scenes.face-slot-scene :as face-slot-scene]
    [cube-test.scenes.tic-tac-attack-scene :as tta-scene]
+   [cube-test.scenes.vrubik-scene :as vrubik-scene]
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]))
 
@@ -112,6 +113,13 @@
  (fn [db _]
    ;side effect
    (tta-scene/init)
+   db))
+
+(re-frame/reg-event-db
+ :init-vrubik-scene
+ (fn [db _]
+   ;side effect
+   (vrubik-scene/init)
    db))
 ;;
 ;; face-slot scene
@@ -380,16 +388,65 @@
    (tta-scene/rubiks-cube-left-side-rot (db :rubiks-grid))
    db))
 
+(re-frame/reg-event-db
+ :tta-left-side-rot-grid
+ (fn [db [_]]
+   (assoc db :rubiks-grid (tta-scene/rubiks-cube-left-side-rot-grid (db :rubiks-grid)))))
+
+(re-frame/reg-event-db
+ :tta-print-rubiks-grid
+ (fn [db [_]]
+   (tta-scene/print-rubiks-grid (db :rubiks-grid))
+   db))
+
 ;;
-;; tic-tac-attack/box-grid
+;; vrubik
+;;
+(re-frame/reg-event-db
+  :run-vrubik-scene
+  (fn [db [_]]
+    (vrubik-scene/run-scene)
+    db))
+
+(re-frame/reg-event-db
+ :init-rubiks-cube
+ (fn [db [_]]
+   (vrubik-scene/init-rubiks-cube)
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-left-side-anim
+ (fn [db [_]]
+   (vrubik-scene/rubiks-cube-left-side-anim (db :rubiks-grid))
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-left-side-rot
+ (fn [db [_]]
+   (vrubik-scene/rubiks-cube-left-side-rot (db :rubiks-grid))
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-left-side-rot-grid
+ (fn [db [_]]
+   (assoc db :rubiks-grid (vrubik-scene/rubiks-cube-left-side-rot-grid (db :rubiks-grid)))))
+
+(re-frame/reg-event-db
+ :vrubik-print-rubiks-grid
+ (fn [db [_]]
+   (vrubik-scene/print-rubiks-grid (db :rubiks-grid))
+   db))
+
+;;
+;; vrubik/box-grid
 ;;
 
 ;; not currently used
-(re-frame/reg-event-db
- :init-grid
- (fn [db [_ grid-key]]
-   (box-grid/init-grid db grid-key)
-   db))
+; (re-frame/reg-event-db
+;  :init-grid
+;  (fn [db [_ grid-key]]
+;    (box-grid/init-grid db grid-key)
+;    db))
 
 (re-frame/reg-event-db
  :init-rubiks-grid
