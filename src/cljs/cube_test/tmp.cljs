@@ -178,11 +178,12 @@
 (def a {:a 1 :b 2})
 
 (reduce (fn [accum b]
-          (-> (assoc-in accum [:abc (first b)] (second b))
+          (-> accum
+              (assoc-in [:abc (first b)] (second b))
               (assoc-in [:def (first b)] (second b))
               (assoc-in [:abc :ghi] 7)
-              (assoc-in [:abc :b] 12)
-              {:z 8}))
+              (assoc-in [:abc :b] 12)))
+
         {} a)
 (reduce (fn [accum b]
           (println "b=" b))
@@ -191,3 +192,10 @@
 
 (map :a 1)
 {:a 1}
+
+(keyword (str 1))
+;; 2020-08-14
+(def a {:0 "abc" :1 "def" :2 "ghi"})
+
+(let [idxs [:0 :2]]
+  (doseq [i idxs] (prn (a i))))

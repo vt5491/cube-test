@@ -407,7 +407,7 @@
   (fn [db [_]]
     (vrubik-scene/run-scene)
     db))
-
+;; start defunct
 (re-frame/reg-event-db
  :init-rubiks-cube
  (fn [db [_]]
@@ -436,7 +436,30 @@
  (fn [db [_]]
    (vrubik-scene/print-rubiks-grid (db :rubiks-grid))
    db))
+;; end defunct
 
+(re-frame/reg-event-db
+ :vrubik-create-left-side-anim-fwd
+ (fn [db [_]]
+   (vrubik-scene/create-left-side-anim-fwd (db :vrubik-grid))
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-run-left-side-anim-fwd
+ (fn [db [_]]
+   (vrubik-scene/run-left-side-anim-fwd (db :vrubik-grid))
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-left-side-anim-fwd
+ (fn [db [_]]
+   (vrubik-scene/left-side-anim-fwd)
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-update-grid
+ (fn [db [_]]
+   (assoc db :vrubik-grid (vrubik-scene/update-grid (db :vrubik-grid)))))
 ;;
 ;; vrubik/box-grid
 ;;
@@ -448,23 +471,29 @@
 ;    (box-grid/init-grid db grid-key)
 ;    db))
 
+; (re-frame/reg-event-db
+;  :init-rubiks-grid
+;  (fn [db [_]]
+;    ; (let [r (box-grid/init-rubiks-grid db)]
+;    ;   (println "events.init-rubiks-grid: result=" db))
+;    ; db
+;    ; (box-grid/init-rubiks-grid db)
+;    ; (assoc db :rubiks-grid (box-grid/init-rubiks-grid db))
+;    ; (let [r (assoc db :abc 7)]
+;    ;   (println "events: r=" r)
+;    ;   r)
+;    (let [r (assoc db :rubiks-grid (box-grid/init-rubiks-grid))]
+;      ; (println "events: r=" r)
+;      r)))
+;      ; (doall r))))
+;      ; (js-debugger))))
+;    ; (assoc db :abc 7)))
+
 (re-frame/reg-event-db
- :init-rubiks-grid
+ :init-vrubik-grid
  (fn [db [_]]
-   ; (let [r (box-grid/init-rubiks-grid db)]
-   ;   (println "events.init-rubiks-grid: result=" db))
-   ; db
-   ; (box-grid/init-rubiks-grid db)
-   ; (assoc db :rubiks-grid (box-grid/init-rubiks-grid db))
-   ; (let [r (assoc db :abc 7)]
-   ;   (println "events: r=" r)
-   ;   r)
-   (let [r (assoc db :rubiks-grid (box-grid/init-rubiks-grid))]
-     ; (println "events: r=" r)
+   (let [r (assoc db :vrubik-grid (box-grid/init-vrubik-grid))]
      r)))
-     ; (doall r))))
-     ; (js-debugger))))
-   ; (assoc db :abc 7)))
 
 ;; event utils
 (re-frame/reg-event-db

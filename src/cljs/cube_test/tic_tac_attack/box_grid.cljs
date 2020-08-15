@@ -39,6 +39,7 @@
   ;   (println "tmp=" tmp))
   ; (set! tmp2 (assoc db :rubiks-grid tmp)))
   ; (js-debugger))
+;;defunct
 (defn init-rubiks-grid []
   (let [rubiks-node (.getNodeByName main-scene/scene "rubiks-cube")
         cubes (.getChildMeshes rubiks-node)
@@ -58,4 +59,26 @@
                                       "green" (assoc-in %1 [:rear (keyword num)] %2))))
                             {} cubes))]
     ; (println "init-rubiks-grid: grid=" grid)
+    grid))
+
+;; red 1-9 -> 0-8
+;; blue 1-9 -> 9-17
+;; green 1-9 -> 18-26
+(defn init-vrubik-grid []
+  (let [rubiks-node (.getNodeByName main-scene/scene "rubiks-cube")
+        cubes (.getChildMeshes rubiks-node)
+        grid  (doall (reduce #(do
+                               (let [ name (.-name %2)
+                                     parse (re-matches #"^([a-z]*)_(cube)_(\d)" name)
+                                     color (get parse 1)
+                                     num-str (get parse 3)]
+                                     ; num-int (js/parseInt num-str)]
+                                     ; num-kw (-> num-str js/parseInt (- 1) (str) (keyword))]
+                                   ; (println "init-rubiks-grid: name=" name ",color=" color ",num=" num)
+                                   (condp = color
+                                      "red" (assoc %1 (-> num-str js/parseInt (- 1) (str) (keyword)) %2)
+                                      "blue" (assoc %1 (-> num-str js/parseInt (+ 8) (str) (keyword)) %2)
+                                      "green" (assoc %1 (-> num-str js/parseInt (+ 17) (str) (keyword)) %2))))
+                            {} cubes))]
+    (println "init-vrubik-grid: grid=" grid)
     grid))
