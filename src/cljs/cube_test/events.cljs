@@ -118,6 +118,9 @@
 (re-frame/reg-event-db
  :init-vrubik-scene
  (fn [db _]
+   ; (let [init-db db]
+   ;   (when (not (db :vrubik-state))
+   ;     (assoc init-db :vrubik-state {}))
    ;side effect
    (vrubik-scene/init)
    db))
@@ -426,10 +429,10 @@
    (vrubik-scene/rubiks-cube-left-side-rot (db :rubiks-grid))
    db))
 
-(re-frame/reg-event-db
- :vrubik-left-side-rot-grid
- (fn [db [_]]
-   (assoc db :rubiks-grid (vrubik-scene/rubiks-cube-left-side-rot-grid (db :rubiks-grid)))))
+; (re-frame/reg-event-db
+;  :vrubik-left-side-rot-grid
+;  (fn [db [_]]
+;    (assoc db :rubiks-grid (vrubik-scene/rubiks-cube-left-side-rot-grid (db :rubiks-grid)))))
 
 (re-frame/reg-event-db
  :vrubik-print-rubiks-grid
@@ -441,7 +444,7 @@
 (re-frame/reg-event-db
  :vrubik-create-left-side-anim-fwd
  (fn [db [_]]
-   (vrubik-scene/create-left-side-anim-fwd (db :vrubik-grid))
+   (vrubik-scene/create-left-side-anim-fwd (db :vrubik-grid) (db :vrubik-game-state))
    db))
 
 (re-frame/reg-event-db
@@ -460,6 +463,27 @@
  :vrubik-update-grid
  (fn [db [_]]
    (assoc db :vrubik-grid (vrubik-scene/update-grid (db :vrubik-grid)))))
+
+(re-frame/reg-event-db
+ :print-grid
+ (fn [db _]
+   ;side effect
+   (vrubik-scene/print-vrubik-grid (db :vrubik-grid))
+   db))
+
+(re-frame/reg-event-db
+ :vrubik-init-game-state
+ (fn [db [_]]
+   ; (assoc db :vrubik-state (vrubik-scene/init-game-state (db :vrubik-state)))
+   ; (println "events.vrubik-init-game-state db=" db)
+   (vrubik-scene/init-game-state db)))
+
+(re-frame/reg-event-db
+ :vrubik-set-side-rot
+ (fn [db [_ side val]]
+   (assoc-in db [:vrubik-game-state :rots](vrubik-scene/set-side-rot side val (get db :rots)))))
+   ; db))
+
 ;;
 ;; vrubik/box-grid
 ;;

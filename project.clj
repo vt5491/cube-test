@@ -7,7 +7,12 @@
                  [thheller/shadow-cljs "2.9.3"]
                  [reagent "0.10.0"]
                  [re-frame "0.12.0"]
-                 [funcool/promesa "5.1.0"]]
+                 [funcool/promesa "5.1.0"]
+                 ;;vt add
+                 [cljstache "2.0.6"]]
+                 ;; vt add for string interpolation
+                 ;; nope: only works for clj
+                 ; [org.clojure/core.incubator "0.1.4"]]
 
   :plugins [[lein-shadow "0.2.0"]
 

@@ -199,3 +199,99 @@
 
 (let [idxs [:0 :2]]
   (doseq [i idxs] (prn (a i))))
+
+(contains? a :0)
+
+(contains? a :7)
+
+(if (contains? a :7)
+  (do (prn "found"))
+  (do (prn "not found")))
+
+(def b [:0 :3 :6 :9 :15 :18 :21 :24])
+
+(contains? b 8)
+(some :1 b)
+(find b 2)
+
+(def c {:0 :3 :6 :9 :15 :18 :21 :24})
+(contains? c 0)
+(find c :3)
+
+;; 2020-08-17
+(reduce (fn [x y]
+          ; (prn "y=" y)
+          (let [k (first y)
+                v (second y)]))
+            ; (assoc x (keyword v) (str k))
+            ; (prn "hi")
+            ; (assoc x :a 7)))
+            ; (condp = k
+            ;   :0 (assoc x :a 7)
+            ;   (assoc x :b 8))))
+        {} a)
+
+(str :a)
+
+(map (fn [x]
+       (println "x=" x)
+       (first x)
+       (second x))
+     a)
+
+(def v [1 2 3])
+
+(map #(do
+        (+ %1 1)
+        (+ %1 2)) v)
+
+(map #(do
+        (+ %2 1)
+        (+ %2 2)) a)
+
+(map (fn [x] (+ x 1)) v)
+
+(map #(+ %1 1) v)
+
+(map #(do (+ %1 1)) v)
+
+(keys a)
+
+(def r (map (fn [x]
+              (prn "x=" x)
+              (first x))
+            {:a 1 :b 2 :c 3}))
+
+(map (fn [x] (prn "x=" x)) {:a 1, :b 2, :c 3})
+
+(doseq [i [1 2 3]] (fn [x] (prn "x=" x)))
+
+(doseq [i [1 2 3]] (do (prn "x=" i) (prn "y=" (+ i 1))))
+
+(let [x 3
+      y 4]
+  (<< "~{x} plus ~{y} equals ~(+ x y)."))
+(sorted-map)
+
+(into (sorted-map) [ 1 3 2])
+(into () '(1 2 3))
+(into [] '(1 2 3))
+(into {} '(1 2 3))
+(into {} {:a 1 :b 2 :c 3})
+(into [] {:a 1 :c 3 :b 2})
+(into (sorted-map ){:a 1 :c 3 :b 2})
+
+(into (sorted-map-by (fn [key1 key2]
+                       (compare (get results key2)
+                                (get results key1))))
+      {:1 :a :10 :k :2 :b})
+(into (sorted-map-by =) {:1 :a :10 :k :2 :b})
+
+(re-matches #"\\:\\d\{1,2\}" (str :7))
+
+(re-matches #"^abc" "abcd")
+(re-find #"^abc" "abcd")
+(re-find #"^abc" "bcd")
+(re-find #"(:)(\d{1,2})" ":7")
+
+(-> (re-find #"(:)(\d{1,2})" (str :17)) (nth 2))

@@ -3,6 +3,7 @@
   (:require
    [re-frame.core :as re-frame]
    [goog.string :as gstring]))
+   ; [clojure.core.strint :refer [<<]]))
 
 (def fps-pnl)
 

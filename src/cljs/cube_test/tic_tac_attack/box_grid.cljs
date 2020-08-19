@@ -80,5 +80,5 @@
                                       "blue" (assoc %1 (-> num-str js/parseInt (+ 8) (str) (keyword)) %2)
                                       "green" (assoc %1 (-> num-str js/parseInt (+ 17) (str) (keyword)) %2))))
                             {} cubes))]
-    (println "init-vrubik-grid: grid=" grid)
+    ; (println "init-vrubik-grid: grid=" grid)
     grid))

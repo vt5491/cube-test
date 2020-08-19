@@ -11,7 +11,8 @@
 (defn main-panel []
   (let [name (re-frame/subscribe [::subs/name])]
     [:div
-     [:button.print-db {:on-click #(re-frame/dispatch [:debug-view])} "debug-view"]
+     [:button.debug-view {:on-click #(re-frame/dispatch [:debug-view])} "debug-view"]
+     [:button.print-grid {:on-click #(re-frame/dispatch [:print-grid])} "print-grid"]
      [:canvas
       {:touchaction "none" :id "renderCanvas"
        :style {:width 1024 :height 768 :border 5 :outline "black 3px solid"}}]
