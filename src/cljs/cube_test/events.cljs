@@ -14,7 +14,8 @@
    [cube-test.scenes.tic-tac-attack-scene :as tta-scene]
    [cube-test.scenes.vrubik-scene :as vrubik-scene]
    [cube-test.face-slot.rotor :as rotor]
-   [cube-test.tic-tac-attack.box-grid :as box-grid]))
+   [cube-test.tic-tac-attack.box-grid :as box-grid]
+   [cube-test.tic-tac-attack.cell :as cell]))
 
 
 (re-frame/reg-event-db
@@ -465,10 +466,10 @@
    (assoc db :vrubik-grid (vrubik-scene/update-grid (db :vrubik-grid)))))
 
 (re-frame/reg-event-db
- :print-grid
+ :pretty-print-grid
  (fn [db _]
    ;side effect
-   (vrubik-scene/print-vrubik-grid (db :vrubik-grid))
+   (vrubik-scene/pretty-print-vrubik-grid (db :vrubik-grid))
    db))
 
 (re-frame/reg-event-db
@@ -484,6 +485,14 @@
    (assoc-in db [:vrubik-game-state :rots](vrubik-scene/set-side-rot side val (get db :rots)))))
    ; db))
 
+(re-frame/reg-event-db
+ :vrubik-init-cells
+ (fn [db [_]]
+   ; (println "events.print-db: db=" db)
+   (let [result (vrubik-scene/init-cells (db :vrubik-grid))]
+     ; (println "init-cells result=" result)
+     (assoc db :vrubik-grid result))))
+   ; db))
 ;;
 ;; vrubik/box-grid
 ;;
@@ -512,12 +521,70 @@
 ;      ; (doall r))))
 ;      ; (js-debugger))))
 ;    ; (assoc db :abc 7)))
-
+;; TODO prefix all these calls with 'vrubik-'
 (re-frame/reg-event-db
  :init-vrubik-grid
  (fn [db [_]]
    (let [r (assoc db :vrubik-grid (box-grid/init-vrubik-grid))]
      r)))
+
+(re-frame/reg-event-db
+  :print-vrubik-grid
+  (fn [db [_]]
+    (box-grid/print-grid (db :vrubik-grid))
+    db))
+
+; (re-frame/reg-event-fx
+;   :print-vrubik-grid
+;   (fn [db [_]]
+;     (box-grid/print-grid (db :vrubik-grid))))
+;     ; db))
+
+(re-frame/reg-event-db
+  :vrubik-user-action
+  (fn [db [_]]
+    (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))))
+
+(re-frame/reg-event-db
+  :vrubik-left-side-fwd
+  (fn [db [_]]
+    (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))))
+; (re-frame/reg-event-db
+;   :vrubik-rot-cells
+;   (fn [db [_]]
+;     (vrubik-scene/rot-cells)
+;     db))
+
+;;localize-action-pending-cells
+(re-frame/reg-event-db
+  :vrubik-localize-action-pending-cells
+  (fn [db [_]]
+    (println "events.vrubik-localize-action-pending-cells")
+    (vrubik-scene/localize-action-pending-cells (db :vrubik-grid))
+    db))
+
+(re-frame/reg-event-db
+  :vrubik-toggle-cell-action-pending
+  (fn [db [_]]
+    (println "events.vrubik-toggle-cell-action-pending")
+    (vrubik-scene/toggle-cell-action-pending)
+    db))
+
+;; combo call
+(re-frame/reg-event-fx
+  :vrubik-rot-cells-combo
+  (fn [db [_]]
+    ; (println "events.vrubik-rot-cells-combo")
+    ; {dispatch-n (list [vrubik-localize-action-pending-cells (db :vrubik-grid)]
+    ;                   [vrubik-toggle-cell-action-pending])}
+    {:dispatch-n [[:vrubik-localize-action-pending-cells (db :vrubik-grid)]
+                  [:vrubik-toggle-cell-action-pending]]}))
+    ; (dispatch-n [[vrubik-localize-action-pending-cells (db :vrubik-grid)
+    ;               [vrubik-toggle-cell-action-pending]]])
+                      ; [vrubik-rot-cells])}
+    ; (println "events.vrubik-rot-cells-combo")
+    ; (vrubik-scene/localize-action-pending-cells (db :vrubik-grid))
+    ; db))
 
 ;; event utils
 (re-frame/reg-event-db
@@ -525,6 +592,16 @@
  (fn [db [_]]
    (println "events.print-db: db=" db)
    db))
+
+;;
+;; cell
+;;
+; (re-frame/reg-event-db
+;  :cell-init
+;  (fn [db [_]]
+;    ; (println "events.print-db: db=" db)
+;    (cell/init)
+;    db))
 
 ;; the following two methods are if something you added to the db are lazy
 ;; and haven't been evaluated yet.

@@ -12,7 +12,11 @@
   (let [name (re-frame/subscribe [::subs/name])]
     [:div
      [:button.debug-view {:on-click #(re-frame/dispatch [:debug-view])} "debug-view"]
-     [:button.print-grid {:on-click #(re-frame/dispatch [:print-grid])} "print-grid"]
+     [:br]
+     [:button.print-grid {:on-click #(re-frame/dispatch [:pretty-print-grid])} "pprint-grid"]
+     [:button.print-grid {:on-click #(re-frame/dispatch [:print-vrubik-grid])} "print-grid"]
+     [:br]
+     [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action])} "user action"]
      [:canvas
       {:touchaction "none" :id "renderCanvas"
        :style {:width 1024 :height 768 :border 5 :outline "black 3px solid"}}]

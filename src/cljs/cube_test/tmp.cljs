@@ -295,3 +295,134 @@
 (re-find #"(:)(\d{1,2})" ":7")
 
 (-> (re-find #"(:)(\d{1,2})" (str :17)) (nth 2))
+
+(into (sorted-map-by (fn [key1 key2]
+                       (prn "key1=" key1 ",key2=" key2)))
+      {:1 :a :10 :k :2 :b})
+
+(def m {:1 :a :10 :k :2 :b})
+
+(get m :1)
+
+(compare :a :d)
+
+(into (sorted-map-by (fn [key1 key2])))
+
+(cube-test.utils/keyword-to-int :17)
+
+(prn cube-test.base/scale-factor)
+
+(ns user
+  (:require [cube-test.base :as base]))
+(+1 1)
+(require '[cube-test.base :as base])
+(ns user2 (:require [cube-test.base :as base]))
+
+(defn kw-to-int [kw]
+  (-> (re-find #"^:(\d{1,3})" (str kw)) (nth 1) (int)))
+
+(kw-to-int :17)
+(js/parseInt "17")
+(-> (re-find #"^:(\d{1,3})" :17))
+
+(into (sorted-map-by (fn [k1 k2]
+                       (let [num-1 (kw-to-int k1)
+                             num-2 (kw-to-int k2)]
+                         (prn "num-1=" num-1 ", num-2" num-2)
+                         (compare num-1 num-2))))
+      m)
+
+(compare 2 10)
+
+(assoc-in {} [:a :b] 7)
+(assoc-in nil [:a :b] 7)
+(def m {:a 1, :b {:c 7}})
+
+(m :a)
+(m [:b :c])
+(get-in m [:b :c])
+
+(assoc {} :a 7)
+(assoc {} :a 7 :b 8)
+(assoc {} :a 7, :b 8)
+
+(map #(+ 1 %1) [1 2 3])
+(map #(prn "1=" %1) [1 2 3])
+(map #(prn "1=" %1) {:a 1, :b 2})
+
+# 2020-08-20
+(def m {:1 7, :2 8, :3 9})
+(def m2 {:1 7, :2 8, :29 9})
+
+(filter (fn [x] (prn "x=" x)) m)
+(filter (fn [x] (= (second x) 8)) m)
+
+(contains? m :1)
+(contains? m2 :28)
+
+(contains? [:1 7] :1)
+(contains? [:1 7] 7)
+
+(first [:a 7])
+
+(contains? [:3 :a] :3)
+
+(some?)
+
+(some #{:a} [:a :b])
+(some #{:1 :2} [:3 :mesh])
+(contains? #{:1 :2} [:1 :mesh])
+(some [:1 :2] [:3 :mesh])
+(some :0 [:0])
+(some #{:0} [:0])
+#{:a}
+# 2020-08-21
+(map (fn [kv-pair]
+       kv-pair)
+     m)
+
+(get m :1)
+(get :1 m)
+
+(assoc m :1 17)
+
+(def m2 {:cell {:a 7 :b 8}})
+
+(-> (get m2 :cell) (assoc :a 17) (assoc :b 18))
+
+(doseq [x m] (do
+              (println "x=" x)
+              (let [k (first x)
+                    v (second x)]
+                (assoc m k (+ v 1)))))
+(get [:a :b] 1)
+
+(def p false)
+(set! p true)
+(atom f false)
+(def ^:dynamic *flag* (atom false))
+
+(swap! *flag* (fn [x] true))
+(swap! *flag* (fn [x] false))
+
+@*flag*
+
+(get-in m2 [:cell :a])
+
+(not (nil? (get-in m2 [:cell :c])))
+
+(+ 1 1)
+
+(def m {:a 1, :b 2, :c 3})
+
+(def r (filter (fn [kv-pair]
+                 (let [k (first kv-pair)
+                       v (second kv-pair)]
+                   (> v 1))) m))
+
+(type (doall r))
+
+(map (fn [kv-pair]
+       (prn "hi")
+       (prn "kv-pari"))
+     m)
