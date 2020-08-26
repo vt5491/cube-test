@@ -16,7 +16,8 @@
      [:button.print-grid {:on-click #(re-frame/dispatch [:pretty-print-grid])} "pprint-grid"]
      [:button.print-grid {:on-click #(re-frame/dispatch [:print-vrubik-grid])} "print-grid"]
      [:br]
-     [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action])} "user action"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action])} "user action 1"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action-2])} "user action 2"]
      [:canvas
       {:touchaction "none" :id "renderCanvas"
        :style {:width 1024 :height 768 :border 5 :outline "black 3px solid"}}]

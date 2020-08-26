@@ -437,3 +437,50 @@
                 v (second kv-pair)]
             (assoc accum k v)))
         {} (merge m m2))
+
+(def m {:1 {:a 7}, :2 {:b 8}})
+
+(def k :abc)
+
+{k 7}
+(m)
+[:k]
+
+(map (fn [kv-pair]
+       (println kv-pair)
+       (let [k (first kv-pair)
+             v (second kv-pair)]
+         [k (assoc v :frame-cnt 30)]))
+     m)
+
+(def ^:dynamic *a* (atom {:1 {:a 7 :b 8}, :2 {:a 17 :b 18}}))
+
+(swap! *a* (fn [x] println "x=" x))
+
+(swap! *a* (fn [x] 7))
+
+(map (fn [kv]
+       (println "kv=" kv))
+     @*a*)
+
+(dec 7)
+
+(map (fn [kv]
+       (let [k (first kv)
+             v (second kv)
+             b (get-in v [:b])]
+         [k (assoc v :b (dec b))]))
+     @*a*)
+
+(assoc [:1 {:a 7}] :1 7)
+(first [:1 {:a 7}])
+(second [:1 {:a 7}])
+
+(def a 7)
+(when (and a (println "hi")))
+
+(count)
+(when 0
+  (println "hi"))
+
+(get m :2)  

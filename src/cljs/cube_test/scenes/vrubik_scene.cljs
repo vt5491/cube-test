@@ -21,6 +21,12 @@
 ;; cells (copied from vrubik-grid) that need action processing.
 ;; We make a local copy to avoid having to invoke re-frame on the tick.
 (def ^:dynamic *action-cells* (atom []))
+(def side-anims
+  {:left [:0 :3 :6 :9 :12 :15 :18 :21 :24],
+   :top [:0 :1 :2 :9 :10 :11 :18 :19 :20]})
+(def side-rot-axes
+  {:left bjs/Axis.X
+   :top bjs/Axis.Y})
 
 (declare pretty-print-vrubik-grid)
 
@@ -462,6 +468,41 @@
 ;;
 ;; "manual" vrubik animation
 ;;
+(defn side-fwd [vrubik-grid side]
+  (println "side-fwd: entered")
+  (let [side-idxs (get side-anims side)
+        side-cells (filter
+                    (fn [kv-pair]
+                      (let [key (first kv-pair)]
+                        ;; Note: how you have to promote the key to a set for the 'some' to work.
+                        (some #{key} side-idxs)))
+                    vrubik-grid)
+        anim-cells (map (fn [kv-pair]
+                          (let [val-map (second kv-pair)
+                                cell-map (get val :cell)]
+                            (-> (assoc cell-map :rot-axis (get side-rot-axes side))
+                                (assoc :rot-vel (* base/ONE-DEG 90)))))
+                        side-cells)
+        result (->
+                (assoc-in vrubik-grid [(get side-idxs 0) :cell] (nth anim-cells 0))
+                (assoc-in [(get side-idxs 1) :cell] (nth anim-cells 1))
+                (assoc-in [(get side-idxs 2) :cell] (nth anim-cells 2))
+                (assoc-in [(get side-idxs 3) :cell] (nth anim-cells 3))
+                (assoc-in [(get side-idxs 4) :cell] (nth anim-cells 4))
+                (assoc-in [(get side-idxs 5) :cell] (nth anim-cells 5))
+                (assoc-in [(get side-idxs 6) :cell] (nth anim-cells 6))
+                (assoc-in [(get side-idxs 7) :cell] (nth anim-cells 7))
+                (assoc-in [(get side-idxs 8) :cell] (nth anim-cells 8)))]
+    (println "side-idxs=" side-idxs)
+    (println "side-cells=" side-cells)
+    (println "anim-cells=" anim-cells)
+    (println "anim-cells 0 =" (nth anim-cells 0))
+    (println "result=" result)
+    (swap! *cell-action-pending* (fn [x] true))
+    result))
+
+
+
 (defn left-side-fwd [vrubik-grid]
   ; (println "left-side-fwd: vrubik-grid=" vrubik-grid)
   (let [left-side-idxs [:0 :3 :6 :9 :12 :15 :18 :21 :24]
@@ -612,15 +653,68 @@
   (let [action-cells (filter
                       (fn [kv-pair]
                         (let [rot-vel (-> (second kv-pair) (get-in [:cell :rot-vel]))]
-                          (println "localize: key=" (first kv-pair) ", rot-vel=" rot-vel)
+                          ; (println "localize: key=" (first kv-pair) ", rot-vel=" rot-vel)
                           ; (not (nil? rot-vel))
                           (not (= rot-vel 0))))
-                      vrubik-grid)]
-    (swap! *action-cells* (fn [x] action-cells))
-    (println "localize-action-pending-cells: action-cells=" @*action-cells*)))
+                      vrubik-grid)
+        ;; add a frame count so animation is limited
+        action-cells-2 (map
+                        (fn [kv-pair]
+                          (let [k (first kv-pair)
+                                v (second kv-pair)]
+                            [k (-> (assoc v :frame-cnt 60)
+                                   (assoc :rot-accum 0)
+                                   (assoc :rot-max (get-in v [:cell :rot-vel])))]))
+                        action-cells)]
+    (swap! *action-cells* (fn [x] action-cells-2))))
+  ; (println "localize-action-pending-cells: action-cells=" @*action-cells*))
 
 (defn toggle-cell-action-pending []
   (swap! *cell-action-pending* (fn [x] (not @*cell-action-pending*))))
+
+
+; (map (fn [kv]
+;        (let [k (first kv)
+;              v (second kv)
+;              b (get-in v [:b])]
+;          [k (assoc v :b (dec b))]))
+;      @*a*)
+
+(defn rot-cells []
+  (doall (map (fn [kv-pair]
+                ; (println "render-loop: kv-pair=" kv-pair)
+                (let [key (first kv-pair)
+                      val (second kv-pair)
+                      rot-vel (get-in val [:cell :rot-vel])
+                      rot-axis (get-in val [:cell :rot-axis])
+                      frame-cnt (get-in val [:frame-cnt])
+                      rot-accum (get-in val [:rot-accum])
+                      rot-max (get-in val [:rot-max])
+                      mesh (get-in val [:mesh])
+                      mesh-quat (.-rotationQuaternion mesh)
+                      rot-delta (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000))
+                      quat-delta (.normalize
+                                  (.multiply
+                                   (bjs/Quaternion.Identity)
+                                   ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
+                                   ; (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))
+                                   (bjs/Quaternion.RotationAxis rot-axis rot-delta)))]
+                  ; (if (> frame-cnt 0))
+                  (if (< rot-accum rot-max)
+                    (do
+                      (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))
+                      ; [key (-> (assoc val :frame-cnt (dec frame-cnt)))]
+                      [key (assoc val :rot-accum (+ rot-accum rot-delta))])
+                    (do
+                      (let [quat-90 (bjs/Quaternion.RotationAxis rot-axis (* base/ONE-DEG 90))]
+                        ; (set! (.-rotationQuaternion mesh) quat-90)
+                        (println "rot-cells: done with anim. setting actions-cells to nil")
+                        (println "last rot=" (.-rotationQuaternion mesh)))
+                      ; (swap! *action-cells* (fn [x] nil))
+                      nil))))
+                  ;; return new action-cells with decremented frame-cnt
+                  ; [key (assoc val :frame-cnt (dec frame-cnt))]))
+              @*action-cells*)))
 
 ;;
 ;; run-time methods
@@ -636,23 +730,28 @@
   (when @*cell-action-pending*
     ; (rot-cells)
     (re-frame/dispatch [:vrubik-rot-cells-combo]))
-  (when @*action-cells*
-    ; (doseq [mesh (get-in)])
-    ; (println "render-loop: processing action-cells")
-    (doall (map (fn [kv-pair]
-                  ; (println "render-loop: kv-pair=" kv-pair)
-                  (let [val (second kv-pair)
-                        rot-vel (get-in val [:cell :rot-vel])
-                        rot-axis (get-in val [:cell :rot-axis])
-                        mesh (get-in val [:mesh])
-                        mesh-quat (.-rotationQuaternion mesh)
-                        quat-delta (.normalize
-                                    (.multiply
-                                     (bjs/Quaternion.Identity)
-                                     ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
-                                     (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))))]
-                    (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))))
-                @*action-cells*)))
+  (let [action-cells @*action-cells*]
+    (when (and action-cells (> (count action-cells) 0) (nth action-cells 0))
+      ; (doseq [mesh (get-in)])
+      ; (println "render-loop: processing action-cells")
+      ; (rot-cells)
+      ; (swap! *action-cells* (rot-cells))
+      (swap! *action-cells* rot-cells)))
+      ; (println "*action-cells=" @*action-cells*)))
+    ; (doall (map (fn [kv-pair]
+    ;               ; (println "render-loop: kv-pair=" kv-pair)
+    ;               (let [val (second kv-pair)
+    ;                     rot-vel (get-in val [:cell :rot-vel])
+    ;                     rot-axis (get-in val [:cell :rot-axis])
+    ;                     mesh (get-in val [:mesh])
+    ;                     mesh-quat (.-rotationQuaternion mesh)
+    ;                     quat-delta (.normalize
+    ;                                 (.multiply
+    ;                                  (bjs/Quaternion.Identity)
+    ;                                  ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
+    ;                                  (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))))]
+    ;                 (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))))
+    ;             @*action-cells*)))
   (.render main-scene/scene))
 
 (defn run-scene []

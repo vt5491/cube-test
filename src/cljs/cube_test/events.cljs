@@ -543,12 +543,23 @@
 (re-frame/reg-event-db
   :vrubik-user-action
   (fn [db [_]]
-    (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))))
+    ; (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))))
+    (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :left))))
+    ; (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :top))))
+
+(re-frame/reg-event-db
+  :vrubik-user-action-2
+  (fn [db [_]]
+    ; (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))))
+    ; (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :left))
+    (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :top))))
 
 (re-frame/reg-event-db
   :vrubik-left-side-fwd
   (fn [db [_]]
-    (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))))
+    ; (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))
+    ; (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :left))
+    (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :top))))
 ; (re-frame/reg-event-db
 ;   :vrubik-rot-cells
 ;   (fn [db [_]]
