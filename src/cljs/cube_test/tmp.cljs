@@ -426,3 +426,14 @@
        (prn "hi")
        (prn "kv-pari"))
      m)
+
+(def m2 {:g 7 :h 8 :i 9})
+
+(merge  m m2)
+(map (fn [x] (merge m x)) m2)
+
+(reduce (fn [accum kv-pair]
+          (let [k (first kv-pair)
+                v (second kv-pair)]
+            (assoc accum k v)))
+        {} (merge m m2))
