@@ -466,6 +466,11 @@
    (assoc db :vrubik-grid (vrubik-scene/update-grid (db :vrubik-grid)))))
 
 (re-frame/reg-event-db
+ :vrubik-update-grid-2
+ (fn [db [_ side]]
+   (assoc db :vrubik-grid (vrubik-scene/update-grid-2 (db :vrubik-grid) side))))
+
+(re-frame/reg-event-db
  :pretty-print-grid
  (fn [db _]
    ;side effect
@@ -560,6 +565,13 @@
     ; (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))
     ; (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :left))
     (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :top))))
+
+(re-frame/reg-event-db
+  :vrubik-side-fwd
+  (fn [db [_ side]]
+    ; (assoc db :vrubik-grid (vrubik-scene/left-side-fwd (db :vrubik-grid)))
+    ; (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) :left))
+    (assoc db :vrubik-grid (vrubik-scene/side-fwd (db :vrubik-grid) side))))
 ; (re-frame/reg-event-db
 ;   :vrubik-rot-cells
 ;   (fn [db [_]]

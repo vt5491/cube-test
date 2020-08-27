@@ -483,4 +483,19 @@
 (when 0
   (println "hi"))
 
-(get m :2)  
+(get m :2)
+
+(every? nil? [nil 7])
+
+(def v [:1 :2 :3])
+
+(interleave v [nil nil nil])
+
+(find m :1)
+
+(get #{v} :1)
+
+(contains? v :1)
+
+(def k :1)
+(some #{k} v)

@@ -21,12 +21,17 @@
 ;; cells (copied from vrubik-grid) that need action processing.
 ;; We make a local copy to avoid having to invoke re-frame on the tick.
 (def ^:dynamic *action-cells* (atom []))
+(def ^:dynamic *action* (atom {:name nil}))
 (def side-anims
   {:left [:0 :3 :6 :9 :12 :15 :18 :21 :24],
    :top [:0 :1 :2 :9 :10 :11 :18 :19 :20]})
 (def side-rot-axes
   {:left bjs/Axis.X
    :top bjs/Axis.Y})
+(def side-rot-xfrm-maps
+  {:left {:0 :6, :3 :15, :6 :24, :9 :3, :15 :21, :18 :0, :21 :9, :24 :18}
+   ; :top {:0 :2, :1 :11, :2 :20, :11 :19, :20 :18, :19 :9, :18 :0, :9 :1}
+   :top {:0 :2, :1 :11, :2 :20, :9 :1, :11 :19, :18 :0, :19 :9, :20 :18}})
 
 (declare pretty-print-vrubik-grid)
 
@@ -56,7 +61,8 @@
         rot-btn (bjs-gui/Button.CreateSimpleButton. "rot-btn" "rotate")
         rot-btn-2 (bjs-gui/Button.CreateSimpleButton. "rot-btn-2" "rotate2")
         rot-btn-3 (bjs-gui/Button.CreateSimpleButton. "rot-btn-3" "rotate3")
-        left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")]
+        left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")
+        top-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "top-side-rot-btn" "top side rot")]
     (set! (.-position top-plane)(bjs/Vector3. 0 6 -2))
     (.addControl top-adv-texture top-pnl)
     (set! (.-text top-hdr) "commands")
@@ -69,8 +75,9 @@
     (.addRowDefinition top-pnl 0.20)
     (.addRowDefinition top-pnl 0.20)
     (.addRowDefinition top-pnl 0.20)
-    (.addColumnDefinition top-pnl 0.5)
-    (.addColumnDefinition top-pnl 0.5)
+    (.addColumnDefinition top-pnl 0.33)
+    (.addColumnDefinition top-pnl 0.33)
+    (.addColumnDefinition top-pnl 0.33)
     (.addControl top-pnl top-hdr 0 0)
     ;; rot-btn
     (set! (.-autoScale rot-btn) true)
@@ -106,8 +113,21 @@
                                                           ; (re-frame/dispatch [:vrubik-left-side-anim])
                                                           ; (re-frame/dispatch [:vrubik-left-side-rot])
                                                           ; (re-frame/dispatch [:vrubik-left-side-anim-fwd])
-                                                          (re-frame/dispatch [:vrubik-left-side-fwd]))))
-    (.addControl top-pnl left-side-rot-btn 4 0)))
+                                                          ; (re-frame/dispatch [:vrubik-left-side-fwd])
+                                                          (re-frame/dispatch [:vrubik-side-fwd :left]))))
+    (.addControl top-pnl left-side-rot-btn 4 0)
+    ;; top-side-rot-btn
+    (set! (.-autoScale top-side-rot-btn) true)
+    (set! (.-fontSize top-side-rot-btn) "100")
+    (set! (.-color top-side-rot-btn) "white")
+    (-> top-side-rot-btn .-onPointerUpObservable (.add (fn [value]
+                                                          (println "top-side-rot-btn pressed")
+                                                          ; (re-frame/dispatch [:vrubik-left-side-anim])
+                                                          ; (re-frame/dispatch [:vrubik-left-side-rot])
+                                                          ; (re-frame/dispatch [:vrubik-left-side-anim-fwd])
+                                                          ; (re-frame/dispatch [:vrubik-left-side-fwd])
+                                                          (re-frame/dispatch [:vrubik-side-fwd :top]))))
+    (.addControl top-pnl top-side-rot-btn 4 2)))
 
 ;; rubiks-cube stuff
 ;; should be defunct once vrubik code is in place
@@ -212,146 +232,6 @@
         (re-frame/dispatch [:vrubik-left-side-rot-grid]))
      1000)))
 
-                                    ; :front (do
-                                    ;          (println "front processing")
-                                    ;          (doseq [box-data (second tier-vec)]
-                                    ;            (do
-                                    ;              (println "front: accum=" accum)
-                                    ;              (println "front: box-data=" box-data)
-                                    ;              (let [box-num (first box-data)]
-                                    ;                (condp = box-num
-                                    ;                  (do
-                                    ;                    (println "front: now updating accum")
-                                    ;                    (assoc-in accum [:front box-num] (second box-data))))))))
-                                    ; :front (do
-                                    ;          (println "front processing")
-                                    ;          (doall
-                                    ;            (map (fn [box-data]
-                                    ;                   (println "front: accum=" accum)
-                                    ;                   (let [box-num (first box-data)]
-                                    ;                     (condp = box-num
-                                    ;                       (do
-                                    ;                         (assoc-in accum [:front box-num] (second box-data))))))
-                                    ;                 (second tier-vec))))
-                                    ; :mid (do
-                                    ;        (println "mid processing")
-                                    ;        (doall (map (fn [box-data]
-                                    ;                      (println "mid.box-data=" box-data)
-                                    ;                      (println "mid.second box-data=" (second box-data))
-                                    ;                      (println "mid.inner level accum=" accum)
-                                    ;                      (println "mid.inner level accum-usr=" accum-usr)
-                                    ;                      (println "mid.inner level def=" def)
-                                    ;                      (let [box-num (first box-data)]
-                                    ;                        (println "mid.box-num=" box-num)
-                                    ;                        (condp = box-num
-                                    ;                          :1 (assoc-in accum [:front :4] (second box-data))
-                                    ;                          ; :1 (assoc-in accum [:mid :1] (second box-data))
-                                    ;                          ; :1 (assoc-in accum-usr [:front :4] 7)
-                                    ;                          ; (assoc-in accum [:mid box-num] (second box-data))
-                                    ;                          (do
-                                    ;                            (assoc-in accum [:mid box-num] (second box-data))))))
-                                    ;                            ; (println "box-num " box-num "not matched")
-                                    ;                            ; (assoc-in accum-usr [:mid box-num] 1)))))
-                                    ;                    (second tier-vec))))
-                                    ; :rear (do
-                                    ;          (println "rear processing")
-                                    ;          (map (fn [box-data]
-                                    ;                 (let [box-num (first box-data)]
-                                    ;                   (condp = box-num
-                                    ;                     (do
-                                    ;                       (assoc-in accum [:rear box-num] (second box-data))))))
-                                    ;               (second tier-vec)))
-;;;;;
-                                      ; (condp = (first tier-vec)
-                                      ;                :front (do
-                                      ;                         (println "front processing")
-                                      ;                         (assoc accum :front (reduce (fn [a box-data]
-                                      ;                                                       (println "front: a=" a)
-                                      ;                                                       (assoc-in a [(first box-data)] (second box-data)))
-                                      ;                                                     {}
-                                      ;                                                     (second tier-vec))))
-                                      ;                :mid (do
-                                      ;                       (println "mid processing")
-                                      ;                       (assoc accum :mid (reduce (fn [a box-data]
-                                      ;                                                   (println "mid: a=" a)
-                                      ;                                                   (condp = (first box-data)
-                                      ;                                                     :1 (assoc a :4 (second box-data))
-                                      ;                                                     (assoc-in a [(first box-data)] (second box-data))))
-                                      ;                                                 {}
-                                      ;                                                 (second tier-vec))))
-                                      ;                :rear (do
-                                      ;                        (println "rear processing")
-                                      ;                        (assoc accum :rear (reduce (fn [a box-data]
-                                      ;                                                     (println "rear: a=" a)
-                                      ;                                                     (assoc-in a [(first box-data)] (second box-data)))
-                                      ;                                                   {}
-                                      ;                                                   (second tier-vec))))
-                                      ;   (println "unknown level " tier-vec)))))
-;; update rubiks grid to be in the state after a forward rot of the left side.
-; (defn rubiks-cube-left-side-rot-grid [rubiks-grid]
-;   (set! result (reduce (fn [accum tier-vec]
-;                                   (println "outer.first tier-vec=" (first tier-vec))
-;                                   (println "outer.second tier-vec=" (second tier-vec))
-;                                   (println "outer.count second tier-vec=" (count (second tier-vec)))
-;                                   (println "outer.outer-level accum=" accum)
-;                          (-> accum
-;                              (assoc-in [:front])
-;                              (assoc-in [:mid])
-;                              (assoc-in [:rear] {})))
-;                        {}
-;                        rubiks-grid))
-;   (println "rot-grid: rubiks-grid=" rubiks-grid)
-;   ; (println "type of result=" (type (doall result)))
-;   ; (println "rot-grid: result=" (first result))
-;   (println "rot-grid: result=" result)
-;   (re-frame/dispatch [:vrubik-print-rubiks-grid])
-;   result)
-
-; (defn rubiks-cube-left-side-rot-grid [rubiks-grid]
-;   (println "rot-grid: rubiks-grid=" rubiks-grid)
-;   (set! result (reduce
-;                 (fn [accum tier-vec]
-;                     (println "outer.first tier-vec=" (first tier-vec))
-;                     (println "outer.second tier-vec=" (second tier-vec))
-;                     (println "outer.count second tier-vec=" (count (second tier-vec)))
-;                     (println "outer.outer-level accum=" accum
-;                   ; (-> accum
-;                   ;     (assoc :front {})
-;                   ;     (assoc :mid {})
-;                   ;     (assoc :rear {})
-;                       (condp = (first tier-vec)
-;                         :front (do
-;                                  (println "front processing")
-;                                  (assoc accum :front (reduce
-;                                                       (fn [a box-data]
-;                                                         (println "front: a=" a)
-;                                                         (assoc-in a [(first box-data)] (second box-data)))
-;                                                       {}
-;                                                       (second tier-vec))))
-;                         :mid (do
-;                                (println "mid processing")
-;                                (assoc accum :mid (reduce (fn [a box-data]
-;                                                            (println "box-num=" (first box-data))
-;                                                            (println "mid: a=" a)
-;                                                            (condp = (first box-data)
-;                                                              :1 (assoc a :4 (second box-data))
-;                                                              (assoc-in a [(first box-data)] (second box-data))))
-;                                                          {}
-;                                                          (second tier-vec))))
-;                         :rear (do
-;                                 (println "rear processing")
-;                                 (assoc accum :rear (reduce (fn [a box-data]
-;                                                              (println "rear: a=" a)
-;                                                              (assoc-in a [(first box-data)] (second box-data)))
-;                                                            {}
-;                                                            (second tier-vec))))
-;                         (println "unknow-level " tier-vec))))
-;                 {:front {} :mid {} :rear {}}
-;                 rubiks-grid))
-;   ; (set! result 7)
-;   (doall result)
-;   (println "rot-grid: result=" result))
-
 (defn print-rubiks-grid [rubiks-grid]
   (let [formatted (reduce #(do
                              (let [level (first %2)]
@@ -423,18 +303,9 @@
      (let [slot-idx (first slot)
            cube (second slot)
            src-idx-pair (find idx-src slot-idx)]
-       ; (js-debugger)
-       ; (println "slot-idx=" slot-idx ", idx-src=" idx-src ", find=" (find idx-src slot-idx))
-       ; (println "idx-map=" idx-map)
-       ; (println "idx-map @ :18=" (idx-map :18))
-       ; (if (find idx-src slot-idx))
        (if src-idx-pair
          (do
            (let [
-                 ; cube-map (idx-map :slot-idx)
-                 ; src-idx (first cube-map)
-                 ; tgt-idx (second cube-map)
-                 ; src-idx slot-idx
                  src-idx (first src-idx-pair)
                  tgt-idx (idx-map slot-idx)]
              (println "now moving " src-idx " to " tgt-idx)
@@ -445,6 +316,28 @@
            (assoc accum slot-idx (vrubik-grid slot-idx))))))
    {}
    vrubik-grid))
+
+;; generalized update for any side
+; (defn update-grid-anim [vrubik-grid idx-src idx-map]
+;   (reduce
+;    (fn [accum slot]
+;      (let [slot-idx (first slot)
+;            cube (second slot)
+;            ; src-idx-pair (find idx-src slot-idx)
+;            src-idx (find idx-src slot-idx)]
+;        (if src-idx-pair
+;          (do
+;            (let [
+;                  src-idx (first src-idx-pair)
+;                  tgt-idx (idx-map slot-idx)]
+;              (println "now moving " src-idx " to " tgt-idx)
+;              ; (assoc accum tgt-idx (-> (vrubik-grid src-idx) (second)))
+;              (assoc accum tgt-idx (vrubik-grid src-idx))))
+;          (do
+;            ; (println "leaving " slot-idx " alone.")
+;            (assoc accum slot-idx (vrubik-grid slot-idx))))))
+;    {}
+;    vrubik-grid))
 
 (defn set-side-rot [side val rots]
   (condp = side
@@ -461,6 +354,22 @@
     ; (println "update-grid: result=" result)
     (doall result)))
 
+(defn update-grid-2 [vrubik-grid side]
+  (println "update-grid-2: side=" side)
+  (let [side-idxs (get side-anims side)
+        ;; convert side-idx to a map like {:0 nil, :3 nil}
+        ;; The reason for this is a map is easier to search than a vector
+        idx-src (reduce
+                 (fn [accum keyword]
+                   (assoc accum keyword nil))
+                 {} side-idxs)
+        idx-map (get side-rot-xfrm-maps side)
+        result (update-grid-left-anim vrubik-grid idx-src idx-map)]
+    (println "update-grid-2: result=" result)
+    (doall result)))
+
+
+
 (defn left-side-anim-fwd []
   (re-frame/dispatch [:vrubik-create-left-side-anim-fwd])
   (re-frame/dispatch [:vrubik-run-left-side-anim-fwd]))
@@ -469,7 +378,7 @@
 ;; "manual" vrubik animation
 ;;
 (defn side-fwd [vrubik-grid side]
-  (println "side-fwd: entered")
+  (println "side-fwd: entered, side=" side)
   (let [side-idxs (get side-anims side)
         side-cells (filter
                     (fn [kv-pair]
@@ -483,6 +392,9 @@
                             (-> (assoc cell-map :rot-axis (get side-rot-axes side))
                                 (assoc :rot-vel (* base/ONE-DEG 90)))))
                         side-cells)
+        a (println "count side-idxs=" (count side-idxs))
+        b (println "count side-cells=" (count side-cells) ", side-cells=" side-cells)
+        c (println "count anim-cells=" (count anim-cells) ", anim-cells=" anim-cells)
         result (->
                 (assoc-in vrubik-grid [(get side-idxs 0) :cell] (nth anim-cells 0))
                 (assoc-in [(get side-idxs 1) :cell] (nth anim-cells 1))
@@ -494,11 +406,12 @@
                 (assoc-in [(get side-idxs 7) :cell] (nth anim-cells 7))
                 (assoc-in [(get side-idxs 8) :cell] (nth anim-cells 8)))]
     (println "side-idxs=" side-idxs)
-    (println "side-cells=" side-cells)
-    (println "anim-cells=" anim-cells)
+    ; (println "side-cells=" side-cells)
+    ; (println "anim-cells=" anim-cells)
     (println "anim-cells 0 =" (nth anim-cells 0))
     (println "result=" result)
     (swap! *cell-action-pending* (fn [x] true))
+    (swap! *action* (fn [x] (assoc @*action* :type "rot" :side side)))
     result))
 
 
@@ -639,13 +552,6 @@
   (re-frame/dispatch [:vrubik-init-game-state])
   (re-frame/dispatch [:vrubik-init-cells]))
 
-; (defn rot-cells []
-;   ; (let [cells (filter
-;   ;              (fn [kv-pair]
-;   ;                (let [rot-vel (-> (second kv-pair) (get-in [:cell :rot-vel]))]
-;   ;                  (not (nil? rot-vel)))))])
-;   (swap! *cell-action-pending* (fn [x] false)))
-
 ;; make a local copy of the relevent cells from the re-frame db
 ;; so we can efficiently access them on the game-level "tick".
 (defn localize-action-pending-cells [vrubik-grid]
@@ -672,49 +578,46 @@
 (defn toggle-cell-action-pending []
   (swap! *cell-action-pending* (fn [x] (not @*cell-action-pending*))))
 
-
-; (map (fn [kv]
-;        (let [k (first kv)
-;              v (second kv)
-;              b (get-in v [:b])]
-;          [k (assoc v :b (dec b))]))
-;      @*a*)
-
 (defn rot-cells []
-  (doall (map (fn [kv-pair]
-                ; (println "render-loop: kv-pair=" kv-pair)
-                (let [key (first kv-pair)
-                      val (second kv-pair)
-                      rot-vel (get-in val [:cell :rot-vel])
-                      rot-axis (get-in val [:cell :rot-axis])
-                      frame-cnt (get-in val [:frame-cnt])
-                      rot-accum (get-in val [:rot-accum])
-                      rot-max (get-in val [:rot-max])
-                      mesh (get-in val [:mesh])
-                      mesh-quat (.-rotationQuaternion mesh)
-                      rot-delta (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000))
-                      quat-delta (.normalize
-                                  (.multiply
-                                   (bjs/Quaternion.Identity)
-                                   ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
-                                   ; (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))
-                                   (bjs/Quaternion.RotationAxis rot-axis rot-delta)))]
-                  ; (if (> frame-cnt 0))
-                  (if (< rot-accum rot-max)
-                    (do
-                      (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))
-                      ; [key (-> (assoc val :frame-cnt (dec frame-cnt)))]
-                      [key (assoc val :rot-accum (+ rot-accum rot-delta))])
-                    (do
-                      (let [quat-90 (bjs/Quaternion.RotationAxis rot-axis (* base/ONE-DEG 90))]
-                        ; (set! (.-rotationQuaternion mesh) quat-90)
-                        (println "rot-cells: done with anim. setting actions-cells to nil")
-                        (println "last rot=" (.-rotationQuaternion mesh)))
-                      ; (swap! *action-cells* (fn [x] nil))
-                      nil))))
-                  ;; return new action-cells with decremented frame-cnt
-                  ; [key (assoc val :frame-cnt (dec frame-cnt))]))
-              @*action-cells*)))
+  (let [result
+        (doall (map (fn [kv-pair]
+                      ; (println "render-loop: kv-pair=" kv-pair)
+                      (let [key (first kv-pair)
+                            val (second kv-pair)
+                            rot-vel (get-in val [:cell :rot-vel])
+                            rot-axis (get-in val [:cell :rot-axis])
+                            frame-cnt (get-in val [:frame-cnt])
+                            rot-accum (get-in val [:rot-accum])
+                            rot-max (get-in val [:rot-max])
+                            mesh (get-in val [:mesh])
+                            mesh-quat (.-rotationQuaternion mesh)
+                            rot-delta (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000))
+                            quat-delta (.normalize
+                                        (.multiply
+                                         (bjs/Quaternion.Identity)
+                                         ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
+                                         ; (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))
+                                         (bjs/Quaternion.RotationAxis rot-axis rot-delta)))]
+                        ; (if (> frame-cnt 0))
+                        (if (< rot-accum rot-max)
+                          (do
+                            (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))
+                            ; [key (-> (assoc val :frame-cnt (dec frame-cnt)))]
+                            [key (assoc val :rot-accum (+ rot-accum rot-delta))])
+                          (do
+                            (let [quat-90 (bjs/Quaternion.RotationAxis rot-axis (* base/ONE-DEG 90))]
+                              ; (set! (.-rotationQuaternion mesh) quat-90)
+                              (println "rot-cells: done with anim. setting actions-cells to nil")
+                              (println "last rot=" (.-rotationQuaternion mesh)))
+                            ; (swap! *action-cells* (fn [x] nil))
+                            nil))))
+                    ;; return new action-cells with decremented frame-cnt
+                    ; [key (assoc val :frame-cnt (dec frame-cnt))]))
+                    @*action-cells*))]
+    (when (every? nil? result)
+      (println "rot-cells: anim done")
+      (re-frame/dispatch [:vrubik-update-grid-2 (get @*action* :side)]))
+    result))
 
 ;;
 ;; run-time methods
@@ -732,26 +635,7 @@
     (re-frame/dispatch [:vrubik-rot-cells-combo]))
   (let [action-cells @*action-cells*]
     (when (and action-cells (> (count action-cells) 0) (nth action-cells 0))
-      ; (doseq [mesh (get-in)])
-      ; (println "render-loop: processing action-cells")
-      ; (rot-cells)
-      ; (swap! *action-cells* (rot-cells))
       (swap! *action-cells* rot-cells)))
-      ; (println "*action-cells=" @*action-cells*)))
-    ; (doall (map (fn [kv-pair]
-    ;               ; (println "render-loop: kv-pair=" kv-pair)
-    ;               (let [val (second kv-pair)
-    ;                     rot-vel (get-in val [:cell :rot-vel])
-    ;                     rot-axis (get-in val [:cell :rot-axis])
-    ;                     mesh (get-in val [:mesh])
-    ;                     mesh-quat (.-rotationQuaternion mesh)
-    ;                     quat-delta (.normalize
-    ;                                 (.multiply
-    ;                                  (bjs/Quaternion.Identity)
-    ;                                  ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
-    ;                                  (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))))]
-    ;                 (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))))
-    ;             @*action-cells*)))
   (.render main-scene/scene))
 
 (defn run-scene []
