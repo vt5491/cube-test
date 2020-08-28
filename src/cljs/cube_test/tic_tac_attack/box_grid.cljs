@@ -67,7 +67,7 @@
 ;; blue 1-9 -> 9-17
 ;; green 1-9 -> 18-26
 (defn init-vrubik-grid []
-  (let [rubiks-node (.getNodeByName main-scene/scene "rubiks-cube")
+  (let [rubiks-node (.getNodeByName main-scene/scene "vrubik-cube")
         cubes (.getChildMeshes rubiks-node)
         grid  (doall (reduce #(do
                                (let [ name (.-name %2)

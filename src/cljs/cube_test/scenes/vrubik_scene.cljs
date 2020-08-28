@@ -17,6 +17,8 @@
 (def cube-anim)
 (def result)
 ; (def cell-action-pending false)
+(def vrubik-right-axis)
+(def vrubik-up-axis)
 (def ^:dynamic *cell-action-pending* (atom false))
 ;; cells (copied from vrubik-grid) that need action processing.
 ;; We make a local copy to avoid having to invoke re-frame on the tick.
@@ -28,18 +30,25 @@
 (def side-rot-axes
   {:left bjs/Axis.X
    :top bjs/Axis.Y})
+; (def side-rot-axes
+;   {:left vrubik-right-axis
+;    :top vrubik-up-axis})
 (def side-rot-xfrm-maps
-  {:left {:0 :6, :3 :15, :6 :24, :9 :3, :15 :21, :18 :0, :21 :9, :24 :18}
+  ; {:left {:0 :6, :3 :15, :6 :24, :9 :3, :15 :21, :18 :0, :21 :9, :24 :18}}
+  {:left {:0 :6, :3 :15, :6 :24, :9 :3, :12 :12, :15 :21, :18 :0, :21 :9, :24 :18}
    ; :top {:0 :2, :1 :11, :2 :20, :11 :19, :20 :18, :19 :9, :18 :0, :9 :1}
-   :top {:0 :2, :1 :11, :2 :20, :9 :1, :11 :19, :18 :0, :19 :9, :20 :18}})
-
+   ; :top {:0 :2, :1 :11, :2 :20, :9 :1, :11 :19, :18 :0, :19 :9, :20 :18}
+   :top {:0 :2, :1 :11, :2 :20, :9 :1, :10 :10, :11 :19, :18 :0, :19 :9, :20 :18}})
 (declare pretty-print-vrubik-grid)
+(declare init-cells)
 
 (defn rubiks-cube-loaded [meshes particle-systems skeletons anim-groups user-cb]
   (println "vrubik.rubiks-cube-loaded")
   (doall (map #(do
                  (when (re-matches #"__root__" (.-id %1))
-                     (set! (.-name %1) "rubiks-cube")
+                     ; (set! (.-name %1) "rubiks-cube")
+                     (set! (.-name %1) "vrubik-cube")
+                     (set! (.-id %1) "vrubik-cube")
                      ;; the neg. on the x is needed otherwise the materials are "flipped"
                      (set! (.-scaling %1)(bjs/Vector3. -0.3 0.3 0.3))
                      (set! (.-position %1)(bjs/Vector3. 0 2 0))))
@@ -317,28 +326,6 @@
    {}
    vrubik-grid))
 
-;; generalized update for any side
-; (defn update-grid-anim [vrubik-grid idx-src idx-map]
-;   (reduce
-;    (fn [accum slot]
-;      (let [slot-idx (first slot)
-;            cube (second slot)
-;            ; src-idx-pair (find idx-src slot-idx)
-;            src-idx (find idx-src slot-idx)]
-;        (if src-idx-pair
-;          (do
-;            (let [
-;                  src-idx (first src-idx-pair)
-;                  tgt-idx (idx-map slot-idx)]
-;              (println "now moving " src-idx " to " tgt-idx)
-;              ; (assoc accum tgt-idx (-> (vrubik-grid src-idx) (second)))
-;              (assoc accum tgt-idx (vrubik-grid src-idx))))
-;          (do
-;            ; (println "leaving " slot-idx " alone.")
-;            (assoc accum slot-idx (vrubik-grid slot-idx))))))
-;    {}
-;    vrubik-grid))
-
 (defn set-side-rot [side val rots]
   (condp = side
     :left-side (assoc-in rots [:left-side] val)))
@@ -395,8 +382,10 @@
         a (println "count side-idxs=" (count side-idxs))
         b (println "count side-cells=" (count side-cells) ", side-cells=" side-cells)
         c (println "count anim-cells=" (count anim-cells) ", anim-cells=" anim-cells)
+        ;; clear out cell info from prev. animations
+        vrubik-grid-2 (init-cells vrubik-grid)
         result (->
-                (assoc-in vrubik-grid [(get side-idxs 0) :cell] (nth anim-cells 0))
+                (assoc-in vrubik-grid-2 [(get side-idxs 0) :cell] (nth anim-cells 0))
                 (assoc-in [(get side-idxs 1) :cell] (nth anim-cells 1))
                 (assoc-in [(get side-idxs 2) :cell] (nth anim-cells 2))
                 (assoc-in [(get side-idxs 3) :cell] (nth anim-cells 3))
@@ -539,7 +528,10 @@
             ; (println "rubiks-grid=" (re-frame/dispatch [:init-rubiks-grid]))
             (re-frame/dispatch [:init-vrubik-grid])
             (re-frame/dispatch [:unlazy-db])
-            (re-frame/dispatch [:vrubik-init-cells]))))
+            (re-frame/dispatch [:vrubik-init-cells])
+            (let [vrubik-cube (.getMeshByID main-scene/scene "vrubik-cube")]
+              (set! vrubik-right-axis (.-right vrubik-cube))
+              (set! vrubik-up-axis (.-up vrubik-cube))))))
             ; (let [s (re-frame/dispatch [:get-main-scene])]
             ;   (println "s=" s))
             ; (let [db (re-frame/dispatch [:unlazy-db])]
@@ -586,6 +578,9 @@
                             val (second kv-pair)
                             rot-vel (get-in val [:cell :rot-vel])
                             rot-axis (get-in val [:cell :rot-axis])
+                            rot-axis-abs (cond
+                                           (.equals rot-axis bjs/Axis.X) vrubik-right-axis
+                                           (.equals rot-axis bjs/Axis.Y) vrubik-up-axis)
                             frame-cnt (get-in val [:frame-cnt])
                             rot-accum (get-in val [:rot-accum])
                             rot-max (get-in val [:rot-max])
@@ -597,15 +592,21 @@
                                          (bjs/Quaternion.Identity)
                                          ; (rot-axis (* base/ONE-DEG 90 (/ (.getDeltaTime main-scene/engine) 1000)))
                                          ; (bjs/Quaternion.RotationAxis rot-axis (* rot-vel (/ (.getDeltaTime main-scene/engine) 1000)))
-                                         (bjs/Quaternion.RotationAxis rot-axis rot-delta)))]
+                                         ; (bjs/Quaternion.RotationAxis rot-axis rot-delta)
+                                         (bjs/Quaternion.RotationAxis rot-axis-abs rot-delta)))]
                         ; (if (> frame-cnt 0))
                         (if (< rot-accum rot-max)
                           (do
-                            (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))
+                            ; (set! (.-rotationQuaternion mesh) (.normalize (.multiply mesh-quat quat-delta)))
+                            ;; Note: we use rotate (instead of updating rotationQuaternion directly)
+                            ;; because 'rotote' has a world axis parameter, and we need to rotate around
+                            ;; the global axis not the local axis
+                            (.rotate mesh rot-axis-abs rot-delta bjs/Space.WORLD)
                             ; [key (-> (assoc val :frame-cnt (dec frame-cnt)))]
                             [key (assoc val :rot-accum (+ rot-accum rot-delta))])
                           (do
-                            (let [quat-90 (bjs/Quaternion.RotationAxis rot-axis (* base/ONE-DEG 90))]
+                            ; (let [quat-90 (bjs/Quaternion.RotationAxis rot-axis (* base/ONE-DEG 90))])
+                            (let [quat-90 (bjs/Quaternion.RotationAxis rot-axis-abs (* base/ONE-DEG 90))]
                               ; (set! (.-rotationQuaternion mesh) quat-90)
                               (println "rot-cells: done with anim. setting actions-cells to nil")
                               (println "last rot=" (.-rotationQuaternion mesh)))
