@@ -28,11 +28,11 @@
 (def ground)
 (def grid-mat)
 (def features-manager)
-; (def light1)
 (def red-mat)
 (def green-mat)
 (def blue-mat)
-; (def cube)
+(def white-mat)
+(def black-mat)
 (def poly-fill)
 (def xr-helper)
 (def session-mgr)
@@ -58,17 +58,13 @@
 (declare enter-xr-handler)
 
 (defn init [top-level-scene-initializer]
-; (defn init []
-; (defn init [n]
   (println "main-scene.init: entered")
   ;; following line necessary for mixamo animations.
-  ; (set! js/BABYLON.Animation.AllowMatricesInterpolation true)
   (set! bjs/Animation.AllowMatricesInterpolation true)
   (set! canvas (-> js/document (.getElementById "renderCanvas")))
   (set! engine (bjs/Engine. canvas true))
   (set! scene (bjs/Scene. engine))
   (re-frame/dispatch [:set-main-scene scene])
-  ; (set! env (.-createDefaultEnvironment scene))
   ;; Note: we have to manually create our own ground in order to
   ;; properly wrap it in a physicsImposter.
   (set! physics-plugin (bjs/OimoJSPlugin.))
@@ -79,7 +75,6 @@
               "createGround" false
               "skyboxSize" 30)
              scene))
-  ; (set! env (.createDefaultEnvironment scene))
   ;; manually create a ground with a physicsImposter.
   (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
     (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
@@ -89,54 +84,19 @@
     (set! (.-ground env) grnd))
 
   (set! grid-mat (bjs-m/GridMaterial. "ground-mat" scene))
-  ; (prn "num of textures=" (count (.-getActiveTextures grid-mat)))
-
-  ; (set! env (.createDefaultEnvironment scene
-  ;             (js-obj
-  ;              ; "groundTexture" (bjs-m/GridMaterial. "ground-mat" scene)
-  ;              ; "groundTexture" grid-mat
-  ;              ; "groundTexture" (.-getActiveTextures grid-mat)
-  ;              "skyboxSize" 30)))
-  ; (js-debugger)
-  ; (set! (.-physicsImpostor (.-ground env))
-  ; ; (set! (.-physicsImpostor (-> env .-ground .-parent))
-  ;   (bjs/PhysicsImpostor. (.-ground env) (js-obj "mass" 0 "restitution" 0.9) scene))
-  ;                           (js-obj "mass" 0 "restitution" 0.9) scene))
-  ; (let [grnd (.-ground env)]
-  ;   (set! (.-physicsImpostor grnd)
-  ;     (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
-  ;                           (js-obj "mass" 0 "restitution" 0.9) scene)))
   (set! red-mat (bjs/StandardMaterial. "red-mat" scene))
   (set! (.-diffuseColor red-mat) (bjs/Color3. 1 0 0))
   (set! green-mat (bjs/StandardMaterial. "green-mat" scene))
   (set! (.-diffuseColor green-mat) (bjs/Color3. 0 1 0))
   (set! blue-mat (bjs/StandardMaterial. "blue-mat" scene))
   (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1))
-  ; (js/BABYLON.Debug.AxesViewer. scene)
-  ; (-> (bjs/Debug.AxesViewer. scene) (.update (bjs/Vector3. 5 0 0)))
+  (set! white-mat (bjs/StandardMaterial. "white-mat" scene))
+  (set! (.-diffuseColor white-mat) (bjs/Color3. 1 1 1))
+  (set! white-mat (bjs/StandardMaterial. "black-mat" scene))
+  (set! (.-diffuseColor white-mat) (bjs/Color3. 0 0 0))
   (let [av (bjs/Debug.AxesViewer. scene)]
-  ; (let [av bjs/Debug.AxesViewer.createInstance])
-  ; (let [av (.createInstance bjs/Debug.AxesViewer.)]
-  ;   (js-debugger)
-    ; (.update av (bjs/Vector3. 0 0 0) (.-xAxis av) (.-yAxis av) (.-zAxis av))
     (.update av (bjs/Vector3. 5 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
   (setup-skybox)
-  ; (set! physics-plugin (bjs/AmmoJSPlugin. true "Ammo"))
-  ; (set! physics-plugin (ammo/AmmoJSPlugin. true "Ammo"))
-  ; (set! physics-plugin (bjs/CannonJSPlugin.))
-  ; (set! physics-plugin (bjs/CannonJSPlugin. true "CANNON"))
-  ; ar ground = BABYLON.Mesh.CreateGround('ground1', 6, 6, 2, scene);
-  ; (bjs/Mesh.CreateGround "ground" 6 6 0.5 scene)
-  ; (bjs/GroundMesh. "ground" scene)
-  ; BABYLON.MeshBuilder.CreateGround(“myGround”, { width: 4, height: 4, depth: 4 }, scene);
-  ; ground.material = new BABYLON.GridMaterial("groundMaterial", scene);
-  ;; ground
-  ; (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
-  ;   (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
-  ;   (set! (.-physicsImpostor grnd)
-  ;     (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
-  ;                           (js-obj "mass" 0 "restitution" 0.9) scene))
-  ;   (set! (.-ground env) grnd))
 
   (cond
     (re-seq #"Chrome" js/navigator.userAgent)
@@ -146,81 +106,46 @@
     (re-seq #"Firefox" js/navigator.userAgent)
     (do
       (prn "Firefox detected")
-      ; (set! xr-mode "vr")
       (set! xr-mode "xr"))
     true (set! xr-mode "xr"))
-  ; (set! poly-fill (xr-pf/WebXRPolyfill.))
-  ; (set! poly-fill (xr-pf/WebXRPolyfill))
-  ; (set! poly-fill (xr-pf.))
-  ; (set! poly-fill xr-pf/WebXRPolyfill. (js-obj "webvr" true))
-  ; (prn "about to call debugger")
-  ; (js-debugger)
-  ; (set! camera (bjs/ArcRotateCamera. "Camera" (/ js/Math.PI 2) (/ js/Math.PI 2) 2 (bjs/Vector3. 0 0 5) scene))
-  ; (if (not base/use-xr))
   (prn "xr-mode=" xr-mode)
   (if (= xr-mode "vr")
     (do
       (println "now setting up vr")
       (set! vrHelper (.createDefaultVRExperience scene (js-obj "useXR" false)))
       (set! camera (.-webVRCamera vrHelper))
-      ; (set! (.-position camera) (bjs/Vector3. 0 0 -5))
-      ; (set! camera-rig (bjs/TransformNode. "camera-rig"))
-      ; (set! (.-rotation camera-rig) (bjs/Vector3. 0 js/Math.PI 0))
-      ; (set! (.-parent camera) camera-rig)
-      ; (set! (.-rotation camera-rig) (bjs/Vector3. 0 3.1 0))
-      ; (set! (.-rotation camera) (bjs/Vector3. 0 (/ js/Math.PI 2) 0))
-      ; (set! camera (.-deviceOrientationCamera vrHelper))
       (let [do-cam (.-deviceOrientationCamera vrHelper)]
         (set! (.-position do-cam) (bjs/Vector3. 0 4 -15)))
-      ; camera.rotationQuaternion = BABYLON.Quaternion.RotationYawPitchRoll(-x, 0, 0);
       (set! (.-id camera) "main-camera")
-      ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll 0 js/Math.Pi 0))
       (controller/init scene vrHelper camera)
       (controller/setup-controller-handlers vrHelper)
       (.enableTeleportation vrHelper (js-obj "floorMeshName" "ground"))
       (.enableInteractions vrHelper)
-      ; vrHelper.onAfterEnteringVRObservable.add(() => {})
-      ; disc.rotate(BABYLON.Axis.Y, Math.PI / 150, BABYLON.Space.LOCAL);
       (-> vrHelper .-onAfterEnteringVRObservable (.add
                                                   (fn []
                                                     (prn "entered vr")
                                                     (.setTarget camera (bjs/Vector3. 0 0 0))
                                                     (prn "cam-rot a=" (.-rotation camera))
-                                                    ; (set! (.-rotation camera) (bjs/Vector3. 0 js/Math.PI 0))
-                                                    ; (set! (.-rotation camera) (bjs/Vector3. js/Math.PI 0 0))
-                                                    ;;vt-x
                                                     (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
-                                                    ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll 0 0 0))
                                                     (.resetToCurrentRotation camera)
                                                     (prn "cam-rot a=" (.-rotation camera))
-                                                    ; (set! (.-rotation camera-rig) (bjs/Vector3. 0 js/Math.PI 0))
                                                     (let [cam-pos (.-position camera)
                                                           x (.-x cam-pos)
                                                           y (.-y cam-pos)
                                                           z (.-z cam-pos)]
                                                       (set! (.-position camera) (bjs/Vector3. x y -5)))
-                                                    ; (.rotate camera-rig bjs/Axis.Y (/ js/Math.PI 2) bjs/Space.LOCAL)
-                                                    ; (.rotate camera bjs/Axis.Y (/ js/Math.PI 2) bjs/Space.LOCAL)
                                                     (prn "cam-rot c=" (.-rotation camera)))))
 
       (top-level-scene-initializer))
-      ; (init-part-2))
     (do
       ;; set up xr
-      ; (js-debugger)
       (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
+      ;; note: ArcRotateCamera still does not give mouse rotate ability
+      ; (set! camera (bjs/ArcRotateCamera. "arc-cam" (/ js/Math.PI 2) (/ js/Math.PI 2) 2 (bjs/Vector3.Zero) scene))
       (-> (.createDefaultXRExperienceAsync scene (js-obj "floorMeshes" (array (.-ground env))))
           (p/then
            (fn [xr-default-exp]
              (set! xr-helper xr-default-exp)
-             ; xrHelper.enterexitui["_buttons"][0].sessionMode = "immersive-ar";
-             ; (-> xr-default-exp (.-baseExperience)
-             ;     (set! .-sessionMOde (-> (.-enterexitui) (get (.-_buttons) 0)) "immersive-ar"))
-             ; (let [btns (-> xr-default-exp (.-enterExitUI) (.-_buttons))
-             ;       btn0 (get btns 0)]
-             ;   ; (js-debugger)
-             ;   (.update btn0))
-             ; (set! (.-sessionMode btn0) "immersive-ar"))
              (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
              ;; Note: baseExperience is of type WebXRExperienceHelper
              (set! features-manager (-> xr-default-exp (.-baseExperience) (.-featuresManager)))
@@ -240,31 +165,35 @@
              (top-level-scene-initializer)))))))
              ; (init-part-2)))))))
 
+    ; var camera = new BABYLON.ArcRotateCamera()
+    ; "Camera",
+    ; Math.PI / 2,
+    ; Math.PI / 2,
+    ; 2,
+    ; BABYLON.Vector3.Zero(),
+    ; scene))
+  ;
 (defn enter-xr-handler [state]
   (println "enter-xr-handler: onStateChangedObservable: state=" state)
   (when (= state bjs/WebXRState.IN_XR)
     (println "onStateChangedObservable: state: in xr")
     (println "state: old camera pos=" (.-position camera) ",camera-init-pos=" camera-init-pos)
     (set! (.-position camera) (bjs/Vector3. 0 4 -10))
-    ; (set! (.-rotation camera) (bjs/Vector3. (* 90 base/ONE-DEG (* 180 base/ONE-DEG 0)) 0))
-    ; (let [ quat (-> scene .activeCamera .rotationQuaternion)])
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [ quat (-> camera .-rotationQuaternion)]
       ; cur-angles (.toEulerAngles quat)]
       ;; Note: do runtime vr camera rotation here
-      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
-      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0)))))
+      ;; svale backyard
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0))
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) 0)))))
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0)))))
-      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
+      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))))
 
 (defn enter-vr []
   (prn "main-scene.enter-vr: entered")
-  ; (js-debugger)
-  ; (-> (.enterXRAsync (.-baseExperience xr-helper)))
-  ; (-> (.enterXRAsync (.baseExperience xr-helper) "immersive-vr" "local-floor"))
   (-> (.-baseExperience xr-helper) (.enterXRAsync "immersive-vr" "local-floor")
-  ; (-> (.-baseExperience xr-helper) (.enterXRAsync "inline" "viewer")
-  ; (-> (.enterXRAsync xr-helper)
       (p/then
        (fn []
          (prn "entered xr")))))

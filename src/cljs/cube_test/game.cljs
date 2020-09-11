@@ -31,7 +31,12 @@
                             (println "top-level-scene= vrubik-scene")
                             (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-vrubik-scene]))])
                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                            (re-frame/dispatch [:run-vrubik-scene]))))
+                            (re-frame/dispatch [:run-vrubik-scene]))
+    :geb-cube-scene (do
+                            (println "top-level-scene= geb-cube-scene")
+                            (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-geb-cube-scene]))])
+                            (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                            (re-frame/dispatch [:run-geb-cube-scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

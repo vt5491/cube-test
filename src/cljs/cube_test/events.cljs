@@ -13,6 +13,7 @@
    [cube-test.scenes.face-slot-scene :as face-slot-scene]
    [cube-test.scenes.tic-tac-attack-scene :as tta-scene]
    [cube-test.scenes.vrubik-scene :as vrubik-scene]
+   [cube-test.scenes.geb-cube-scene :as geb-cube-scene]
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]
    [cube-test.tic-tac-attack.cell :as cell]))
@@ -124,6 +125,36 @@
    ;     (assoc init-db :vrubik-state {}))
    ;side effect
    (vrubik-scene/init)
+   db))
+
+; (reg-event-fx
+;  :geb-cube-scene-init
+;  (fn [{:keys []} [_ a]]
+;    (geb-cube-scene/init)
+;    {:http {:method :get}
+;     :url    "http://json.my-endpoint.com/blah"
+;     :on-success  [:process-blah-response]
+;     :on-fail     [:failed-blah]}))
+;     ; :db   (assoc db :flag true)}))
+
+; (reg-fx         ;; <-- registration function
+;   :geb-cube-scene-init
+;   (fn [value]  ;;  <2> effect handler
+;     (geb-cube-scene/init)))
+
+
+(re-frame/reg-event-db
+ :init-vrubik-scene
+ (fn [db _]
+   ;side effect
+   (vrubik-scene/init)
+   db))
+
+(re-frame/reg-event-db
+ :init-geb-cube-scene
+ (fn [db _]
+   ;side effect
+   (geb-cube-scene/init)
    db))
 ;;
 ;; face-slot scene
@@ -411,6 +442,7 @@
   (fn [db [_]]
     (vrubik-scene/run-scene)
     db))
+
 ;; start defunct
 (re-frame/reg-event-db
  :init-rubiks-cube
@@ -608,6 +640,15 @@
     ; (println "events.vrubik-rot-cells-combo")
     ; (vrubik-scene/localize-action-pending-cells (db :vrubik-grid))
     ; db))
+
+;;
+;; geb-cube-scene
+;;
+(re-frame/reg-event-db
+  :run-geb-cube-scene
+  (fn [db [_]]
+    (geb-cube-scene/run-scene)
+    db))
 
 ;; event utils
 (re-frame/reg-event-db
