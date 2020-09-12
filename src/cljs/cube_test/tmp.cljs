@@ -489,7 +489,13 @@
 
 (def v [:1 :2 :3])
 
+(reduce (fn [accum keyword]
+          (assoc accum keyword nil))
+        {} v)
+
 (interleave v [nil nil nil])
+
+(r)
 
 (find m :1)
 
@@ -499,3 +505,5 @@
 
 (def k :1)
 (some #{k} v)
+
+(assoc {} :a 7 :b 8)

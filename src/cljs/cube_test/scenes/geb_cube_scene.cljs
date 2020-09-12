@@ -21,7 +21,7 @@
 (def y-fwd-light)
 (def y-bwd-light)
 (def z-fwd-light)
-
+(def shadow-light-intensity 0.5)
 ;; loads
 (defn geb-cube-loaded [meshes particle-systems skeletons anim-groups user-cb]
   (println "geb-cube-loaded")
@@ -116,25 +116,123 @@
                      "z-fwd-light"
                      (bjs/Vector3. 0 0 1)
                      main-scene/scene)]
-    (set! (.-intensity xfl) 1)
+    (set! (.-intensity xfl) shadow-light-intensity)
     (set! x-fwd-light xfl)
-    (set! (.-intensity yfl) 1)
+    (set! (.-intensity yfl) shadow-light-intensity)
     (set! y-fwd-light yfl)
-    (set! (.-intensity zfl) 1)
+    (set! (.-intensity zfl) shadow-light-intensity)
     (set! z-fwd-light zfl)
-    (set! (.-intensity ybl) 1)
+    (set! (.-intensity ybl) shadow-light-intensity)
     (set! (.-position ybl) (bjs/Vector3. 0 10 0))
     (set! y-bwd-light ybl)))
 
+    ; var button = new BABYLON.GUI.RadioButton();
+    ; button.width = "20px";
+    ; button.height = "20px";
+    ; button.color = "white";
+    ; button.background = "green";
+    ;
+    ; button.onIsCheckedChangedObservable.add(function(state) {})
+    ;     if (state) {}
+    ;         textblock.text = "You selected " + text));
+    ;
+
+    ; var textblock = new BABYLON.GUI.TextBlock();
+    ;  textblock.height = "50px";
+    ;  panel.addControl(textblock)));
+
+; (defn add-radio [text-blk text parent]
+;   (println "hi from add-radio, text=" text)
+;   (let [btn (bjs-gui/RadioButton.)
+;         text-blk (bjs-gui/TextBlock.)]
+;     (set! (.-width btn) "20px")
+;     (set! (.-height btn) "20px")
+;     (set! (.-color btn) "white")
+;     (set! (.-autoScale btn) true)
+;     ; (set! (.-fontSize btn) "100")
+;     (-> btn
+;         .-onIsCheckedChangedObservable
+;         (.add
+;          (fn [state]
+;            (when state
+;              (set! (.-text text-blk) (str "you selected " text))))))
+;     (set! (.-height text-blk) "50px")))
+
+; var header = BABYLON.GUI.Control.AddHeader(button, text, "100px", { isHorizontal: true, controlFirst: true});
+; header.height = "30px";
+(defn init-gui []
+  (let [gui-plane (bjs/Mesh.CreatePlane. "gui-plane" 2)
+        gui-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. gui-plane 1024 1024)
+        ; gui-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. gui-plane 512 512)
+        gui-pnl (bjs-gui/Grid.)
+        gui-hdr (bjs-gui/TextBlock.)
+        cube-radio-text-blk (bjs-gui/TextBlock.)
+        add-radio (fn [text parent row col]
+                    (let [btn (bjs-gui/RadioButton.)
+                          ; text-blk (bjs-gui/TextBlock.)
+                          header (bjs-gui/Control.AddHeader
+                                  btn
+                                  text
+                                  "120px"
+                                  (js-obj "isHorizontal" "true"
+                                          "controlFirst" "true"))]
+                      ; (set! (.-font header) "50px")
+                      (set! (.-width btn) "40px")
+                      (set! (.-height btn) "40px")
+                      (set! (.-color btn) "white")
+                      (-> btn
+                          .-onIsCheckedChangedObservable
+                          (.add
+                           (fn [state]
+                             (when state
+                               (set! (.-text cube-radio-text-blk) (str "you selected " text))))))
+                      ; (set! (.-height header) "30px")
+                      (set! (.-height header) "100px")
+                      (set! (.-width header) "250px")
+                      (set! (.-fontSize header) "50px")
+                      ; (set! (.-autoScale header) true)
+                      (set! (.-color header) "white")
+                      (.addControl parent header row col)))]
+
+        ; cube-radio-btn (bjs-gui/RadioButton.)]
+    ; (set! (.-position gui-plane)(bjs/Vector3. 0 6 -1))
+    (set! (.-position gui-plane)(bjs/Vector3. 0 4 -9))
+    (.addControl gui-adv-texture gui-pnl)
+    ;; gui-pnl
+    ; (set! (.-height gui-pnl) "100px")
+    ;; gui-hdr
+    (set! (.-text gui-hdr) "box type")
+    (set! (.-height gui-hdr) "100px")
+    (set! (.-fontSize gui-hdr) "80")
+    (set! (.-color gui-hdr) "white")
+    ;; create 4 rows and 3 cols
+    (.addRowDefinition gui-pnl 0.25 false)
+    (.addRowDefinition gui-pnl 0.25)
+    (.addRowDefinition gui-pnl 0.25)
+    (.addRowDefinition gui-pnl 0.25)
+    (.addColumnDefinition gui-pnl 0.33)
+    (.addColumnDefinition gui-pnl 0.33)
+    (.addColumnDefinition gui-pnl 0.33)
+    (.addControl gui-pnl gui-hdr 0 0)
+    ;; text-block
+    (set! (.-height cube-radio-text-blk) "50px")
+    (.addControl gui-pnl cube-radio-text-blk  1 0)
+    ;; cube radio btn
+    ; (add-radio cube-radio-text-blk "geb" gui-pnl)
+    (add-radio "geb" gui-pnl 1 0)
+    (add-radio "vat" gui-pnl 1 1)))
+
+   ; addRadio("option 1", panel)));
 ; var shadowGenerator2 = new BABYLON.ShadowGenerator(1024, light2);
 (defn init []
   (println "geb-cube-scene.init: entered")
   ; (set! shadow-generator (bjs/ShadowGenerator. 1024))
   (let [light (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
-    (.setEnabled light true))
+    (.setEnabled light false))
   (load-geb-cube
    "models/geb_cube/"
-   "geb_cube.glb"
+   ; "geb_cube.glb"
+   "vat_cube.glb"
    (fn [] (do
             (println "now in load cb")
             (let [geb-cube (.getNodeByName main-scene/scene "geb-cube")]
@@ -147,7 +245,8 @@
               (set! z-fwd-shadow-gen (bjs/ShadowGenerator. 1024 z-fwd-light))
               (.addShadowCaster z-fwd-shadow-gen geb-cube)))))
   (init-screens)
-  (init-lights))
+  (init-lights)
+  (init-gui))
 
 ;; render
 (defn render-loop []

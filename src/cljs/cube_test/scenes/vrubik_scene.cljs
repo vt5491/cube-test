@@ -78,7 +78,7 @@
     (set! (.-height top-hdr) "100px")
     (set! (.-fontSize top-hdr) "80")
     (set! (.-color top-hdr) "white")
-    ;; create 4 rows and 2 cols
+    ;; create 5 rows and 3 cols
     (.addRowDefinition top-pnl 0.20 false)
     (.addRowDefinition top-pnl 0.20)
     (.addRowDefinition top-pnl 0.20)
@@ -92,26 +92,6 @@
     (set! (.-autoScale rot-btn) true)
     (set! (.-fontSize rot-btn) "100")
     (set! (.-color rot-btn) "red")
-    ; (-> rot-btn .-onPointerUpObservable (.add (fn [value]
-    ;                                               (println "rot-btn pressed")
-    ;                                               (re-frame/dispatch [:tta-rot-cube]))))
-    ; (.addControl top-pnl rot-btn 2 0)
-    ; ;; rot-btn-2
-    ; (set! (.-autoScale rot-btn-2) true)
-    ; (set! (.-fontSize rot-btn-2) "100")
-    ; (set! (.-color rot-btn-2) "white")
-    ; (-> rot-btn-2 .-onPointerUpObservable (.add (fn [value]
-    ;                                               (println "rot-btn-2 pressed")
-    ;                                               (re-frame/dispatch [:tta-rot-cube-2]))))
-    ; (.addControl top-pnl rot-btn-2 2 1)
-    ; ;; rot-btn-3
-    ; (set! (.-autoScale rot-btn-3) true)
-    ; (set! (.-fontSize rot-btn-3) "100")
-    ; (set! (.-color rot-btn-3) "white")
-    ; (-> rot-btn-3 .-onPointerUpObservable (.add (fn [value]
-    ;                                               (println "rot-btn-3 pressed")
-    ;                                               (re-frame/dispatch [:tta-rot-cube-3]))))
-    ; (.addControl top-pnl rot-btn-3 3 0)
 
     ;; left-side-rot-btn
     (set! (.-autoScale left-side-rot-btn) true)
@@ -119,10 +99,6 @@
     (set! (.-color left-side-rot-btn) "white")
     (-> left-side-rot-btn .-onPointerUpObservable (.add (fn [value]
                                                           (println "left-side-rot-btn pressed")
-                                                          ; (re-frame/dispatch [:vrubik-left-side-anim])
-                                                          ; (re-frame/dispatch [:vrubik-left-side-rot])
-                                                          ; (re-frame/dispatch [:vrubik-left-side-anim-fwd])
-                                                          ; (re-frame/dispatch [:vrubik-left-side-fwd])
                                                           (re-frame/dispatch [:vrubik-side-fwd :left]))))
     (.addControl top-pnl left-side-rot-btn 4 0)
     ;; top-side-rot-btn
@@ -131,10 +107,6 @@
     (set! (.-color top-side-rot-btn) "white")
     (-> top-side-rot-btn .-onPointerUpObservable (.add (fn [value]
                                                           (println "top-side-rot-btn pressed")
-                                                          ; (re-frame/dispatch [:vrubik-left-side-anim])
-                                                          ; (re-frame/dispatch [:vrubik-left-side-rot])
-                                                          ; (re-frame/dispatch [:vrubik-left-side-anim-fwd])
-                                                          ; (re-frame/dispatch [:vrubik-left-side-fwd])
                                                           (re-frame/dispatch [:vrubik-side-fwd :top]))))
     (.addControl top-pnl top-side-rot-btn 4 2)))
 
