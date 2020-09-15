@@ -507,3 +507,33 @@
 (some #{k} v)
 
 (assoc {} :a 7 :b 8)
+
+(apply (fn
+         ([x]
+          (println "x=" x))
+         ([x y]
+          (println "x+y=" (+ x y)))) [7 8])
+
+(apply (fn
+         ([x]
+          (println "x=" x))
+         ([x y]
+          (println "x+y=" (+ x y)))) [7 8])
+
+(count "abc")
+(apply count ["abc"])
+
+(let [f (fn ([x] (f x 2))
+          ([x y] (+ x y)))])
+
+(my-f fn ([x] (my-f x 2)
+          ([x y] (+ x y))))
+
+(apply (fn my-f [x y]
+         (+ x y)) [1 2])
+
+(apply (fn my-f
+         ([x] (my-f x 3))
+         ([x y]
+          (+ x y)))
+  [1])

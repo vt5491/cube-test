@@ -184,12 +184,13 @@
       ; cur-angles (.toEulerAngles quat)]
       ;; Note: do runtime vr camera rotation here
       ;; svale backyard
-      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0))
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0)))))
+      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
-      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))))
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))))
 
 (defn enter-vr []
   (prn "main-scene.enter-vr: entered")
