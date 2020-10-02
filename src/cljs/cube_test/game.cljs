@@ -4,12 +4,14 @@
    [re-frame.core :as re-frame]
    [cube-test.main-scene :as main-scene]
    [cube-test.utils.fps-panel :as fps-panel]
-   [cube-test.base :as base]))
+   [cube-test.base :as base]
+   [cube-test.dummy-base :as dummy-base]))
+   ; [cube-test.dummy-base :as dummy-base]))
 
 (declare render-loop)
 
 (defn init []
-  (println "game.init: entered")
+  (println "game.init: entered, dummy-base.abc=" dummy-base/abc)
   (condp = base/top-level-scene
     :cube-spin-scene (do
                            (println "top-level-scene=cube-spin-scene")
@@ -36,7 +38,12 @@
                             (println "top-level-scene= geb-cube-scene")
                             (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-geb-cube-scene]))])
                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                            (re-frame/dispatch [:run-geb-cube-scene]))))
+                            (re-frame/dispatch [:run-geb-cube-scene]))
+    :skyscrapers-scene (do
+                            (println "top-level-scene= skyscrapers-scene")
+                            (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-skyscrapers-scene]))])
+                            (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                            (re-frame/dispatch [:run-skyscrapers-scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

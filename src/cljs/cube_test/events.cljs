@@ -14,6 +14,7 @@
    [cube-test.scenes.tic-tac-attack-scene :as tta-scene]
    [cube-test.scenes.vrubik-scene :as vrubik-scene]
    [cube-test.scenes.geb-cube-scene :as geb-cube-scene]
+   [cube-test.scenes.skyscrapers-scene :as skyscrapers-scene]
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]
    [cube-test.tic-tac-attack.cell :as cell]))
@@ -685,3 +686,17 @@
  (fn [db [_]]
    (tta-scene/do-it db)
    db))
+
+;; skyscrapers-scene
+(re-frame/reg-event-db
+ :init-skyscrapers-scene
+ (fn [db _]
+   ;side effect
+   (skyscrapers-scene/init)
+   db))
+
+(re-frame/reg-event-db
+  :run-skyscrapers-scene
+  (fn [db [_]]
+    (skyscrapers-scene/run-scene)
+    db))

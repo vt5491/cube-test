@@ -2,7 +2,9 @@
 ;   (:require
 ;    [re-frame.core :as re-frame]
 ;    [babylonjs :as bjs]))
-
+(require '[clojure.spec.alpha :as s]
+         '[clojure.spec.test.alpha :as stest])
+(require 'cube-test.utils.box-grid :as bg)
 (+ js/Math.PI 1)
 
 (+ 1 1)
@@ -537,3 +539,71 @@
          ([x y]
           (+ x y)))
   [1])
+;; fun with specs
+(s/conform even? 1001)
+
+(s/valid? even? 3)
+
+(s/valid? (fn [x] (> x 5)) 1)
+(s/valid? #(> %1 5) 10)
+
+(s/def ::date inst?)
+
+(s/def ::suit #{:club :diamond :heart :spade})
+(s/def ::vt-suit #{:club :diamond :heart :spade})
+(s/def ::black #{:club :spade})
+(s/def ::black-suit (and ::suit ::black))
+(s/valid? ::suit :lub)
+(s/valid? ::vt-suit :heart)
+
+(s/valid? (s/and ::suit ::black) :club)
+(s/valid? ::black-suit :club)
+(s/conform ::black-suit :club)
+(s/explain-data ::black-suit :club)
+
+(s/doc ::black-suit)
+(defrecord Person [first-name last-name email phone])
+
+(:first-name Person)
+
+(def p (user.Person "joe" "elliot" "abc"))
+(->Person "Bugs" nil nil nil)
+(def p (->Person "joe" "elliot" "abc" "123"))
+(def q (Person. "joe2" "elliot" "abc" nil))
+
+(:first-name p)
+(:first-name q)
+
+; (defrecord Vt-point [:x-disp :y-disp])
+(defrecord Vt-point [x y])
+
+(s/def ::x-disp int?)
+(s/def ::y-disp int?)
+
+(s/def ::two-point (s/cat :x ::x-disp :y ::y-disp))
+
+(s/valid? ::two-point [1 2])
+(s/conform ::two-point [1 2])
+
+(def p (->Vt-point 1 2))
+(:x p)
+
+(s/valid? ::two-point p)
+
+(cube-test.utils.box-grid/do-it 2)
+
+(s/conform :cube-test.utils.box-grid.do-it-ret [1])
+(require 'cube-test.utils.box-grid)
+
+(cube-test.utils.box-grid/do-it 1)
+(:cube-test.utils.box-grid.do-it-args)
+(s/conform :cube-test.utils.box-grid/do-it-args [1])
+(s/conform :cube-test.utils.box-grid/do-it-args 1)
+
+(map? {:a 7})
+(seq? {:a 7})
+
+(doc 'cube-test.utils.box-grid/do-it)
+(cljs.repl/doc map)
+(cljs.repl/doc map)
+(doc map)

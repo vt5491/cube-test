@@ -20,7 +20,8 @@
 
   :min-lein-version "2.9.0"
 
-  :source-paths ["src/clj" "src/cljs"]
+  ;;:source-paths ["src/clj" "src/cljs"]
+  :source-paths ["src/clj" "src/cljs" "src/cljc" "src/test" "test2" "test"]
 
   ;;vt add for re-frame-10x
   ; :compiler    {
@@ -37,8 +38,6 @@
 
   :shadow-cljs {:nrepl {:port 8778}
                 ;;vt add
-                ; :ssl {:keystore "dev_artifacts/ssl/keystore.jks"
-                ;       :password "Ex69Cite"}
                 ; :ssl {:keystore "dev_artifacts/ssl/keystore2.jks"
                 ;       :password "shadow-cljs"}
                 ;;vt end
