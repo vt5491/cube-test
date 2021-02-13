@@ -607,3 +607,5 @@
 (cljs.repl/doc map)
 (cljs.repl/doc map)
 (doc map)
+(s/explain :cube-test.utils.box-grid/do-it-args [1])
+(s/explain :cube-test.utils.box-grid/do-it-args 1)

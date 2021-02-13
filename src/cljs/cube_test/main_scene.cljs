@@ -92,7 +92,7 @@
   (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1))
   (set! white-mat (bjs/StandardMaterial. "white-mat" scene))
   (set! (.-diffuseColor white-mat) (bjs/Color3. 1 1 1))
-  (set! white-mat (bjs/StandardMaterial. "black-mat" scene))
+  (set! black-mat (bjs/StandardMaterial. "black-mat" scene))
   (set! (.-diffuseColor white-mat) (bjs/Color3. 0 0 0))
   (let [av (bjs/Debug.AxesViewer. scene)]
     (.update av (bjs/Vector3. 5 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
@@ -103,10 +103,12 @@
     (do
       (prn "Chrome detected")
       (set! xr-mode "xr"))
+      ; (set! xr-mode "vr"))
     (re-seq #"Firefox" js/navigator.userAgent)
     (do
       (prn "Firefox detected")
-      (set! xr-mode "xr"))
+      ; (set! xr-mode "xr"))
+      (set! xr-mode "vr"))
     true (set! xr-mode "xr"))
   (prn "xr-mode=" xr-mode)
   (if (= xr-mode "vr")
@@ -133,45 +135,46 @@
                                                           x (.-x cam-pos)
                                                           y (.-y cam-pos)
                                                           z (.-z cam-pos)]
-                                                      (set! (.-position camera) (bjs/Vector3. x y -5)))
-                                                    (prn "cam-rot c=" (.-rotation camera)))))
+                                                      (set! (.-position camera) (bjs/Vector3. x y -5))
+                                                      (prn "cam-rot c=" (.-rotation camera))))))
 
+      ; (js-debugger)
       (top-level-scene-initializer))
     (do
       ;; set up xr
-      (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
-      ;; note: ArcRotateCamera still does not give mouse rotate ability
-      ; (set! camera (bjs/ArcRotateCamera. "arc-cam" (/ js/Math.PI 2) (/ js/Math.PI 2) 2 (bjs/Vector3.Zero) scene))
-      (-> (.createDefaultXRExperienceAsync scene (js-obj "floorMeshes" (array (.-ground env))))
-          (p/then
-           (fn [xr-default-exp]
-             (set! xr-helper xr-default-exp)
-             (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
-             ;; Note: baseExperience is of type WebXRExperienceHelper
-             (set! features-manager (-> xr-default-exp (.-baseExperience) (.-featuresManager)))
-             (println "xr features available=" (.GetAvailableFeatures js/BABYLON.WebXRFeaturesManager))
-             (println "xr features acitve=" (-> xr-default-exp (.-baseExperience) (.-featuresManager) (.getEnabledFeatures)))
-             (set! camera (-> xr-default-exp (.-baseExperience) (.-camera)))
-             (set! (.-position camera) camera-init-pos)
-             ;;Note: setting rotations on the xr camera here have no effect.  You have to do it
-             ;; on the pre-xr camera (any rotations on that *will* propagate to the xr camera)
-             (re-frame/dispatch [:init-xr xr-default-exp])
-             (-> xr-default-exp (.-baseExperience)
-                 (.-onStateChangedObservable)
-                 (.add enter-xr-handler))
-                 ;; Note: set xr camera rotation in 'enter-xr-handler'
+        (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
+        ;; note: ArcRotateCamera still does not give mouse rotate ability
+        ; (set! camera (bjs/ArcRotateCamera. "arc-cam" (/ js/Math.PI 2) (/ js/Math.PI 2) 2 (bjs/Vector3.Zero) scene))
+        (-> (.createDefaultXRExperienceAsync scene (js-obj "floorMeshes" (array (.-ground env))))
+            (p/then
+             (fn [xr-default-exp]
+               (set! xr-helper xr-default-exp)
+               (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
+               ;; Note: baseExperience is of type WebXRExperienceHelper
+               (set! features-manager (-> xr-default-exp (.-baseExperience) (.-featuresManager)))
+               (println "xr features available=" (.GetAvailableFeatures js/BABYLON.WebXRFeaturesManager))
+               (println "xr features acitve=" (-> xr-default-exp (.-baseExperience) (.-featuresManager) (.getEnabledFeatures)))
+               (set! camera (-> xr-default-exp (.-baseExperience) (.-camera)))
+               (set! (.-position camera) camera-init-pos)
+               ;;Note: setting rotations on the xr camera here have no effect.  You have to do it
+               ;; on the pre-xr camera (any rotations on that *will* propagate to the xr camera)
+               (re-frame/dispatch [:init-xr xr-default-exp])
+               (-> xr-default-exp (.-baseExperience)
+                   (.-onStateChangedObservable)
+                   (.add enter-xr-handler))
+                   ;; Note: set xr camera rotation in 'enter-xr-handler'
 
-             (println "main-scene: top-level scene=" top-level-scene-initializer)
-             (top-level-scene-initializer)))))))
-             ; (init-part-2)))))))
+               (println "main-scene: top-level scene=" top-level-scene-initializer)
+               (top-level-scene-initializer)))))))
+               ; (init-part-2)))))))
 
-    ; var camera = new BABYLON.ArcRotateCamera()
-    ; "Camera",
-    ; Math.PI / 2,
-    ; Math.PI / 2,
-    ; 2,
-    ; BABYLON.Vector3.Zero(),
-    ; scene))
+      ; var camera = new BABYLON.ArcRotateCamera()
+      ; "Camera",
+      ; Math.PI / 2,
+      ; Math.PI / 2,
+      ; 2,
+      ; BABYLON.Vector3.Zero(),
+      ; scene))
   ;
 (defn enter-xr-handler [state]
   (println "enter-xr-handler: onStateChangedObservable: state=" state)
@@ -185,10 +188,12 @@
       ;; Note: do runtime vr camera rotation here
       ;; svale backyard
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
+      ;; svale living room
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) 0)))))
-      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0))
+      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0)))))
-      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
+      ;; scruz
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))))
 

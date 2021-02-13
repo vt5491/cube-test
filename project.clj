@@ -38,16 +38,21 @@
 
   :shadow-cljs {:nrepl {:port 8778}
                 ;;vt add
-                ; :ssl {:keystore "dev_artifacts/ssl/keystore2.jks"
-                ;       :password "shadow-cljs"}
+                ;; update 2020-02-04
+                ;; this works in that it creates 'https://localhost:8281/', and thus creates
+                ;; a navigator.xr in the browser.  However, xr-mode in firefox and chrome still
+                ;; doesn't work.
+                ;; Note: if using the oculus quest, the two browsers on there require https in order to enter vr mode
+                :ssl {:keystore "dev_artifacts/ssl/keystore2.jks"
+                      :password "shadow-cljs"}
                 ;;vt end
                 :builds {:app {:target :browser
                                :output-dir "resources/public/js/compiled"
                                :asset-path "/js/compiled"
                                :modules {:app {:init-fn cube-test.core/init
-                                               :preloads [devtools.preload
+                                               :preloads [devtools.preload]}}
                                                           ;;vt add
-                                                          day8.re-frame-10x.preload]}}
+                                                          ; day8.re-frame-10x.preload]}}
                                 ;;vt add
                                :dev {:compiler-options {
                                                         :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}

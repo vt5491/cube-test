@@ -11,14 +11,14 @@
 (declare render-loop)
 
 (defn init []
-  (println "game.init: entered, dummy-base.abc=" dummy-base/abc)
+  (println "game.init: entered, top-level-scene=" base/top-level-scene)
   (condp = base/top-level-scene
     :cube-spin-scene (do
-                           (println "top-level-scene=cube-spin-scene")
-                           (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-cube-spin-scene]))])
-                           (re-frame/dispatch [:init-cube-fx])
-                           (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                           (re-frame/dispatch [:run-cube-spin-scene]))
+                               (println "top-level-scene=cube-spin-scene")
+                               (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-cube-spin-scene]))])
+                               (re-frame/dispatch [:init-cube-fx])
+                               (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                               (re-frame/dispatch [:run-cube-spin-scene]))
     :face-slot-scene (do
                        (println "top-level-scene= face-slot-scene")
                        (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-face-slot-scene]))])
@@ -43,7 +43,12 @@
                             (println "top-level-scene= skyscrapers-scene")
                             (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-skyscrapers-scene]))])
                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                            (re-frame/dispatch [:run-skyscrapers-scene]))))
+                            (re-frame/dispatch [:run-skyscrapers-scene]))
+    :ut-simp-scene (do
+                            (println "top-level-scene= ut-simp-scene")
+                            (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-ut-simp-scene]))])
+                            (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                            (re-frame/dispatch [:run-ut-simp-scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

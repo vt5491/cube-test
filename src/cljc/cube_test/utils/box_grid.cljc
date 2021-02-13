@@ -9,8 +9,7 @@
   ; (:require [cube-test.base :as base]))
 
 (defn do-it [n]
-  (+ n 1))
-
+  (+ n 2))
 ; (s/def ::do-it-args (s/cat :n int?))
 ; ; (s/def ::do-it-args int?)
 ;

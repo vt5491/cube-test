@@ -55,3 +55,13 @@
         :args ::init-box-grid-args
         :ret ::init-box-grid-ret
         :fn ::init-box-grid-fn)
+
+;; vt 2021-02-09
+; (s/valid? (s/cat :num number?
+;                  :key keyword?) [5 :x])
+;
+; (s/explain (s/cat :num number?
+;             :key keyword?) ["5" :x])
+;
+; (def b 17)
+; (def c 12)

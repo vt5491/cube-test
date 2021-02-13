@@ -6,7 +6,7 @@
    [babylonjs :as bjs]
    [cube-test.main-scene :as main-scene]
    [babylonjs-gui :as bjs-gui]
-   ; [cube-test.controller :as controller]
+   [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.base :as base]
@@ -129,7 +129,9 @@
     (set! z-fwd-light zfl)
     (set! (.-intensity ybl) shadow-light-intensity)
     (set! (.-position ybl) (bjs/Vector3. 0 10 0))
-    (set! y-bwd-light ybl)))
+    (set! y-bwd-light ybl)
+    (set! (.-position xfl) (bjs/Vector3. -2 0 0))
+    (set! (.-position zfl) (bjs/Vector3. 0 0 -2))))
 
 ; (defn add-radio [text-blk text parent]
 ;   (println "hi from add-radio, text=" text)
@@ -241,7 +243,8 @@
     ;; cube radio btn
     ; (add-radio cube-radio-text-blk "geb" gui-pnl)
     (add-radio "geb" gui-pnl 1 0 false)
-    (add-radio "vat" gui-pnl 1 1 true)))
+    (add-radio "iwp" gui-pnl 1 1 false)
+    (add-radio "vat" gui-pnl 1 2 true)))
 
    ; addRadio("option 1", panel)));
 ; var shadowGenerator2 = new BABYLON.ShadowGenerator(1024, light2);
@@ -289,10 +292,10 @@
 ;; render
 (defn render-loop []
   ; (println "face-slot-scene: render-loop")
-  ; (if (= main-scene/xr-mode "vr")
-  ;   (controller/tick)
-  ;   (controller-xr/tick))
-  (controller-xr/tick)
+  (if (= main-scene/xr-mode "vr")
+    (controller/tick)
+    (controller-xr/tick))
+  ; (controller-xr/tick)
   (fps-panel/tick main-scene/engine)
   ; (when @*cell-action-pending*
   ;   ; (rot-cells)

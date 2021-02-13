@@ -86,12 +86,15 @@
   ; (js-debugger)
   (if (.-pressed cmpt)
     (when (and left-ctrl-xr (not is-gripping))
+      ; (println "grip-handler-xr: path a")
       (set! grip-start-pos (-> left-ctrl-xr (.-grip) (.-position) (.clone)))
       (set! is-gripping true)
       (set! player-start-pos (.-position main-scene/camera))
       (set! last-grip-time (.now js/Date)))
+    ; (println "grip-handler-xr: a-b: is-gripping=" is-gripping)
     (if is-gripping
       (do
+        ; (println "grip-handler-xr: path b")
         ;; transition from gripping to non-gripping
         (set! is-gripping false)
         (set! last-grip-time (.now js/Date))
@@ -135,6 +138,7 @@
       is-gripping
       (let [ctrl-delta-pos (-> left-ctrl-xr (.-grip) (.-position) (.subtract grip-start-pos) (.multiplyByFloats grip-factor grip-factor grip-factor))
             new-pos (.subtract (.-position main-scene/camera) ctrl-delta-pos)]
+        ; (println "tick: is-gripping=true")
         (set! (.-position main-scene/camera) new-pos)
         (set! last-grip-vel (.subtract new-pos last-player-pos))
         (set! last-player-pos (.-position main-scene/camera)))
@@ -142,4 +146,5 @@
       (let [delta-time (- (.now js/Date) last-grip-time)
             vel-strength (* 5.6 (- 1.0 (/ delta-time GRIP_DECELERATION_INT)))
             delta-pos (.multiplyByFloats last-grip-vel vel-strength vel-strength vel-strength)]
+        ; (println "tick: is-gripping=false")
         (set! (.-position main-scene/camera) (.add (.-position main-scene/camera) delta-pos))))))

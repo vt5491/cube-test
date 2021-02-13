@@ -15,6 +15,9 @@
    [cube-test.scenes.vrubik-scene :as vrubik-scene]
    [cube-test.scenes.geb-cube-scene :as geb-cube-scene]
    [cube-test.scenes.skyscrapers-scene :as skyscrapers-scene]
+   [cube-test.ut-simp.ut-simp-scene :as ut-simp-scene]
+   [cube-test.ut-simp.msg-box :as msg-box]
+   [cube-test.ut-simp.msg-cube-ph :as msg-cube-ph]
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]
    [cube-test.tic-tac-attack.cell :as cell]))
@@ -156,6 +159,13 @@
  (fn [db _]
    ;side effect
    (geb-cube-scene/init)
+   db))
+
+(re-frame/reg-event-db
+ :init-ut-simp-scene
+ (fn [db _]
+   ;side effect
+   (ut-simp-scene/init)
    db))
 ;;
 ;; face-slot scene
@@ -651,6 +661,67 @@
     (geb-cube-scene/run-scene)
     db))
 
+;;
+;; ut-simp
+;;
+(re-frame/reg-event-db
+  :run-ut-simp-scene
+  (fn [db [_]]
+    (ut-simp-scene/run-scene)
+    db))
+
+(re-frame/reg-event-db
+  :add-msg-box
+  (fn [db [_ msg-boxes-atom]]
+    (msg-box/add-msg-box msg-boxes-atom)
+    db))
+
+(re-frame/reg-event-db
+  :add-msg-cube-ph
+  (fn [db [_ msg-box]]
+    (msg-cube-ph/add-msg-cube-ph msg-box)
+    db))
+
+; (reg-event-fx                              ;; <1>
+;    :my-event
+;    (fn [{:keys [db]} [_ a]]                ;; <2>
+;       {:db  (assoc db :flag true)          ;; <3>
+;        :dispatch [:do-something-else 3]}))
+(re-frame/reg-event-fx
+   :add-msg-box-2
+   ; (fn [{:keys [db]} [_ msg-box]])
+   (fn [{:keys [db]} [_ msg-box]]
+      {:db  (assoc db :msg-boxes-2 (conj (db :msg-boxes-2) msg-box))
+       :dispatch [:add-msg-cube-ph msg-box]}))
+; (re-frame/reg-event-db
+;   :add-msg-cube-ph-2
+;   (fn [db [_ msg-box]]
+;     (msg-cube-ph/add-msg-cube-ph msg-box)
+;     db))
+
+(re-frame/reg-event-db
+ :set-msg-boxes-atom
+ (fn [db [_ msg-boxes-atom]]
+   (assoc db :msg-boxes-atom msg-boxes-atom)))
+
+(re-frame/reg-event-db
+ :init-msg-boxes-2
+ (fn [db [_]]
+   ; (assoc db :msg-boxes-atom-2 (atom []))
+   (assoc db :msg-boxes-2 [])))
+
+(re-frame/reg-event-db
+  :simp-ut-action-1
+  (fn [db [_]]
+    (msg-box/print-msg-boxes db)
+    db))
+
+; (re-frame/reg-event-db
+;   :simp-ut-action-2
+;   (fn [db [_]]
+;     (msg-box/print-msg-boxes db)
+;     db))
+    
 ;; event utils
 (re-frame/reg-event-db
  :print-db
