@@ -3,7 +3,7 @@
    [re-frame.core :as re-frame]
    [cube-test.subs :as subs]
    [babylonjs :as bjs]
-   [cube-test.ut-simp.msg-box :as msg-box]))
+   [cube-test.ut-simp.msg :as msg]))
 
 ; <div style="z-index: 11; position: absolute; right: 20px; bottom: 50px;">
 ;<button class="babylonVRicon" title="immersive-vr - local-floor"></button></div>
@@ -19,10 +19,11 @@
      [:br]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action])} "user action 1"]
      [:button.user-action {:on-click #(re-frame/dispatch [:simp-ut-action-1])} "user action 1"]
-     [:button.user-action {:on-click #(re-frame/dispatch [:add-msg-box-2
-                                                          {::msg-box/id 3
-                                                           ::msg-box/msg {::msg-box/text "ghi" ::msg-box/msg-level :INFO}}
-                                                          "user action 2"])}]
+     [:button.user-action {:on-click #(re-frame/dispatch [:simp-ut-action-2])} "user action 2"]
+     ; [:button.user-action {:on-click #(re-frame/dispatch [:add-msg-box
+     ;                                                      {::msg/box-id 3
+     ;                                                       ::msg/msg {::msg/text "ghi" ::msg/msg-level :INFO}}
+     ;                                                      "user action 2"])}]
      [:canvas
       {:touchaction "none" :id "renderCanvas"
        :style {:width 1024 :height 768 :border 5 :outline "black 3px solid"}}]

@@ -16,8 +16,8 @@
    [cube-test.scenes.geb-cube-scene :as geb-cube-scene]
    [cube-test.scenes.skyscrapers-scene :as skyscrapers-scene]
    [cube-test.ut-simp.ut-simp-scene :as ut-simp-scene]
-   [cube-test.ut-simp.msg-box :as msg-box]
-   [cube-test.ut-simp.msg-cube-ph :as msg-cube-ph]
+   [cube-test.ut-simp.msg :as msg]
+   [cube-test.ut-simp.msg-box-phys :as msg-box-phys]
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]
    [cube-test.tic-tac-attack.cell :as cell]))
@@ -670,16 +670,16 @@
     (ut-simp-scene/run-scene)
     db))
 
-(re-frame/reg-event-db
-  :add-msg-box
-  (fn [db [_ msg-boxes-atom]]
-    (msg-box/add-msg-box msg-boxes-atom)
-    db))
+; (re-frame/reg-event-db
+;   :add-msg-box
+;   (fn [db [_ msg-boxes-atom]]
+;     (msg-box/add-msg-box msg-boxes-atom)
+;     db))
 
 (re-frame/reg-event-db
-  :add-msg-cube-ph
+  :add-msg-box-phys
   (fn [db [_ msg-box]]
-    (msg-cube-ph/add-msg-cube-ph msg-box)
+    (msg-box-phys/add-msg-box-phys msg-box)
     db))
 
 ; (reg-event-fx                              ;; <1>
@@ -688,40 +688,81 @@
 ;       {:db  (assoc db :flag true)          ;; <3>
 ;        :dispatch [:do-something-else 3]}))
 (re-frame/reg-event-fx
-   :add-msg-box-2
-   ; (fn [{:keys [db]} [_ msg-box]])
-   (fn [{:keys [db]} [_ msg-box]]
-      {:db  (assoc db :msg-boxes-2 (conj (db :msg-boxes-2) msg-box))
-       :dispatch [:add-msg-cube-ph msg-box]}))
+ :dummy
+ (fn [db [_]]
+   (println "**DUMMY***")
+   db))
+
+; (re-frame/reg-event-fx
+;    :add-msg-box
+;    ; (fn [{:keys [db]} [_ msg-box]])
+;    (fn [{:keys [db]} [_ msg-box]]
+;       ; {:db  (assoc db :msg-boxes-2 (conj (db :msg-boxes-2) msg-box))}
+;       ; {:db  (assoc-in db [::msg/msgs ::msg/msg-boxes] (conj (get-in db [::msg/msgs ::msg/msg-boxes]) msg-box))}
+;       ; {:db  (assoc-in db [:msgs ::msg/msg-boxes] (conj (get-in db [:msgs ::msg/msg-boxes]) msg-box))}
+;       {:db (let [db-change-1 (assoc-in db [:msgs ::msg/msg-boxes] (conj (get-in db [:msgs ::msg/msg-boxes]) msg-box))
+;                  db-change-2 (let [max-id (get-in db [:msgs ::msg/max-id])]
+;                                (println "***hello, max-id=" max-id)
+;                                (assoc-in db-change-1 [:msgs ::msg/max-id] (+ max-id 1)))]
+;              db-change-2)
+;        ; :db (let [max-id (get-in db [:msgs ::msg/max-id])])
+;        :dispatch [:add-msg-box-phys msg-box]}))
+;        ; :dispatch-2 [:dummy]}))
+
+(re-frame/reg-event-fx
+   :add-msg
+   ; (fn [{:keys [db]} [_ ::msg/text ::msg/msg-level]])
+   (fn [{:keys [db]} [_ text msg-level]]
+     (let [max-id (get-in db [:msgs ::msg/max-id])
+           msg-boxes (get-in db [:msgs ::msg/msg-boxes])
+           new-msg-box {::msg/box-id max-id ::msg/msg {::msg/text text ::msg/msg-level msg-level}}]
+       ; (println "***add-msg: msg-boxes=" msg-boxes)
+       {:db
+        (let [
+              ; msg-boxes (db [:msgs ::msg/msg-boxes])
+              db-change-1 (assoc-in db [:msgs ::msg/msg-boxes]
+                                    (conj msg-boxes new-msg-box))
+              db-change-2 (assoc-in db-change-1 [:msgs ::msg/max-id] (+ max-id 1))]
+          ; (println "***add-msg: db-change-1=" db-change-1)
+          db-change-2)
+        :dispatch [:add-msg-box-phys new-msg-box]})))
+
+
 ; (re-frame/reg-event-db
 ;   :add-msg-cube-ph-2
 ;   (fn [db [_ msg-box]]
 ;     (msg-cube-ph/add-msg-cube-ph msg-box)
 ;     db))
 
-(re-frame/reg-event-db
- :set-msg-boxes-atom
- (fn [db [_ msg-boxes-atom]]
-   (assoc db :msg-boxes-atom msg-boxes-atom)))
+; (re-frame/reg-event-db
+;  :set-msg-boxes-atom
+;  (fn [db [_ msg-boxes-atom]]
+;    (assoc db :msg-boxes-atom msg-boxes-atom)))
 
 (re-frame/reg-event-db
- :init-msg-boxes-2
+ ; :init-msg-boxes
+ :init-msgs
  (fn [db [_]]
    ; (assoc db :msg-boxes-atom-2 (atom []))
-   (assoc db :msg-boxes-2 [])))
+   ; (assoc db :msg-boxes-2 [])
+   (assoc db :msgs {::msg/max-id 0 ::msg/msg-boxes []})))
+   ; (assoc db :msgs ::msg/msgs)))
 
 (re-frame/reg-event-db
   :simp-ut-action-1
   (fn [db [_]]
-    (msg-box/print-msg-boxes db)
+    (msg/print-msg-boxes db)
     db))
 
-; (re-frame/reg-event-db
-;   :simp-ut-action-2
-;   (fn [db [_]]
-;     (msg-box/print-msg-boxes db)
-;     db))
-    
+(re-frame/reg-event-db
+  :simp-ut-action-2
+  (fn [db [_]]
+    ; (let [max-id (get-in db [:msgs ::msg/max-id])]
+    ;   (println "simp-ut-action-2: max-id=" max-id)
+    ;   (msg-box-phys/add-msg-box-phys {::msg/box-id (+ max-id 0), ::msg/msg {}}))
+    (re-frame/dispatch [:add-msg "new" :INFO])
+    db))
+
 ;; event utils
 (re-frame/reg-event-db
  :print-db
