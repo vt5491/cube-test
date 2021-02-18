@@ -33,12 +33,15 @@
 
 (s/valid? ::msgs {::max-id 3 ::msg-boxes [{::box-id 0 ::msg {::text "abc" ::msg-level :INFO}}]})
 
+;; end-specs
 ; (defn add-msg-box [*msg-boxes-atom*]
 ;   (swap! *msg-boxes-atom* (fn [x] [{::id 1 ::msg {::text "abc" ::msg-level :INFO}}]))
 ;   (let [r (s/assert ::msg-boxes @*msg-boxes-atom*)
 ;         r2 (s/valid? ::msg-boxes @*msg-boxes-atom*)]
 ;     (println "*msg-boxes*=" *msg-boxes-atom*)
 ;     (println "add-msg-box: assert=" r ", valid=" r2)))
+;; methods
+(def dummy 11)
 
 (defn add-msg-box [db]
   (swap! (db :msg-boxes-atom-2) (fn [x] [{::id 1 ::msg {::text "def" ::msg-level :INFO}}])))
@@ -47,3 +50,14 @@
   (println "print-msg-boxes: db=" db)
   (println "print-msg-boxes: msg-boxes=" (db :msg-boxes-atom)))
   ; (println "print-msg-boxes: msg-boxes=" @(db :msg-boxes-atom)))
+
+(defn inc-msg-level [msg-box]
+  (let [msg-level (get-in msg-box [::msg ::msg-level])
+        msg-level' (case msg-level
+                                :INFO :WARN
+                                :WARN :SEVERE
+                                :SEVERE :INFO)]
+    (assoc-in msg-box [::msg ::msg-level] msg-level')))
+
+(defn extract-msg-box-num [msg-box-id]
+  (-> (re-find #"msg-box-(\d+)" "msg-box-0") (get  1) (js/parseInt)))

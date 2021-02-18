@@ -18,8 +18,17 @@
 ; (def msg-boxes)
 (def ^:dynamic *msg-boxes-atom* (atom []))
 ; (s-def)
-
+   ; mesh.actionManager = new BABYLON.ActionManager(scene);
+   ;      mesh.actionManager.registerAction()
+   ;          new BABYLON.ExecuteCodeAction()
+   ;              {
+   ;                  trigger: BABYLON.ActionManager.OnPickTrigger,}
+   ;              ,
+   ;              function (e) {}
+   ;
+   ;                  console.log(e));
 ;; inits
+
 (defn init []
   (println "ut-simp-scene/scene.init: entered")
   (let [light (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
@@ -50,6 +59,7 @@
 ; {::id 0 ::msg {::text "abc" ::msg-level :INFO}}
 ; (defn add-msg-box []
 ;   (swap! *msg-boxes* [{::id 0 ::msg {::text "abc" ::msg-level :INFO}}]))
+
 
 ;; render
 (defn render-loop []
