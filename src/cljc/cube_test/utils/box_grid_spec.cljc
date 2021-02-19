@@ -20,7 +20,14 @@
 ;(​fn​ [{:keys [args ret]}] ​
 ;(​let​ [n (or (:n args) 1)] ​  (​cond​ (zero? n) (zero? ret) ​  (pos? n) (and (>= ret 0) (< ret n)) ​  (neg? n) (and (<= ret 0) (> ret n))))
 ; (s/fdef clojure.core/rand ​  :args ::rand-args ​  :ret  ::rand-ret ​  :fn   ::rand-fn)
-
+(comment
+   (+ 1 1)
+   (println "hi")
+   (js/parseInt "5")
+   (println *ns*)
+   (do (println "hi")
+       (println "bye"))
+  ,)
 (s/def ::do-it-args (s/cat :n int?))
 
 (s/def ::do-it-ret int?)

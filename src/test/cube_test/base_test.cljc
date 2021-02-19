@@ -20,6 +20,10 @@
             ; [cube-test.base :as base]))
             [cube-test.dummy-base :as dummy-base]))
             ; [cube-test.base :refer :all]))
+(comment
+ (println "hi")
+ (js/parseInt "5")
+ ,)
 
 (println  "now in src/test/cube_test/base_test.cljc mutha2")
 (println "now in base_test.cljc, base.abc=" dummy-base/abc)

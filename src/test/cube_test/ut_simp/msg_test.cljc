@@ -1,6 +1,7 @@
 (ns cube-test.ut-simp.msg-test
   (:require [clojure.test :refer :all]
-            [cube-test.ut-simp.msg :as msg]))
+            [cube-test.ut-simp.msg :as msg]
+            [clojure-test :as t]))
 
 (deftest a-test
   (testing "basic dummy test"
@@ -24,6 +25,13 @@
       (println "msg-level=" msg-level')
       (is (= msg-level' :WARN)))))
 
+(comment
+ (println *ns*)
+;;  (require '[clojure.test :as t])
+;;  (require [clojure.test :as t])
+ (repl/dir t)
+ (t/run-tests 'cube-test.ut-simp.msg-test)
+ ,) 
 ; (deftest inc-msg-level
 ;   (testing "inc-msg-level properly increments msg-level"
 ;     (is (= 0 1))))

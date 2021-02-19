@@ -7,6 +7,11 @@
 ;; example of how you can refer to "outsider" specs.
 ; (s/valid? ::mb-spec/msg-box {::mb-spec/id 0 ::mb-spec/msg {::mb-spec/text "abc" ::mb-spec/msg-level :INFO}})
 
+(comment
+  (def a 9)
+  (+ a 1)
+  (+ 1 1)
+ ,)
 ;; specs
 (s/def ::text string?)
 (s/def ::msg-level #{:INFO :WARN :SEVERE})
