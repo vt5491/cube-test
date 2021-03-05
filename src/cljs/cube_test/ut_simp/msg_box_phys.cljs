@@ -9,6 +9,14 @@
 
 (def cube)
 
+;; lifecycle hooks
+(defn ^:dev/before-load msg-box-phys-stop []
+  (js/console.log "msg-box-phys: stop"))
+
+(defn ^:dev/after-load msg-box-phys-start []
+  (js/console.log "msg-box-phys: start"))
+
+;; methods
 (defn add-mesh-pick-action [mesh]
   (set! (.-actionManager mesh) (bjs/ActionManager. main-scene/scene))
   ; (let [action-mgr (.-actionManager mesh)]))

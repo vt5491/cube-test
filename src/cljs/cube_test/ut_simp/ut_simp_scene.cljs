@@ -35,15 +35,6 @@
     (.setEnabled light true))
   ; (msg-box/add-msg-box *msg-boxes-atom*)
   ; (assoc-in db [:vrubik-state :rots :left-side] 0)
-  ; (assoc-in db [:msg-boxes-atom] *msg-boxes-atom*)
-  ; (println "init-pre db=" db)
-  ; (re-frame/dispatch [:set-msg-boxes-atom *msg-boxes-atom*])
-  ; (println "init-post db=" db)
-  ; (assoc-in db [:abc] 7)
-  ; (assoc db :abc 7)
-  ; (re-frame/dispatch [:add-msg-box *msg-boxes-atom*])
-  ; (js-debugger)
-  ; (re-frame/dispatch [:add-msg-box-phys (get @*msg-boxes-atom* 0)])
   ;; 2nd method
   (re-frame/dispatch [:init-msgs])
   ; (re-frame/dispatch [:add-msg-box
@@ -56,12 +47,62 @@
   ; (println "init: (db :abc=)" (db :abc))
   ; (println "init: db=" db))
 
-; {::id 0 ::msg {::text "abc" ::msg-level :INFO}}
-; (defn add-msg-box []
-;   (swap! *msg-boxes* [{::id 0 ::msg {::text "abc" ::msg-level :INFO}}]))
+; ;; this is to create a scene without being dependent on main-scene in an attempt to get
+; ;; a refreshable scene
+; (def canvas)
+; (def camera)
+; (def engine)
+; (def scene)
+; (def sphere)
+; (def env)
+; (def green-mat)
+; (def blue-mat)
+; (def grnd)
+;
+; (defn ^:dev/after-load create-grnd []
+;   (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
+;     (set! (.-material grnd) blue-mat)
+;     (set! (.-ground env) grnd)))
+;
+;
+; (defn init-2 []
+;   (println "main-scene.create-scene: entered")
+;   (set! canvas (.getElementById js/document "renderCanvas"))
+;   (set! engine (bjs/Engine. canvas true))
+;   (set! scene (bjs/Scene.))
+;   (let [ninety-deg (/ js/Math.PI 2)]
+;     (set! camera (bjs/ArcRotateCamera.
+;                   "Camera"
+;                   ninety-deg
+;                   ninety-deg
+;                   2
+;                   (bjs/Vector3. 0 1 -8)
+;                   scene)))
+;   (.attachControl camera canvas true)
+;   (.setTarget camera (bjs/Vector3. 0 0 0))
+;   (let [light1 (bjs/HemisphericLight. "light1" (bjs/Vector3. 1 1 0) scene)
+;         light2 (bjs/PointLight. "light2" (bjs/Vector3. 0 1 -1) scene)
+;         sph (bjs/MeshBuilder.CreateSphere "sphere" (js-obj "diameter" 1) scene)]
+;     (set! sphere sph))
+;   (set! env (bjs/EnvironmentHelper.
+;              (js-obj
+;               "createGround" false
+;               "skyboxSize" 30)
+;              scene))
+; ; (set! (.-material ground) green-mat
+;   (set! green-mat (bjs/StandardMaterial. "green-mat" scene))
+;   (set! (.-diffuseColor green-mat) (bjs/Color3. 0 1 0))
+;   (set! blue-mat (bjs/StandardMaterial. "blue-mat" scene))
+;   (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1))
+;
+;   (set! (.-material sphere) green-mat)
+;
+;   (create-grnd)
+;
+;   (bjs/Debug.AxesViewer. scene))
 
 
-;; render
+  ;; render
 (defn render-loop []
   ; (println "ut-simp-scene.render-loop")
   (if (= main-scene/xr-mode "vr")
@@ -70,6 +111,13 @@
   (fps-panel/tick main-scene/engine)
   (.render main-scene/scene))
 
+; (defn run-render-loop-2 []
+;   (println "run-render-loop-2: engine=" engine)
+;   (.runRenderLoop engine (fn [] (.render scene))))
+
 (defn run-scene []
   (println "ut-simp-scene.run-scene: entered")
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
+
+; (defn run-scene-2 []
+;   (run-render-loop-2))

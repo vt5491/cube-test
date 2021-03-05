@@ -24,10 +24,14 @@
      ;                                                      {::msg/box-id 3
      ;                                                       ::msg/msg {::msg/text "ghi" ::msg/msg-level :INFO}}
      ;                                                      "user action 2"])}]
-     [:canvas
-      {:touchaction "none" :id "renderCanvas"
-       :style {:width 1024 :height 768 :border 5 :outline "black 3px solid"}}]
+
+     ; note: now define in index.html since defining it here will put it under the "app" div
+     ;; and this can interfere with bjs refreshibility.
+     ; [:canvas
+     ;  {:touchaction "none" :id "renderCanvas"
+     ;   :style {:width 1024 :height 768 :border 5 :outline "black 3px solid"}}]
      [:div {:id "vt-div"}]]))
+
       ; [:button.babylonVRicon {:on-click #(re-frame/dispatch [:enter-vr])}]
       ; (.-element (bjs/WebXREnterExitUIButton.))]])
   ; (-> js/document (.getElementById "app") (.appendChild (.-element (bjs/WebXREnterExitUIButton.))))

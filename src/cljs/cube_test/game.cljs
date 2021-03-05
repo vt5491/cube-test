@@ -47,8 +47,14 @@
     :ut-simp-scene (do
                             (println "top-level-scene= ut-simp-scene")
                             (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-ut-simp-scene]))])
+                            ; (re-frame/dispatch [:init-ut-simp-scene-2])
                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                            (re-frame/dispatch [:run-ut-simp-scene]))))
+                            (re-frame/dispatch [:run-ut-simp-scene]))
+                            ; (re-frame/dispatch [:run-ut-simp-scene-2]))
+    :simp-scene (do
+                           (println "top-level-scene2= simp-scene")
+                           (re-frame/dispatch [:init-simp-scene])
+                           (re-frame/dispatch [:run-simp-scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

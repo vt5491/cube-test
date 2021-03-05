@@ -15,6 +15,7 @@
    [cube-test.scenes.vrubik-scene :as vrubik-scene]
    [cube-test.scenes.geb-cube-scene :as geb-cube-scene]
    [cube-test.scenes.skyscrapers-scene :as skyscrapers-scene]
+   [cube-test.scenes.simp-scene :as simp-scene]
    [cube-test.ut-simp.ut-simp-scene :as ut-simp-scene]
    [cube-test.ut-simp.msg :as msg]
    [cube-test.ut-simp.msg-box-phys :as msg-box-phys]
@@ -167,6 +168,33 @@
    ;side effect
    (ut-simp-scene/init)
    db))
+
+; (re-frame/reg-event-db)
+ ; :init-simp-scene
+ ; (fn [db _]
+ ;   ;side effect
+ ;   ; (simp-scene/init)
+ ;   (println "events: now in :init-simp-scene")
+ ;   (simp-scene/init-once)
+ ;   db))
+
+; (re-frame/reg-event-db
+;  :init-ut-simp-scene-2
+;  (fn [db _]
+;    ;side effect
+;    (ut-simp-scene/init-2)
+;    db))
+
+(re-frame/reg-fx
+ :init-simp-scene-fx
+ (fn [_]
+  ; (simp-scene/init)
+  (simp-scene/init-once)))
+
+(re-frame/reg-event-fx
+  :init-simp-scene
+  (fn [cofx _]
+     {:init-simp-scene-fx nil}))
 ;;
 ;; face-slot scene
 ;;
@@ -671,6 +699,12 @@
     db))
 
 ; (re-frame/reg-event-db
+;   :run-ut-simp-scene-2
+;   (fn [db [_]]
+;     (ut-simp-scene/run-scene-2)
+;     db))
+
+; (re-frame/reg-event-db
 ;   :add-msg-box
 ;   (fn [db [_ msg-boxes-atom]]
 ;     (msg-box/add-msg-box msg-boxes-atom)
@@ -763,6 +797,12 @@
     (re-frame/dispatch [:add-msg "new" :INFO])
     db))
 
+;; simp-scene
+(re-frame/reg-event-db
+  :run-simp-scene
+  (fn [db [_]]
+    (simp-scene/run-scene)
+    db))
 ;; event utils
 (re-frame/reg-event-db
  :print-db

@@ -18,7 +18,8 @@
 ; import * as GUI from 'babylonjs-gui';
 (def canvas)
 (def engine)
-(def scene)
+; (def scene)
+; (defonce scene)
 (def env)
 (def camera)
 (def camera-rig)
@@ -49,6 +50,9 @@
 (def gui-pnl)
 (def adv-texture)
 
+;; we have to pre-declare scene because it's defined with 'init' as a defonce.
+(declare scene)
+(declare init)
 (declare init-part-2)
 (declare init-cube)
 (declare setup-skybox)
@@ -58,13 +62,22 @@
 (declare pointer-handler)
 (declare enter-xr-handler)
 
+(defn ^:dev/after-load main-scene-reload []
+  (println "main-scene: after-load event detected, scene=" scene)
+  ;; not all scenes (e.g simp-scene) "inherit" off main-scene, so if no main-scene do not re-init it.
+  (if (not (nil? scene)) (init) nil))
+
+; (defn ^:dev/after-load create-grnd [])
 (defn init [top-level-scene-initializer]
+; (defn ^:dev/after-load init [top-level-scene-initializer]
   (println "main-scene.init: entered")
   ;; following line necessary for mixamo animations.
   (set! bjs/Animation.AllowMatricesInterpolation true)
   (set! canvas (-> js/document (.getElementById "renderCanvas")))
   (set! engine (bjs/Engine. canvas true))
-  (set! scene (bjs/Scene. engine))
+  ; (set! scene (bjs/Scene. engine))
+  ;; Note: even though scene is defined inside 'init' it has file level scope.
+  (defonce scene (bjs/Scene. engine))
   (re-frame/dispatch [:set-main-scene scene])
   ;; Note: we have to manually create our own ground in order to
   ;; properly wrap it in a physicsImposter.
@@ -78,7 +91,8 @@
              scene))
   ;; manually create a ground with a physicsImposter.
   (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
-    (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
+    ; (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
+    (set! (.-material grnd) (bjs-m/GridMaterial. "green-mat" scene))
     (set! (.-physicsImpostor grnd)
       (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
                             (js-obj "mass" 0 "restitution" 0.9) scene))
@@ -98,7 +112,7 @@
   (set! black-mat (bjs/StandardMaterial. "black-mat" scene))
   (set! (.-diffuseColor white-mat) (bjs/Color3. 0 0 0))
   (let [av (bjs/Debug.AxesViewer. scene)]
-    (.update av (bjs/Vector3. 5 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
+    (.update av (bjs/Vector3. 4 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
   (setup-skybox)
 
   (cond

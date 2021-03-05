@@ -4,7 +4,9 @@
                   :exclusions [com.google.javascript/closure-compiler-unshaded
                                org.clojure/google-closure-library
                                org.clojure/google-closure-library-third-party]]
-                 [thheller/shadow-cljs "2.9.3"]
+                 ; [thheller/shadow-cljs "2.9.3"]
+                 [thheller/shadow-cljs "2.11.7"]
+                 ; [thheller/shadow-cljs "2.11.20"]
                  [reagent "0.10.0"]
                  [re-frame "0.12.0"]
                  [funcool/promesa "5.1.0"]
@@ -14,8 +16,9 @@
                  ;; nope: only works for clj
                  ; [org.clojure/core.incubator "0.1.4"]]
 
-  :plugins [[lein-shadow "0.2.0"]
-
+  :plugins [
+            ; [lein-shadow "0.2.0"]
+            [lein-shadow "0.3.1"]
             [lein-shell "0.5.0"]]
 
   :min-lein-version "2.9.0"
@@ -64,6 +67,9 @@
 
   :aliases {"dev"          ["with-profile" "dev" "do"
                             ["shadow" "watch" "app"]]
+            ;; vt add watch from a more modern project
+            "watch"         ["with-profile" "dev" "do"
+                             ["shadow" "watch" "app" "browser-test" "karma-test"]]
             "prod"         ["with-profile" "prod" "do"
                             ["shadow" "release" "app"]]
             "build-report" ["with-profile" "prod" "do"
