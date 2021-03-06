@@ -25,14 +25,16 @@
  (js/parseInt "5")
  ,)
 
-(println  "now in src/test/cube_test/base_test.cljc mutha2")
-(println "now in base_test.cljc, base.abc=" dummy-base/abc)
+(println  "now in src/test/cube_test/base_test.cljc mutha3")
+; (println "now in base_test.cljc, base.abc=" dummy-base/abc)
 ; (println "*current-env*=" *current-env*)
 ; (println "async=" async)
 ; (println "now in base_test.cljs, base.scale-factor=" base/scale-factor)
 
+(def dummy 39)
 ; (ct/deftest a-test)
 (deftest a-test
   (testing "FIXME, I fail."
     ; (is (= 0 1))
-    (is (= dummy-base/abc 8))))
+    ; (is (= dummy-base/abc 8))
+    (is (= dummy 19))))

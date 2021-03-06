@@ -1,9 +1,9 @@
-;; Note: consider placing tests under $Root/test (see '/test/cube_test/test/ut_simp/msg_test_2.cljc')
 (ns cube-test.ut-simp.msg-test
-  (:require 
-      [clojure.test :refer :all]
-      [cube-test.ut-simp.msg :as msg]
-      [clojure.test :as t]))
+  (:require
+            ; [clojure.test :refer :all]
+            [cube-test.ut-simp.msg :as msg]
+            ; [clojure-test :as t]
+            [clojure.test :as t]))
 
 (deftest a-test
   (testing "basic dummy test"
@@ -27,16 +27,16 @@
       (println "msg-level=" msg-level')
       (is (= msg-level' :WARN)))))
 
+(def dummy 7)
+
 (comment
  (println *ns*)
- (+ 1 1)
- (println "msg/dummy=" msg/dummy)
- (require '[cube-test.ut-simp.msg :as msg])
 ;;  (require '[clojure.test :as t])
 ;;  (require [clojure.test :as t])
+ (require [clojure.repl :as repl])
  (repl/dir t)
  (t/run-tests 'cube-test.ut-simp.msg-test)
- ,) 
+ ,)
 ; (deftest inc-msg-level
 ;   (testing "inc-msg-level properly increments msg-level"
 ;     (is (= 0 1))))
