@@ -16,5 +16,6 @@
 ; (def top-level-scene :vrubik-scene)
 ; (def top-level-scene :geb-cube-scene)
 ; (def top-level-scene :skyscrapers-scene)
-(def top-level-scene :ut-simp-scene)
+; (def top-level-scene :ut-simp-scene)
 ; (def top-level-scene :simp-scene)
+(def top-level-scene :msg-cube)

@@ -21,7 +21,9 @@
    [cube-test.ut-simp.msg-box-phys :as msg-box-phys]
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]
-   [cube-test.tic-tac-attack.cell :as cell]))
+   [cube-test.tic-tac-attack.cell :as cell]
+   [cube-test.msg-cube.msg-cube-game :as msg-cube-game]
+   [cube-test.msg-cube.msg-cube-scene :as msg-cube-scene]))
 
 
 (re-frame/reg-event-db
@@ -195,6 +197,41 @@
   :init-simp-scene
   (fn [cofx _]
      {:init-simp-scene-fx nil}))
+
+(re-frame/reg-event-fx
+  :init-simp-scene
+  (fn [cofx _]
+     {:init-msg-cube-game-fx nil}))
+
+(re-frame/reg-fx
+ :init-msg-cube-scene-fx
+ (fn [_]
+  ; (simp-scene/init-once)
+  (msg-cube-scene/init)))
+
+; (re-frame/reg-event-fx
+;   :init-msg-cube-scene
+;   (fn [cofx _]
+;      {:init-msg-cube-scene-fx nil}))
+
+(re-frame/reg-event-db
+ :init-msg-cube-scene
+ (fn [db _]
+   ;side effect
+   (msg-cube-scene/init)
+   db))
+
+(re-frame/reg-fx
+ :init-msg-cube-game-fx
+ (fn [_]
+  ; (simp-scene/init-once)
+  (msg-cube-game/init)))
+
+(re-frame/reg-event-fx
+  :init-msg-cube-game
+  (fn [cofx _]
+     {:init-msg-cube-game-fx nil}))
+
 ;;
 ;; face-slot scene
 ;;
@@ -797,12 +834,51 @@
     (re-frame/dispatch [:add-msg "new" :INFO])
     db))
 
+;; msg-cube
+;; I think an effect handler is user to indicate an effect that may (e.g dispatch)
+;; other effects.  If it's just an "ordinary" effect, then dipatch an event
+(re-frame/reg-fx
+ :run-msg-cube-scene-fx
+ (fn [_]
+  (msg-cube-scene/run-scene)))
+
+;; Since this is a single effect, we specify it as an event handler.
+(re-frame/reg-event-fx
+ :run-msg-cube-scene-evt
+ (fn [_]
+  (msg-cube-scene/run-scene)))
+
+(re-frame/reg-event-fx
+  :run-msg-cube-scene
+  (fn [cofx _]
+     ;; following works
+     ; {:run-msg-cube-scene-fx nil}))
+     ;; ':fx' works, but need to be on a current version
+     ; {:db nil}))
+     ; {:fx [[:dispatch [:run-msg-cube-scene-evt]]]}))
+     {:fx [[:run-msg-cube-scene-fx]]}))
+     ;; Note: definitely need double vectors on :fx calls
+     ; {:fx [:run-msg-cube-scene-fx]}))
+     ;; following works
+     ; {:dispatch [:run-msg-cube-scene-evt]}))
+
+(re-frame/reg-fx
+ :run-msg-cube-game-fx
+ (fn [_]
+  (msg-cube-game/run)))
+
+(re-frame/reg-event-fx
+  :run-msg-cube-game
+  (fn [cofx _]
+     {:run-msg-cube-game-fx nil}))
+
 ;; simp-scene
 (re-frame/reg-event-db
   :run-simp-scene
   (fn [db [_]]
     (simp-scene/run-scene)
     db))
+
 ;; event utils
 (re-frame/reg-event-db
  :print-db

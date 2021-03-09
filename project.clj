@@ -8,7 +8,8 @@
                  [thheller/shadow-cljs "2.11.7"]
                  ; [thheller/shadow-cljs "2.11.20"]
                  [reagent "0.10.0"]
-                 [re-frame "0.12.0"]
+                 ; [re-frame "0.12.0"]
+                 [re-frame "1.2.0"]
                  [funcool/promesa "5.1.0"]
                  ;;vt add
                  [cljstache "2.0.6"]]

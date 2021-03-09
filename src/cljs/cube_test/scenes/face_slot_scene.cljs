@@ -305,7 +305,7 @@
             (when (> @*top-rotor-face* 7)
               (swap! *top-rotor-face* (fn [x] 0))))
      :mid (do
-            (re-frame/dispatch [:rotor-anim-fwd hlq @*mid-rotor-face*] mute)
+            (re-frame/dispatch [:rotor-anim-fwd hlq @*mid-rotor-face* mute])
             (swap! *mid-rotor-face* inc)
             (when (> @*mid-rotor-face* 7)
               (swap! *mid-rotor-face* (fn [x] 0))))

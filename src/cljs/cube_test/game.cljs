@@ -54,7 +54,16 @@
     :simp-scene (do
                            (println "top-level-scene2= simp-scene")
                            (re-frame/dispatch [:init-simp-scene])
-                           (re-frame/dispatch [:run-simp-scene]))))
+                           (re-frame/dispatch [:run-simp-scene]))
+    :msg-cube (do
+                           (println "top-level-scene=msg-cube")
+                           (re-frame/dispatch [:init-main-scene
+                                               (fn [] (do
+                                                        (re-frame/dispatch [:init-msg-cube-game])
+                                                        (re-frame/dispatch [:run-msg-cube-game])))])
+                           (re-frame/dispatch [:init-fps-panel main-scene/scene]))))
+                           ; (re-frame/dispatch [:run-msg-cube-game]))))
+                           ; (re-frame/dispatch [:run-msg-cube-scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will
