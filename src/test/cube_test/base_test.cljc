@@ -12,14 +12,14 @@
   ; (:require [cljs.test :as ct :refer (deftest is testing run-tests update-current-env!)])
   ; (:require [cljs.test :as ct :refer (deftest is testing run-tests)]
   ;; note: following works
-  (:require [clojure.test :refer :all]
+  ; (:require [clojure.test :refer :all]
   ; (:require [cljs.test :refer :all])
   ; (:require [cljs.test :refer-macros [async deftest is testing]])
-  ; (:require [cljs.test :refer [async deftest is testing update-current-env!]]
-             ; :refer [*current-env*]]
-            ; [cube-test.base :as base]))
-            [cube-test.dummy-base :as dummy-base]))
-            ; [cube-test.base :refer :all]))
+  (:require [cljs.test :refer [async deftest is testing update-current-env!]]
+         ; :refer [*current-env*]]
+        ; [cube-test.base :as base]))
+        [cube-test.dummy-base :as dummy-base]))
+        ; [cube-test.base :refer :all]))
 (comment
  (println "hi")
  (js/parseInt "5")

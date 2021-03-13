@@ -21,7 +21,7 @@
 (defn create-grnd []
   (println "msg-cube-scene: create-grnd entered")
   (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
-    (set! (.-material grnd) blue-mat)
+    (set! (.-material grnd) green-mat)
     (set! (.-ground env) grnd)))
 
 (defn init []
@@ -54,7 +54,7 @@
     (set! blue-mat (bjs/StandardMaterial. "blue-mat" scene))
     (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1))
 
-    (set! (.-material sphere) green-mat)
+    (set! (.-material sphere) blue-mat)
 
     ; (create-grnd)
 

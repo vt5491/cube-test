@@ -1,7 +1,7 @@
 (ns cube-test.scenes.simp-scene
   (:require
-   [babylonjs :as bjs]))
-
+   [babylonjs :as bjs]
+   [cube-test.base :as base]))
 
 ;; this is to create a scene without being dependent on main-scene in an attempt to get
 ;; a refreshable scene
@@ -17,8 +17,15 @@
 
 (declare init)
 
+(comment
+ (+ 1 1)
+ (+ 1 2)
+ ,)
+
 (defn ^:dev/after-load simp-scene-restart []
-  (println "now in simp-scene-restart"))
+  (println "simp-scene-restart: top-level-scene=" base/top-level-scene)
+  (when (= base/top-level-scene :simp-scene)
+    (println "now in simp-scene-restart 3")))
   ; (init))
 
 (defn ^:dev/after-load create-grnd []

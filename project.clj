@@ -13,6 +13,12 @@
                  [funcool/promesa "5.1.0"]
                  ;;vt add
                  [cljstache "2.0.6"]]
+                 ; [proto-repl "1.4.24"]
+                 ;; Note: proto-repl .jar has a different version than proto-repl the atom plugin
+                 ;; so use "0.3.1" not "1.4.24"
+                 ;; Note: need to add to ":profiles" so it's picked up by ":shadow-cljs"
+                 ;; and subsequently put into (auto-generated)"shadow-cljs.edn"
+                 ; [proto-repl "0.3.1"]]
                  ;; vt add for string interpolation
                  ;; nope: only works for clj
                  ; [org.clojure/core.incubator "0.1.4"]]
@@ -78,25 +84,43 @@
                             ["shell" "open" "target/build-report.html"]]
             "karma"        ["with-profile" "prod" "do"
                             ["shadow" "compile" "karma-test"]
-                            ["shell" "karma" "start" "--single-run" "--reporters" "junit,dots"]]}
+                            ["shell" "karma" "start" "--single-run" "--reporters" "junit,dots"]]
+            ;;vt-add
+            ; "fig:build" ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]
+            ; "devfw" ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]
+            ; run with: lein.bat trampoline devfw
+            ; update: run with: lein.bat devfw since we added "trampoline" before "run" below
+            "devfw" ["with-profile" "devfw" "do"
+                     ; ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]
+                     ["trampoline" "run" "-m" "figwheel.main" "-b" "devfw" "-r"]]}
+                     ; ["trampoline" "-m" "figwheel.main" "-b" "devfw" "-r"]]}
 
   :profiles
   {:dev
-   {:dependencies [[binaryage/devtools "1.0.0"]
-                   ;;vt add
-                   [day8.re-frame/re-frame-10x "0.7.0"]]
-                   ; [day8.re-frame/re-frame-10x "0.4.7"]]
-                   ; [day8.re-frame/tracing "0.5.3"]]
-                   ;;vt end
-    :source-paths ["dev"]}
-    ;; vt add for re-frame-10x
-                ; [day8.re-frame/re-frame-10x "0.7.0"]}
-                ; [day8.re-frame/tracing "0.5.3"]}
-    ;;vt end
-
-
+    {:dependencies [[binaryage/devtools "1.0.0"]
+                    ;;vt add
+                    [day8.re-frame/re-frame-10x "0.7.0"]]
+                        ; [day8.re-frame/re-frame-10x "0.4.7"]]
+                        ; [day8.re-frame/tracing "0.5.3"]]
+                        ; [proto-repl/proto-repl "0.3.1"]]
+                        ;;vt end
+     :source-paths ["dev"]}
+   ;; vt add for re-frame-10x
+   ; [day8.re-frame/re-frame-10x "0.7.0"]}
+   ; [day8.re-frame/tracing "0.5.3"]}
+   ;;vt end
+   ;;vt add
+   :devfw
+    {:dependencies [[com.bhauman/figwheel-main "0.2.12"]
+                    [com.bhauman/rebel-readline-cljs "0.1.4"]
+                    [reagent "0.10.0"]
+                    [re-frame "1.2.0"]]
+     :resource-paths ["target"]
+     :source-paths ["src"]
+     ;; need to add the compiled assets to the :clean-targets
+     :clean-targets ^{:protect false} ["target"]}
+   ;; vt-end
    :prod {}}
-
 
 
   :prep-tasks [])

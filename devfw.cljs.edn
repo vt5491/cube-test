@@ -1,0 +1,12 @@
+;; figwheel only file
+^{:watch-dirs ["test" "src"]
+  :css-dirs ["resources/public/css"]
+  ; :auto-testing true
+  ;; don't get repl with this set
+  ; :auto-bundle :webpack
+  :open-url "http://localhost:[[server-port]]/index_fw.html"}
+
+; {:main figwheel-tmp.core}
+; {:main figwheel-tmp.core.init}
+{:main cube-test.core.init}
+; {:main cube-test.scenes.simp-scene.init}

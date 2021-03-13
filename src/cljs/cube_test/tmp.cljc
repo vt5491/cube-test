@@ -7,3 +7,5 @@
   (let [v1 (bjs/Vector3. 1 2 3)]
     (.-position v1)))
 (str "abc" "def")
+
+(js/parseInt "7")

@@ -1,0 +1,20 @@
+;; This is for figwheel on this project.
+; {:deps {com.bhauman/figwheel-main {:mvn/version "0.2.12"}
+;         com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}}
+
+;; run with 'clj -A:build'
+{:deps {org.clojure/clojure {:mvn/version "1.10.1"}
+        org.clojure/clojurescript {:mvn/version "1.10.764"}
+        ; org.clojure/core.async {:mvn/version "0.4.474"}
+        ; cljsjs/react-dom-server {:mvn/version "15.3.1-0"} ;; for sablono
+        ; cljsjs/react-dom {:mvn/version "15.3.1-0"}        ;; for sablono
+        ; cljsjs/react {:mvn/version "15.3.1-0"}            ;; for sablono
+        ; sablono {:mvn/version "0.7.5"}
+        com.bhauman/figwheel-main {:mvn/version "0.2.12"}
+        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+        ;;vt add
+        reagent {:mvn/version "0.10.0"}
+        re-frame {:mvn/version "1.1.2"}}
+ :paths ["src" "resources" "target"]
+ :aliases {:build {:main-opts ["-m" "figwheel.main" "-b" "devfw" "-r"]}}}
+ ; :aliases {:build {:main-opts ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]}}}
