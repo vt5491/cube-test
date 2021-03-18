@@ -18,7 +18,7 @@
      [:button.print-grid {:on-click #(re-frame/dispatch [:print-vrubik-grid])} "print-grid"]
      [:br]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action])} "user action 1"]
-     [:button.user-action {:on-click #(re-frame/dispatch [:simp-ut-action-1])} "user action 1"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:print-db])} "print-db"]
      [:button.user-action {:on-click #(re-frame/dispatch [:simp-ut-action-2])} "user action 2"]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:add-msg-box
      ;                                                      {::msg/box-id 3

@@ -1,6 +1,6 @@
 ;; main_scene should reference few and be accessible by many
 (ns cube-test.main-scene
-  (:require-macros [cube-test.macros :as macros])
+  ; (:require-macros [cube-test.macros :as macros])
   (:require
    [re-frame.core :as re-frame]
    [cube-test.base :as base]
@@ -10,12 +10,14 @@
    ;; Note: you need this to get the controller models loaded
    [babylonjs-loaders :as bjs-l]
    [babylonjs-gui :as bjs-gui]
-   ["@hapi/ammo" :as ammo]
+   ; ["@hapi/ammo" :as ammo]
    [cannon :as cannon]
    [oimo :as oimo]
    [promesa.core :as p]
    [webxr-polyfill :as xr-pf]))
 ; import * as GUI from 'babylonjs-gui';
+(defn dummy [])
+
 (def canvas)
 (def engine)
 ; (def scene)
@@ -49,6 +51,7 @@
 (def plane2)
 (def gui-pnl)
 (def adv-texture)
+(def top-level-scene-init)
 
 ;; we have to pre-declare scene because it's defined with 'init' as a defonce.
 (declare scene)
@@ -62,15 +65,17 @@
 (declare pointer-handler)
 (declare enter-xr-handler)
 
-(defn ^:dev/after-load main-scene-reload []
-  (println "main-scene: after-load event detected, scene=" scene)
-  ;; not all scenes (e.g simp-scene) "inherit" off main-scene, so if no main-scene do not re-init it.
-  (if (not (nil? scene)) (init) nil))
+; (defn ^:dev/after-load main-scene-reload []
+;   (println "main-scene: after-load event detected, scene=" scene)
+;   ;; not all scenes (e.g simp-scene) "inherit" off main-scene, so if no main-scene do not re-init it.
+;   (if (not (nil? scene)) (init top-level-scene-init) nil))
 
+(defn  dummy2 [])
 ; (defn ^:dev/after-load create-grnd [])
 (defn init [top-level-scene-initializer]
 ; (defn ^:dev/after-load init [top-level-scene-initializer]
   (println "main-scene.init: entered")
+  (set! top-level-scene-init top-level-scene-initializer)
   ;; following line necessary for mixamo animations.
   (set! bjs/Animation.AllowMatricesInterpolation true)
   (set! canvas (-> js/document (.getElementById "renderCanvas")))
@@ -145,7 +150,9 @@
                                                     (prn "entered vr")
                                                     (.setTarget camera (bjs/Vector3. 0 0 0))
                                                     (prn "cam-rot a=" (.-rotation camera))
-                                                    (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
+                                                    ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
+                                                    ;; scruz adjustment
+                                                    (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -45) 0 0))
                                                     (.resetToCurrentRotation camera)
                                                     (prn "cam-rot a=" (.-rotation camera))
                                                     (let [cam-pos (.-position camera)
@@ -206,11 +213,11 @@
       ;; svale backyard
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
       ;; svale living room
+      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) 0)))))
-      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0)))))
       ;; scruz
-      ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
+      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
       ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))))
 

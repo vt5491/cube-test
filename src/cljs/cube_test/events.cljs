@@ -22,8 +22,9 @@
    [cube-test.face-slot.rotor :as rotor]
    [cube-test.tic-tac-attack.box-grid :as box-grid]
    [cube-test.tic-tac-attack.cell :as cell]
-   [cube-test.msg-cube.msg-cube-game :as msg-cube-game]
-   [cube-test.msg-cube.msg-cube-scene :as msg-cube-scene]))
+   [cube-test.msg-cube.msg-cube-game :as msg-cube.game]
+   [cube-test.msg-cube.msg-cube-scene :as msg-cube.scene]
+   [cube-test.msg-cube.data.msg :as msg-cube.msg]))
 
 
 (re-frame/reg-event-db
@@ -150,12 +151,12 @@
 ;     (geb-cube-scene/init)))
 
 
-(re-frame/reg-event-db
- :init-vrubik-scene
- (fn [db _]
-   ;side effect
-   (vrubik-scene/init)
-   db))
+; (re-frame/reg-event-db
+;  :init-vrubik-scene
+;  (fn [db _]
+;    ;side effect
+;    (vrubik-scene/init)
+;    db))
 
 (re-frame/reg-event-db
  :init-geb-cube-scene
@@ -198,16 +199,16 @@
   (fn [cofx _]
      {:init-simp-scene-fx nil}))
 
-(re-frame/reg-event-fx
-  :init-simp-scene
-  (fn [cofx _]
-     {:init-msg-cube-game-fx nil}))
+; (re-frame/reg-event-fx
+;   :init-simp-scene
+;   (fn [cofx _]
+;      {:init-msg-cube-game-fx nil}))
 
 (re-frame/reg-fx
  :init-msg-cube-scene-fx
  (fn [_]
   ; (simp-scene/init-once)
-  (msg-cube-scene/init)))
+  (msg-cube.scene/init)))
 
 ; (re-frame/reg-event-fx
 ;   :init-msg-cube-scene
@@ -218,20 +219,27 @@
  :init-msg-cube-scene
  (fn [db _]
    ;side effect
-   (msg-cube-scene/init)
+   (msg-cube.scene/init)
    db))
 
-(re-frame/reg-fx
- :init-msg-cube-game-fx
- (fn [_]
-  ; (simp-scene/init-once)
-  (msg-cube-game/init)))
+; (re-frame/reg-fx
+;  :init-msg-cube-game-fx
+;  (fn [_]
+;   ; (simp-scene/init-once)
+;   (msg-cube.game/init)))
 
-(re-frame/reg-event-fx
+; (re-frame/reg-event-fx
+;   :init-msg-cube-game
+;   (fn [cofx _]
+;      {:init-msg-cube-game-fx nil}))
+
+(re-frame/reg-event-db
   :init-msg-cube-game
-  (fn [cofx _]
-     {:init-msg-cube-game-fx nil}))
-
+  (fn [db _]
+     ; {:init-msg-cube-game-fx nil
+     ;  :db}
+     ;; note: init is db effect and a side-effect
+     (msg-cube.game/init db)))
 ;;
 ;; face-slot scene
 ;;
@@ -520,11 +528,11 @@
     db))
 
 ;; start defunct
-(re-frame/reg-event-db
- :init-rubiks-cube
- (fn [db [_]]
-   (vrubik-scene/init-rubiks-cube)
-   db))
+; (re-frame/reg-event-db
+;  :init-rubiks-cube
+;  (fn [db [_]]
+;    (vrubik-scene/init-rubiks-cube)
+;    db))
 
 (re-frame/reg-event-db
  :vrubik-left-side-anim
@@ -840,13 +848,13 @@
 (re-frame/reg-fx
  :run-msg-cube-scene-fx
  (fn [_]
-  (msg-cube-scene/run-scene)))
+  (msg-cube.scene/run-scene)))
 
 ;; Since this is a single effect, we specify it as an event handler.
 (re-frame/reg-event-fx
  :run-msg-cube-scene-evt
  (fn [_]
-  (msg-cube-scene/run-scene)))
+  (msg-cube.scene/run-scene)))
 
 (re-frame/reg-event-fx
   :run-msg-cube-scene
@@ -865,7 +873,7 @@
 (re-frame/reg-fx
  :run-msg-cube-game-fx
  (fn [_]
-  (msg-cube-game/run)))
+  (msg-cube.game/run)))
 
 (re-frame/reg-event-fx
   :run-msg-cube-game
@@ -928,3 +936,16 @@
   (fn [db [_]]
     (skyscrapers-scene/run-scene)
     db))
+
+;; msg-cube.data.msg events
+(re-frame/reg-event-db
+  :gen-msg
+  (fn [db [_]]
+    ; (msg-cube.msg/gen {:id 1, :text "hi"})
+    (msg-cube.msg/gen {:id 1, :text "hi"})
+    db))
+
+(re-frame/reg-event-db
+  :msg-cube.add-msg
+  (fn [db [_ msg]]
+    (msg-cube.game/add-msg msg db)))

@@ -1,12 +1,14 @@
-(ns cube-test.tmp
+(ns cube-test.tmp)
 ;   (:require
 ;    [re-frame.core :as re-frame]
 ;    [babylonjs :as bjs]))
-  (:require [clojure.spec.alpha :as s]
-           [clojure.spec.test.alpha :as stest]
-           [cube-test.utils.box-grid :as bg]))
+  ; (:require [clojure.spec.alpha :as s]
+  ;          [clojure.spec.test.alpha :as stest]
+  ;          [cube-test.utils.box-grid :as bg]))
   ; (require 'cube-test.utils.box-grid :as bg))
 
+; (shadow.cljs.devtools.api/nrepl-select :app)
+; (clojure.browser.repl/connect "http://localhost:8778")
 ; (+ js/Math.PI 1)
 ;
 ; (+ 1 1)
@@ -167,7 +169,7 @@
 ; (def r (map (fn [x]
 ;               (println "x=" x))
 ;             m))
-; 
+;
 ; (count r)
 ;
 ; (doseq m (fn [x]
@@ -618,3 +620,65 @@
 ; (println "dummy=" cube-test.base/dummy)
 ;
 ; (js/parseInt "6")
+;; two command to start a cljs browser repl
+(do
+  (shadow.cljs.devtools.api/nrepl-select :app)
+  (clojure.browser.repl/connect "http://localhost:8778"))
+
+(in-ns 'cube-test.msg-cube.msg-cube-scene)
+
+gui-plane
+
+(when cube-test.msg-cube.msg-cube-scene/gui-plane
+  (.dispose cube-test.msg-cube.msg-cube-scene/gui-plane))
+
+(def a (cube-test.main-scene.scene/getMeshByID "sphere"))
+
+cube-test.msg-cube.msg-cube-scene/top-plane
+
+(+ 1 1)
+(+ 1 2)
+
+;; destructuring test
+(defn move [{:keys [body direction] :as snake} & grow]
+ (println "snake=" body))
+
+(move {:body :direction})
+
+
+(defn gen-m [{:keys [id level text] :as msg}]
+  (println "msg=" msg)
+  (println "id=" id))
+
+; (defn gen-m [{:keys [id level text] :as msg}]
+;   (println "msg=" msg))
+
+(gen-m {:id 7})
+
+(defn gen-m2 [{:keys [id level text] :as msg}]
+  (println "id=" (msg :id)))
+
+(gen-m2 {:id 7})
+
+(def my-msg {:id 7 :text "hi"})
+
+my-msg
+; (defn head-outside-bounds? [[head-x head-y]])
+(defn fa [[a b]]
+  (println "a=" a))
+
+(fa [[1 2]])
+
+(defn fb [a]
+  (prn "a=" a))
+
+(defn fc [x]
+  7)
+
+(def a (conj (conj [] {:a 7}) {:a 8}))
+
+(println "val=" cube-test.msg-cube.msg-cube-game/msgs)
+
+(def m {})
+
+(assoc m :a 7 :b 8)

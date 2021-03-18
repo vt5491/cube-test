@@ -28,7 +28,8 @@
     (println "now in simp-scene-restart 3")))
   ; (init))
 
-(defn ^:dev/after-load create-grnd []
+; (defn ^:dev/after-load create-grnd [])
+(defn create-grnd []
   (println "simp-cene: create-grnd entered")
   (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
     (set! (.-material grnd) blue-mat)
