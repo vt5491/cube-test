@@ -5,6 +5,7 @@
    [re-frame.core :as re-frame]
    [cube-test.events :as events]
    [cube-test.views :as views]
+   [cube-test.subs :as subs]
    [cube-test.config :as config]
    [cube-test.game :as game]))
 

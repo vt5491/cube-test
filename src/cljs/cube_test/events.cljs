@@ -215,12 +215,17 @@
 ;   (fn [cofx _]
 ;      {:init-msg-cube-scene-fx nil}))
 
-(re-frame/reg-event-db
+; (re-frame/reg-event-db
+;  :init-msg-cube-scene
+;  (fn [db _]
+;    ;side effect
+;    (msg-cube.scene/init)
+;    db))
+
+(re-frame/reg-fx
  :init-msg-cube-scene
- (fn [db _]
-   ;side effect
-   (msg-cube.scene/init)
-   db))
+ (fn [_]
+   (msg-cube.scene/init)))
 
 ; (re-frame/reg-fx
 ;  :init-msg-cube-game-fx
@@ -228,18 +233,20 @@
 ;   ; (simp-scene/init-once)
 ;   (msg-cube.game/init)))
 
-; (re-frame/reg-event-fx
-;   :init-msg-cube-game
-;   (fn [cofx _]
-;      {:init-msg-cube-game-fx nil}))
-
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
   :init-msg-cube-game
-  (fn [db _]
-     ; {:init-msg-cube-game-fx nil
-     ;  :db}
-     ;; note: init is db effect and a side-effect
-     (msg-cube.game/init db)))
+  (fn [cofx _]
+     {:db (msg-cube.game/init (:db cofx))
+      ; :init-msg-cube-game-fx nil
+      :init-msg-cube-scene nil}))
+
+; (re-frame/reg-event-db
+;   :init-msg-cube-game
+;   (fn [db _]
+;      ; {:init-msg-cube-game-fx nil
+;      ;  :db}
+;      ;; note: init is db effect and a side-effect
+;      (msg-cube.game/init db)))
 ;;
 ;; face-slot scene
 ;;
@@ -878,7 +885,8 @@
 (re-frame/reg-event-fx
   :run-msg-cube-game
   (fn [cofx _]
-     {:run-msg-cube-game-fx nil}))
+     ; {:run-msg-cube-game-fx nil}
+     {:fx [[:run-msg-cube-game-fx nil]]}))
 
 ;; simp-scene
 (re-frame/reg-event-db
@@ -949,3 +957,20 @@
   :msg-cube.add-msg
   (fn [db [_ msg]]
     (msg-cube.game/add-msg msg db)))
+
+(re-frame/reg-event-db
+  :msg-cube.inc-max-id
+  (fn [db [_ msg]]
+    (msg-cube.game/inc-max-id db)))
+
+;; add a physical cube to the bjs scene
+(re-frame/reg-event-fx
+   :add-msg-cube
+   (fn [cofx [_ msg]]
+     ; (println ":add-msg-cube: id=" id)
+     (println ":add-msg-cube: msg=" msg)
+     ; {:fx [[msg-cube.scene/add-msg-cube (-> (cofx :db) :max-id)]]}
+     ; {:fx [[msg-cube.scene/add-msg-cube (get-in cofx [:db :max-id])]]}
+     ; {:fx [[msg-cube.scene/add-msg-cube id]]}
+     ; {:fx [(msg-cube.scene/add-msg-cube id)]}
+     {:fx [(msg-cube.scene/add-msg-cube msg)]}))

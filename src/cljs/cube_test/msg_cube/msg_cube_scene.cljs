@@ -1,6 +1,7 @@
 (ns cube-test.msg-cube.msg-cube-scene
   (:require
    [re-frame.core :as re-frame]
+   [cube-test.subs :as subs]
    [babylonjs :as bjs]
    [babylonjs-gui :as bjs-gui]
    [cube-test.main-scene :as main-scene]
@@ -19,6 +20,8 @@
 (def blue-mat)
 (def grnd)
 (def gui-plane)
+
+(def msgs @(re-frame/subscribe [:msgs]))
 
 ; (defn ^:dev/after-load create-grnd [])
 (defn create-grnd []
@@ -39,7 +42,8 @@
         top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 3048 2048)
         top-pnl (bjs-gui/Grid.)
         top-hdr (bjs-gui/TextBlock.)
-        add-msg-btn (bjs-gui/Button.CreateSimpleButton. "add-msg-btn" "add")]
+        add-msg-btn (bjs-gui/Button.CreateSimpleButton. "add-msg-btn" "add")
+        max-id-btn (bjs-gui/Button.CreateSimpleButton. "max-id-btn" "inc max-id")]
     (set! (.-position top-plane)(bjs/Vector3. 0 6 2))
     (set! (.-renderOutline top-plane) true)
     (set! gui-plane top-plane)
@@ -66,27 +70,38 @@
     (-> add-msg-btn .-onPointerUpObservable (.add (fn [value]
                                                     (println "add-msg-btn clicked")
                                                     (re-frame/dispatch [:msg-cube.add-msg { :text "hi"}]))))
+    (.addControl top-pnl add-msg-btn 1 2)
+    ;; max-id btn
+    (set! (.-fontSize max-id-btn) "150")
+    (set! (.-color max-id-btn) "white")
+    (-> max-id-btn .-onPointerUpObservable (.add (fn [value]
+                                                   (println "max-id-btn clicked")
+                                                   (re-frame/dispatch [:msg-cube.inc-max-id]))))
+    (.addControl top-pnl max-id-btn 0 1)))
 
-    (.addControl top-pnl add-msg-btn 1 2)))
+(defn init-max-id-sub []
+  (println "init-max-id-sub: pre")
+  @(re-frame/subscribe [:msgs-cnt])
+  (println "init-max-id-sub: post"))
+
+(defn add-msg-cube [msg]
+  (println "add-msg-cube: entered, msg=" msg)
+  ; (when (and id (> id 0)))
+  (let [id (msg :id)]
+    (when (and id (> id 0))
+      (let [scene main-scene/scene
+            msg-cube (bjs/MeshBuilder.CreateBox (str "mc-" id) (js-obj "height" 1 "width" 1) scene)
+            pos (bjs/Vector3. (* id 1.1) 0 0)]
+        (set! (.-position msg-cube) pos))))
+  ;; return nil because this is a pure side effect
+  nil)
+      ; (set! (.-position msg-cube) (bjs/Vector3. (* id 1.1) 0 0)))))
 
 
 ; (defn ^:dev/after-load init [])
 (defn init []
   (println "msg-cube-scene.init: entered")
   (let [scene main-scene/scene]
-    ; (set! canvas (.getElementById js/document "renderCanvas"))
-    ; (set! engine (bjs/Engine. canvas true))
-    ; (set! scene (bjs/Scene.))
-    ; (let [ninety-deg (/ js/Math.PI 2)]
-    ;   (set! camera (bjs/ArcRotateCamera.
-    ;                 "Camera"
-    ;                 ninety-deg
-    ;                 ninety-deg
-    ;                 2
-    ;                 (bjs/Vector3. 0 1 -8)
-    ;                 scene)))
-    ; (.attachControl camera canvas true)
-    ; (.setTarget camera (bjs/Vector3. 0 0 0))
       (let [light1 (bjs/HemisphericLight. "light1" (bjs/Vector3. 1 1 0) scene)
             light2 (bjs/PointLight. "light2" (bjs/Vector3. 0 1 -1) scene)
             sph (bjs/MeshBuilder.CreateSphere "sphere" (js-obj "diameter" 1) scene)]
@@ -108,7 +123,9 @@
     ; (create-grnd)
 
     (init-gui)
+    (init-max-id-sub)
     (bjs/Debug.AxesViewer. scene)))
+    ; @(re-frame/subscribe [:msgs-change])))
 
 ; (defn run-render-loop []
 ;   (println "msg-cube-scene: run-render-loop: engine=" engine)
