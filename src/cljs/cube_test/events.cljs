@@ -1,7 +1,7 @@
 ;; events is refer to many
 (ns cube-test.events
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :refer [reg-event-db reg-event-fx reg-fx] :as re-frame]
    [cube-test.db :as db]
    [cube-test.game :as game]
    [cube-test.main-scene :as main-scene]
@@ -974,3 +974,17 @@
      ; {:fx [[msg-cube.scene/add-msg-cube id]]}
      ; {:fx [(msg-cube.scene/add-msg-cube id)]}
      {:fx [(msg-cube.scene/add-msg-cube msg)]}))
+
+(reg-event-db
+ :msg-cube.inc-level
+ ; (fn [db [_ id msgs]])
+ (fn [db [_ id]]
+  ; (println "events: msg-cube.up-msg-severity id=" id)
+  (msg-cube.msg/inc-level id (db :msgs))))
+
+(reg-event-db
+ :msg-cube.set-level
+ ; (fn [db [_ id level msgs]])
+ (fn [db [_ id level]]
+  ; (println "events: msg-cube.up-msg-severity id=" id)
+  (msg-cube.msg/set-level id level (db :msgs))))

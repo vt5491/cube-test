@@ -13,6 +13,7 @@
 
 
 (defn inc-max-id [db]
+  ; (js-debugger)
   (assoc db :max-id (+ (db :max-id) 1)))
 
 ; (defn gen [{:keys [id level text] :as msg}])

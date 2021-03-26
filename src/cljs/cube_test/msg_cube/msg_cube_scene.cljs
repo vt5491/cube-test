@@ -7,7 +7,8 @@
    [cube-test.main-scene :as main-scene]
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
-   [cube-test.utils.fps-panel :as fps-panel]))
+   [cube-test.utils.fps-panel :as fps-panel]
+   [cube-test.msg-cube.data.msg :as msg]))
 
 (def canvas)
 (def camera)
@@ -84,6 +85,23 @@
   @(re-frame/subscribe [:msgs-cnt])
   (println "init-max-id-sub: post"))
 
+(defn add-mesh-pick-action [mesh]
+  (set! (.-actionManager mesh) (bjs/ActionManager. main-scene/scene))
+
+  (let [eca (bjs/ExecuteCodeAction. (js-obj "trigger" bjs/ActionManager.OnPickTrigger))
+        mesh-change-mat-f
+          (fn [e]
+            (do (let [mesh (.-meshUnderPointer e)
+                      mesh-id (.-id mesh)
+                      ; box-num (msg/extract-msg-box-num mesh-id)
+                      msg-id (msg/extract-id mesh-id)]
+                  (println "trigger-handler: msg-id=" msg-id)
+                  ; (js-debugger)
+                  (set! (-> (.-meshUnderPointer e) (.-material)) main-scene/blue-mat)
+                  (re-frame/dispatch [:msg-cube.inc-level msg-id]))))]
+    (set! (.-func eca) mesh-change-mat-f)
+    (.registerAction (.-actionManager mesh) eca)))
+
 (defn add-msg-cube [msg]
   (println "add-msg-cube: entered, msg=" msg)
   ; (when (and id (> id 0)))
@@ -92,7 +110,9 @@
       (let [scene main-scene/scene
             msg-cube (bjs/MeshBuilder.CreateBox (str "mc-" id) (js-obj "height" 1 "width" 1) scene)
             pos (bjs/Vector3. (* id 1.1) 0 0)]
-        (set! (.-position msg-cube) pos))))
+        (set! (.-position msg-cube) pos)
+        (add-mesh-pick-action msg-cube))))
+
   ;; return nil because this is a pure side effect
   nil)
       ; (set! (.-position msg-cube) (bjs/Vector3. (* id 1.1) 0 0)))))

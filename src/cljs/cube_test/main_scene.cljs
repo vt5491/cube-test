@@ -152,7 +152,8 @@
                                                     (prn "cam-rot a=" (.-rotation camera))
                                                     ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
                                                     ;; scruz adjustment
-                                                    (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -45) 0 0))
+                                                    ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -45) 0 0))
+                                                    (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG 0) 0 0))
                                                     (.resetToCurrentRotation camera)
                                                     (prn "cam-rot a=" (.-rotation camera))
                                                     (let [cam-pos (.-position camera)

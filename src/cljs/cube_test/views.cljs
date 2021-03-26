@@ -37,7 +37,9 @@
               (println "doit")
               ^{:key (:id m)} m))])
      ;; Note: you actually have to extract the value with "@" to get a result
-     (let [dmy @(re-frame/subscribe [:gen-msg-cube])])]))
+     (let [dmy @(re-frame/subscribe [:gen-msg-cube])])
+     (let [dmy2 @(re-frame/subscribe [:msgs-level :level 3])]
+       [:text-field dmy2])]))
      ; (let [dmy (re-frame/subscribe [:gen-msg-cube])]
        ; [:text-field "gen-msg-cube-dummy-field"])]))
      ; [:text-field "gen-msg-cube-dummy-field" @(re-frame/subscribe [:gen-msg-cube])]]))

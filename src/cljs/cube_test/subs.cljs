@@ -109,3 +109,10 @@
 ;   :showing          ;; usage:   (subscribe [:showing])
 ;   (fn [db _]        ;; db is the (map) value stored in the app-db atom
 ;     (:showing db))) ;; extract a value from the application state
+
+(re-frame/reg-sub
+ :msgs-level
+ :<- [:msgs]
+ (fn [[msgs] query-v]
+   (println "msgs-level: query-v=" query-v)
+   (str "msgs-level: query-v=" query-v)))

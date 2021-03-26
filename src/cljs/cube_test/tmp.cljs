@@ -7,11 +7,13 @@
   ;          [cube-test.utils.box-grid :as bg]))
   ; (require 'cube-test.utils.box-grid :as bg))
 
-; (shadow.cljs.devtools.api/nrepl-select :app)
-; (clojure.browser.repl/connect "http://localhost:8778")
+; hook-up
+(shadow.cljs.devtools.api/nrepl-select :app)
+(clojure.browser.repl/connect "http://localhost:8778")
+;
 ; (+ js/Math.PI 1)
 ;
-; (+ 1 1)
+(+ 1 1)
 ;
 ; (js/setTimeout (fn [] (prn "hi")) 2000)
 ;
@@ -682,3 +684,60 @@ my-msg
 (def m {})
 
 (assoc m :a 7 :b 8)
+
+;; play with msg extraction
+
+(def bd {:msgs [
+                {:id 1 :text "abc" :level :INFO}
+                {:id 2 :text "def" :level :INFO}
+                {:id 3 :text "ghi" :level :INFO}]})
+
+(-> (bd :msgs) (get 1))
+(-> (bd :msgs) (count))
+
+(pos? -7)
+(while pos? [-1 -2 3 -1])
+
+(def a (atom 10))
+
+(doseq [x [1 2 3]]
+  (println x))
+
+(find {:a 1 :b 2} :c)
+
+(find [{:a 1} {:b 2}] :a)
+
+(contains? {:a 1 :b 2} :a)
+
+(contains? [{:a 1 :b 2} {:a 11 :b 21}] [:a 11])
+
+(defn get-by-id [db id]
+  "extract the msg map from db :msgs by the msg id")
+
+(contains? (bd :msgs))
+
+(bd :msgs)
+
+; #(+ %1 %2)
+(map #(println "1=" %1) [1 2 3])
+
+(map #(do
+        (let [a 3]
+          (+ %1 a))) [1 2 3])
+
+(assoc {:a 1} :a 2)
+
+(def a (+ 1 6))
+
+(map #(do
+        (let [id (%1 :id)
+              new-id (+ id 1)]
+          (println "new-id=" new-id))) (bd :msgs))
+          ; (assoc %1 :id new-id))) bd)
+
+*ns*
+
+(js/parseInt "5")
+
+(first '({:a 7}))
+(first '(1 2 3))
