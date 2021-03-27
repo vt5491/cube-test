@@ -117,6 +117,22 @@
   nil)
       ; (set! (.-position msg-cube) (bjs/Vector3. (* id 1.1) 0 0)))))
 
+; (defn update-msg-cube [id])
+(defn update-msg-cube
+  ([id]
+   (update-msg-cube id nil nil))
+  ([id level]
+   (update-msg-cube id level nil))
+  ; ([id _ text]
+  ;  (update-msg-cube id nil text))
+  ([id level text]
+   (println "msg-cube-scene.update-msg-cube: id=" id ", level=" level ", text=" text)
+   (when main-scene/scene
+     (let [mesh (-> main-scene/scene (.getMeshByName (str "mc-" id)))]
+           ; red-mat (bjs/StandardMaterial. "red-mat" scene)]
+       (when mesh
+         (set! (-> mesh (.-material)) main-scene/red-mat))))))
+
 
 ; (defn ^:dev/after-load init [])
 (defn init []

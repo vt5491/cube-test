@@ -980,11 +980,18 @@
  ; (fn [db [_ id msgs]])
  (fn [db [_ id]]
   ; (println "events: msg-cube.up-msg-severity id=" id)
-  (msg-cube.msg/inc-level id (db :msgs))))
+  ; (msg-cube.msg/inc-level id (db :msgs))
+  (assoc db :msgs (msg-cube.msg/inc-level id (db :msgs)))))
 
 (reg-event-db
  :msg-cube.set-level
  ; (fn [db [_ id level msgs]])
  (fn [db [_ id level]]
   ; (println "events: msg-cube.up-msg-severity id=" id)
-  (msg-cube.msg/set-level id level (db :msgs))))
+  (assoc db :msgs (msg-cube.msg/set-level id level (db :msgs)))))
+
+(reg-event-fx
+ :msg-cube.update-msg-cube
+ (fn [cofx [_ id level text]]
+   ; {:fx [[:dispatch]]}
+   {:fx [[(msg-cube.scene/update-msg-cube id level text)]]}))

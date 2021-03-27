@@ -1,6 +1,6 @@
 (ns cube-test.views
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :refer [dispatch subscribe] :as re-frame]
    [cube-test.subs :as subs]
    [babylonjs :as bjs]
    [cube-test.ut-simp.msg :as msg]))
@@ -37,11 +37,17 @@
               (println "doit")
               ^{:key (:id m)} m))])
      ;; Note: you actually have to extract the value with "@" to get a result
+     ;; this is needed to actually see a cube
      (let [dmy @(re-frame/subscribe [:gen-msg-cube])])
-     (let [dmy2 @(re-frame/subscribe [:msgs-level :level 3])]
-       [:text-field dmy2])]))
+     ; (let [dmy2 @(re-frame/subscribe [:msgs-level :level 3])]
+     ;   [:text-field dmy2])
+     [:br]
+     (let [mc-1 @(subscribe [:msg-changed-by-id 1])])
+     (let [mc-2 @(subscribe [:msg-changed-by-id 2])])
+     (let [mc-4 @(subscribe [:msg-changed-by-id 4])])]))
+       ; [:text-field mc-1])]))
      ; (let [dmy (re-frame/subscribe [:gen-msg-cube])]
-       ; [:text-field "gen-msg-cube-dummy-field"])]))
+     ;   [:text-field "gen-msg-cube-dummy-field"])]))
      ; [:text-field "gen-msg-cube-dummy-field" @(re-frame/subscribe [:gen-msg-cube])]]))
      ; [:br "gen-msg-cube-dummy-field" @(re-frame/subscribe [:gen-msg-cube])]]))
      ; [:button.user-action {:on-click #(re-frame/dispatch [:add-msg-box
