@@ -959,6 +959,11 @@
     (msg-cube.game/add-msg msg db)))
 
 (re-frame/reg-event-db
+  :msg-cube.add-msg-2
+  (fn [db [_ msg]]
+    (msg-cube.game/add-msg-2 msg db)))
+
+(re-frame/reg-event-db
   :msg-cube.inc-max-id
   (fn [db [_ msg]]
     (msg-cube.game/inc-max-id db)))
@@ -975,6 +980,12 @@
      ; {:fx [(msg-cube.scene/add-msg-cube id)]}
      {:fx [(msg-cube.scene/add-msg-cube msg)]}))
 
+(re-frame/reg-event-fx
+   :add-msg-cube-2
+   (fn [cofx [_ msg]]
+     (println ":add-msg-cube-2: msg=" msg)
+     {:fx [(msg-cube.scene/add-msg-cube-2 msg)]}))
+
 (reg-event-db
  :msg-cube.inc-level
  ; (fn [db [_ id msgs]])
@@ -982,6 +993,11 @@
   ; (println "events: msg-cube.up-msg-severity id=" id)
   ; (msg-cube.msg/inc-level id (db :msgs))
   (assoc db :msgs (msg-cube.msg/inc-level id (db :msgs)))))
+
+(reg-event-db
+ :msg-cube.inc-level-2
+ (fn [db [_ id]]
+  (assoc db :msgs-2 (msg-cube.msg/inc-level-2 id (db :msgs-2)))))
 
 (reg-event-db
  :msg-cube.set-level
@@ -993,5 +1009,7 @@
 (reg-event-fx
  :msg-cube.update-msg-cube
  (fn [cofx [_ id level text]]
+   (println "events.msg-cube.update-msg-cube: id=" id)
    ; {:fx [[:dispatch]]}
-   {:fx [[(msg-cube.scene/update-msg-cube id level text)]]}))
+   ; {:fx [[(msg-cube.scene/update-msg-cube id level text)]]}
+   {:fx [(msg-cube.scene/update-msg-cube id level text)]}))

@@ -102,6 +102,23 @@
     (set! (.-func eca) mesh-change-mat-f)
     (.registerAction (.-actionManager mesh) eca)))
 
+(defn add-mesh-pick-action-2 [mesh]
+  (set! (.-actionManager mesh) (bjs/ActionManager. main-scene/scene))
+
+  (let [eca (bjs/ExecuteCodeAction. (js-obj "trigger" bjs/ActionManager.OnPickTrigger))
+        mesh-change-mat-f
+          (fn [e]
+            (do (let [mesh (.-meshUnderPointer e)
+                      mesh-id (.-id mesh)
+                      ; box-num (msg/extract-msg-box-num mesh-id)
+                      msg-id (msg/extract-id mesh-id)]
+                  (println "trigger-handler: msg-id=" msg-id)
+                  ; (js-debugger)
+                  (set! (-> (.-meshUnderPointer e) (.-material)) main-scene/blue-mat)
+                  (re-frame/dispatch [:msg-cube.inc-level-2 msg-id]))))]
+    (set! (.-func eca) mesh-change-mat-f)
+    (.registerAction (.-actionManager mesh) eca)))
+
 (defn add-msg-cube [msg]
   (println "add-msg-cube: entered, msg=" msg)
   ; (when (and id (> id 0)))
@@ -112,10 +129,20 @@
             pos (bjs/Vector3. (* id 1.1) 0 0)]
         (set! (.-position msg-cube) pos)
         (add-mesh-pick-action msg-cube))))
-
   ;; return nil because this is a pure side effect
   nil)
-      ; (set! (.-position msg-cube) (bjs/Vector3. (* id 1.1) 0 0)))))
+
+(defn add-msg-cube-2 [msg]
+  (println "add-msg-cube-2: entered, msg=" msg)
+  (let [id (msg :id)]
+    (when (and id (> id 0))
+      (let [scene main-scene/scene
+            msg-cube (bjs/MeshBuilder.CreateBox (str "mc2-" id) (js-obj "height" 1 "width" 1) scene)
+            pos (bjs/Vector3. (* id -1.1) 0 0)]
+        (set! (.-position msg-cube) pos)
+        (add-mesh-pick-action-2 msg-cube))))
+  ;; return nil because this is a pure side effect
+  nil)
 
 ; (defn update-msg-cube [id])
 (defn update-msg-cube
@@ -128,10 +155,18 @@
   ([id level text]
    (println "msg-cube-scene.update-msg-cube: id=" id ", level=" level ", text=" text)
    (when main-scene/scene
-     (let [mesh (-> main-scene/scene (.getMeshByName (str "mc-" id)))]
+     (let [mesh (-> main-scene/scene (.getMeshByName (str "mc2-" id)))]
            ; red-mat (bjs/StandardMaterial. "red-mat" scene)]
        (when mesh
-         (set! (-> mesh (.-material)) main-scene/red-mat))))))
+         (case level
+           :INFO (set! (-> mesh (.-material)) main-scene/green-mat)
+           :WARN (set! (-> mesh (.-material)) main-scene/orange-mat)
+           :SEVERE (set! (-> mesh (.-material)) main-scene/red-mat))
+           ; (set! (-> mesh (.-material)) main-scene/red-mat))
+           ; (println "update-msg-cube: just updated mesh")
+        ;; have to return nil or a vector
+        ; nil
+        [1 2])))))
 
 
 ; (defn ^:dev/after-load init [])

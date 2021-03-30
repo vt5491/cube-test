@@ -21,6 +21,11 @@
     (println "reg-sub:msgs: query-v=" query-v)
     (:msgs db)))
 
+(reg-sub
+  :msgs-2
+  (fn [db query-v]
+    (println "reg-sub:msgs-2: query-v=" query-v)
+    (:msgs-2 db)))
 
 (re-frame/reg-sub
   :max-id-and-msgs
@@ -57,6 +62,21 @@
        (re-frame/dispatch [:add-msg-cube msg]))
      (println "hi there 2"))))
 
+(reg-sub
+ :gen-msg-cube-2
+ :<- [:max-id]
+ :<- [:msgs-2]
+ ; (fn [query-v]
+ ;   (println "gen-msg-cube-2: query-v=" query-v)
+ ;   [(subscribe [:msgs-2])])
+ (fn [[max-id msgs-2] query-v]
+   (println ":gen-msg-cube-2: max-id=" max-id ",msgs-2=" msgs-2)
+   (let [ msg-2 (-> (filter #(= (%1 :id) max-id) msgs-2) (first))]
+     (println "reg-sub:gen-msg-cube: detected :max-id and :msgs change: max-id=" max-id ", msgs-2=" msgs-2, ",msg-2=" msg-2)
+     (println "hi there a")
+     (when (not (empty? msg-2))
+       (re-frame/dispatch [:add-msg-cube-2 msg-2]))
+     (println "hi there 2a"))))
 
 (re-frame/reg-sub
  :msgs-cnt
@@ -104,10 +124,37 @@
    ; (subscribe [:msgs 1])
    ; (subscribe [:msgs id]))
    ; (subscribe [:msg-by-id id]))
-   (subscribe [:msg-by-id 4]))
+   (subscribe [:msg-by-id 1]))
  ; (fn [[msgs] query-v])
  ; (fn [msgs query-v])
  (fn [[msg] [_ id]]
    (println "reg-sub:msg-changed-by-id: *msg-changed-by-id: msg=" msg ", id=" id)))
    ; (re-frame/dispatch [:msg-cube.update-msg-cube id])))
    ; (str "msg-by-id: id=" id)))
+
+(reg-sub
+  :msg-by-id-2
+  (fn [db [_ id]]
+    (println "reg-sub:msg-by-id-2: id=" id)
+    (let [msg (msg/get-by-id id (db :msgs-2))]
+      (println "reg-sub: msg-by-id-2: msg=" msg)
+      ; msg
+      ; [1 2]
+      ;; Note: Definitely need to return your result in a vector.
+      [msg])))
+    ; (msg/get-by-id id (:msgs-2 db))))
+
+(reg-sub
+ :msg-changed-by-id-2
+ ; :<- [:msgs]
+ ; (fn [query-v])
+ (fn [[_ id]]
+   (println "abc")
+   (println "reg-sub:msg-changed-by-id-2 id=" id)
+   ; (subscribe [:msg-by-id-2 2])
+   (subscribe [:msg-by-id-2 id]))
+ (fn [[msg] [_ id]]
+   (println "reg-sub:msg-changed-by-id-2: *msg-changed-by-id: msg=" msg ", id=" id)
+   (when msg
+     (re-frame/dispatch [:msg-cube.update-msg-cube id (msg :level)]))
+   ["result"]))

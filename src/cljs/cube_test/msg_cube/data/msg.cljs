@@ -39,6 +39,10 @@
   ; (println "hi from get-by-id")
   (first (filterv #(= (%1 :id) id) msgs)))
 
+; (defn get-by-id-2 [id msgs]
+;   "Return the first occurence from :msgs vector that has the given id"
+;   (first (filterv #(= (%1 :id) id) msgs)))
+
 (defn set-level [id level msgs]
   "Set the level for the id, returing a new :msgs vector"
   ; (println "***msg.set-level: id=" id ", level=" level ", msgs=" msgs)
@@ -66,3 +70,15 @@
         :WARN (set-level id :SEVERE msgs)
         ;; don't do anything if already at highest level
         :SEVERE msgs)))
+
+(defn inc-level-2 [id msgs-2]
+  "increment the severity level to the next level, capping
+   - at :SEVERE"
+  (let [msg (get-by-id id msgs-2)
+        msg-level (msg :level)]
+    (println "inc-level: msg-level=" msg-level)
+    (case msg-level
+        :INFO (set-level id :WARN msgs-2)
+        :WARN (set-level id :SEVERE msgs-2)
+        ;; don't do anything if already at highest level
+        :SEVERE msgs-2)))

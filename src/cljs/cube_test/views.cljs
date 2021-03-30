@@ -23,6 +23,9 @@
      [:button.user-action {:on-click #(re-frame/dispatch [:msg-cube.inc-max-id])} "inc-max-id"]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:simp-ut-action-2])} "user action 2"]
      [:button.user-action {:on-click #(re-frame/dispatch [:msg-cube.add-msg {:text "hi2" :level :INFO}])} "user action 2"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:msg-cube.add-msg-2 {:text "hi2" :level :INFO}])} "user action 2a"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:msg-cube.inc-level 1])} "inc-level cube-1"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:msg-cube.inc-level-2 3])} "inc-level msgs2@cube-1"]
     ; [:div
      [:text-field "abc"]
      [:br]
@@ -39,12 +42,17 @@
      ;; Note: you actually have to extract the value with "@" to get a result
      ;; this is needed to actually see a cube
      (let [dmy @(re-frame/subscribe [:gen-msg-cube])])
+     (let [dmy2 @(re-frame/subscribe [:gen-msg-cube-2])])
      ; (let [dmy2 @(re-frame/subscribe [:msgs-level :level 3])]
      ;   [:text-field dmy2])
      [:br]
-     (let [mc-1 @(subscribe [:msg-changed-by-id 1])])
-     (let [mc-2 @(subscribe [:msg-changed-by-id 2])])
-     (let [mc-4 @(subscribe [:msg-changed-by-id 4])])]))
+     ; (let [mc-1 @(subscribe [:msg-changed-by-id 1])])
+     ; (let [mc-2 @(subscribe [:msg-changed-by-id 2])])
+     (let [mc-4 @(subscribe [:msg-changed-by-id 4])])
+     [:br]
+     (let [mc2-1 @(subscribe [:msg-changed-by-id-2 3])]
+       (println "view: mc2-1=" mc2-1)
+       [:text-field (str "mc2-1=" mc2-1)])]))
        ; [:text-field mc-1])]))
      ; (let [dmy (re-frame/subscribe [:gen-msg-cube])]
      ;   [:text-field "gen-msg-cube-dummy-field"])]))

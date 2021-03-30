@@ -18,6 +18,7 @@
 
 ; (defn gen [{:keys [id level text] :as msg}])
 ; (defn add-msg [text db])
+;; TODO: move into msg.cljs
 (defn add-msg [{:keys [text level] :as msg} db]
   (println "msg-cube-game: add-msg: msg=" msg ", msg.text" (:text msg) ", text=" text ", level=" level)
   (println "msg-cube-game: add-msg: db=" db)
@@ -30,6 +31,18 @@
            :msgs (conj old-msgs new-msg)
            :max-id new-id)))
 
+(defn add-msg-2 [{:keys [text level] :as msg} db]
+  (println "msg-cube-game: add-msg-2: msg=" msg ", msg.text" (:text msg) ", text=" text ", level=" level)
+  (println "msg-cube-game: add-msg-2: db=" db)
+  (let [new-id (+ (db :max-id) 1)
+        new-msg {:id new-id :text text :level level}
+        old-msgs (db :msgs-2)]
+    (println "add-msg: old-msgs=" old-msgs)
+    ;;TODO: add into default-db in 'db.cljs'
+    (assoc db
+           :msgs-2 (conj old-msgs new-msg)
+           :max-id new-id)))
+           
 (defn init [db]
   (println "msg-cube-game.init: entered")
   ; (js-debugger)
