@@ -122,13 +122,15 @@
 (defn add-msg-cube [msg]
   (println "add-msg-cube: entered, msg=" msg)
   ; (when (and id (> id 0)))
-  (let [id (msg :id)]
-    (when (and id (> id 0))
-      (let [scene main-scene/scene
-            msg-cube (bjs/MeshBuilder.CreateBox (str "mc-" id) (js-obj "height" 1 "width" 1) scene)
-            pos (bjs/Vector3. (* id 1.1) 0 0)]
-        (set! (.-position msg-cube) pos)
-        (add-mesh-pick-action msg-cube))))
+  (let [id (msg :id)
+        scene main-scene/scene]
+    (when (not (.getMeshByID scene (str "mc-" id)))
+      (when (and id (> id 0))
+        (let [scene main-scene/scene
+              msg-cube (bjs/MeshBuilder.CreateBox (str "mc-" id) (js-obj "height" 1 "width" 1) scene)
+              pos (bjs/Vector3. (* id 1.1) 0 0)]
+          (set! (.-position msg-cube) pos)
+          (add-mesh-pick-action msg-cube)))))
   ;; return nil because this is a pure side effect
   nil)
 
@@ -137,7 +139,7 @@
   (let [id (msg :id)]
     (when (and id (> id 0))
       (let [scene main-scene/scene
-            msg-cube (bjs/MeshBuilder.CreateBox (str "mc2-" id) (js-obj "height" 1 "width" 1) scene)
+            msg-cube (bjs/MeshBuilder.CreateBox (str "mc-" id) (js-obj "height" 1 "width" 1) scene)
             pos (bjs/Vector3. (* id -1.1) 0 0)]
         (set! (.-position msg-cube) pos)
         (add-mesh-pick-action-2 msg-cube))))
@@ -155,7 +157,7 @@
   ([id level text]
    (println "msg-cube-scene.update-msg-cube: id=" id ", level=" level ", text=" text)
    (when main-scene/scene
-     (let [mesh (-> main-scene/scene (.getMeshByName (str "mc2-" id)))]
+     (let [mesh (-> main-scene/scene (.getMeshByName (str "mc-" id)))]
            ; red-mat (bjs/StandardMaterial. "red-mat" scene)]
        (when mesh
          (case level

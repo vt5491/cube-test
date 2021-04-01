@@ -4,7 +4,8 @@
 (ns cube-test.msg-cube.data.msg
   (:require
    [re-frame.core :as re-frame]
-   [clojure.spec.alpha :as s]))
+   [clojure.spec.alpha :as s]
+   [reagent.core :as reagent]))
 
 ;; hookup
 (comment
@@ -82,3 +83,11 @@
         :WARN (set-level id :SEVERE msgs-2)
         ;; don't do anything if already at highest level
         :SEVERE msgs-2)))
+
+; (r/create-element "div" #js{:className "foo"}
+;   "Hi " (r/as-element [:strong "world!"]))
+
+(defn add-ints [db]
+  (println "msg.add-ints: entered")
+  (assoc db :ints (conj (db :ints) 7)))
+  ; (reagent/create-element "text-field"))

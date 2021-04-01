@@ -1,6 +1,8 @@
 (ns cube-test.subs
   (:require
    [re-frame.core :as re-frame :refer [reg-sub subscribe]]
+   ; [cube-test.db :as db]
+   [re-frame.db :as rf-db]
    [cube-test.msg-cube.data.msg :as msg]))
 
 (re-frame/reg-sub
@@ -13,13 +15,30 @@
   :max-id
   (fn [db _]
     (:max-id db)))
+    ; [(:max-id db)]))
+
+(re-frame/reg-sub
+  :max-id-with-msgs
+  (fn [db _]
+    ; (:max-id db)
+    (println ":max-id-with-msgs: db=" db)
+    [(:max-id db) (:msgs db)]))
+
+;; This is just a better-named version of 'max-id-with-msgs'
+(re-frame/reg-sub
+  :max-id-and-msgs
+  (fn [db _]
+    ; (:max-id db)
+    (println ":max-id-and-msgs: db=" db)
+    [(:max-id db) (:msgs db)]))
 
 (reg-sub
   :msgs
   ; (fn [db _])
   (fn [db query-v]
-    (println "reg-sub:msgs: query-v=" query-v)
+    (println "reg-sub:msgs: db=" db ",query-v=" query-v)
     (:msgs db)))
+
 
 (reg-sub
   :msgs-2
@@ -27,15 +46,98 @@
     (println "reg-sub:msgs-2: query-v=" query-v)
     (:msgs-2 db)))
 
-(re-frame/reg-sub
-  :max-id-and-msgs
-  ; :<- [:max-id]
-  ; :<- [:msgs])
-  ; :<- [:msgs :max-id])
-  (fn [db _]
-    [(:max-id db) (:msgs db)]))
+(reg-sub
+  :ints
+  (fn [db query-v]
+    (println "reg-sub:ints: query-v=" query-v)
+    (:ints db)))
+
+(reg-sub
+  :input-id
+  (fn [db query-v]
+    (:input-id db)))
+; (re-frame/reg-sub
+;   :max-id-and-msgs
+;   ; :<- [:max-id]
+;   ; :<- [:msgs])
+;   ; :<- [:msgs :max-id])
+;   (fn [db _]
+;     (println ":max-id-and-msgs: db=")
+;     [(:max-id db) (:msgs db)])
+;   (fn [[max-id msgs] query-v]
+;     (println ":max-id-and-msgs: max-id=" max-id ", msgs=" msgs)))
 
 ;; signal flows
+(reg-sub
+  :msgs-cnt-2
+  ; (fn [db _])
+  (fn [db query-v]
+    (println "reg-sub:msgs-cnt: db=" db ",query-v=" query-v)
+    ; (count (:msgs db))
+    [(count (:msgs db)) (:msgs db)]))
+    ; [(count (:msgs db)) (:msgs db) (:max-id db)]))
+
+(reg-sub
+ :scene-msgs-cnt
+ :<- [:msgs-cnt-2]
+ ; (fn [[msgs-cnt]])
+ (fn [[msgs-cnt msgs]]
+ ; (fn [[msgs-cnt msgs max-id]]
+   ; (println ":scene-msgs-cnt: msgs-cnt=" msgs-cnt)
+   (println ":scene-msgs-cnt: msgs-cnt=" msgs-cnt ", msgs=" msgs)
+   ; (println ":scene-msgs-cnt: msgs-cnt=" msgs-cnt ", msgs=" msgs ", max-id=" max-id)
+   [[2]]))
+
+(reg-sub
+ :add-scene-msg-cube
+ ; :<- [:max-id]
+ :<- [:max-id-and-msgs]
+ ; :<- [:max-id-with-msgs]
+ ; (fn [db query-v]
+ ;   (println ":add-scene-msg-cube fn1: db=" db ", query-v" query-v)
+ ;   (let [db rf-db/app-db
+ ;         msgs (:msgs @db)]
+ ;     (println "add-scene-msg-cube fn1a msgs=" msgs)
+ ;     [(subscribe [:max-id] @db)]))
+   ; [(subscribe [:max-id])]
+   ; (subscribe [:max-id])
+   ; (subscribe [:max-id-with-msgs]))
+ ; (fn [db [_ query-v]]
+ ; (fn [x]
+ ;   (println ":add-scene-msg-cube: x=" x)
+ ;   [1 2])
+ ; (fn [db query-vec]
+ ; (fn [[max-id] msgs]
+ (fn [[max-id msgs]]
+  (println ":add-scene-msg-cube: max-id=" max-id ", msgs=" msgs)
+  ;; the max-id msg is the "hot-spot" msg we are interested in.
+  (let [ msg (-> (filter #(= (%1 :id) max-id) msgs) (first))]
+    (when (not (empty? msg))
+      (re-frame/dispatch [:msg-cube.scene.add-msg-cube msg])))))
+
+ ; (fn [max-id]
+ ; ; (fn [max-id msgs]
+ ;   ; (println ":add-scene-msg-cube: db=" db ", query-vec" query-vec)))
+ ;   ; (println ":add-scene-msg-cube: max-id=" max-id ", msgs=" msgs)
+ ;   (println ":add-scene-msg-cube: max-id=" max-id)
+ ;   ; (let [db @db/default-db])
+ ;   (let [db rf-db/app-db
+ ;         ; msgs (:msgs @db)
+ ;         msgs [1 2]]
+ ;     (println ":add-scene-msg-cube fn2: max-id=" max-id ",db=" @db ", msgs=" msgs)
+ ;     [[1]])))
+
+
+
+; (reg-sub
+;   :add-msg-cube
+;   (fn [db query-v]
+;     (println ":add-msg-cube: db=" db ", query-v=" query-v)
+;     [(subscribe [:max-id])
+;      (db :msgs)])
+;  (fn [[max-id msgs] query-v]
+;    (println ":add-msg-cube: max-id=" max-id ", msgs=" msgs)))
+
 (reg-sub
  :gen-msg-cube
  ; :<- [:max-id]
@@ -47,7 +149,7 @@
    [(subscribe [:max-id])
     (subscribe [:msgs])])
  (fn [[max-id msgs] query-v]
-   (println ":gen-msg-cube: msgs=" msgs)
+   (println ":gen-msg-cube: max-id=" max-id ", msgs=" msgs)
  ; (fn [args]
  ;   (println "get-msg-cube: args=" args)))
  ; (fn [[max-id] [msgs] query-v]
@@ -109,28 +211,23 @@
   (fn [db [_ id]]
     (println "reg-sub:msg-by-id")
     (println "reg-sub:msg-by-id: id=" id)
-    (msg/get-by-id id (:msgs db))))
-    ; (:msgs db)))
+    (let [msg (msg/get-by-id id (:msgs db))]
+      [msg])))
 
 (reg-sub
  :msg-changed-by-id
  ; :<- [:msgs]
  ; (fn [query-v])
  (fn [[_ id]]
-   ; [(subscribe [:msgs])]
-   ; (println "reg-sub:msg-by-id query-v=" query-v)
    (println "abc")
    (println "reg-sub:msg-changed-by-id id=" id)
-   ; (subscribe [:msgs 1])
-   ; (subscribe [:msgs id]))
-   ; (subscribe [:msg-by-id id]))
-   (subscribe [:msg-by-id 1]))
- ; (fn [[msgs] query-v])
- ; (fn [msgs query-v])
+   (subscribe [:msg-by-id id]))
  (fn [[msg] [_ id]]
-   (println "reg-sub:msg-changed-by-id: *msg-changed-by-id: msg=" msg ", id=" id)))
-   ; (re-frame/dispatch [:msg-cube.update-msg-cube id])))
-   ; (str "msg-by-id: id=" id)))
+   (println "reg-sub:msg-changed-by-id: *msg-changed-by-id: msg=" msg ", id=" id)
+   (when msg
+     (re-frame/dispatch [:msg-cube.update-msg-cube id (msg :level)]))
+   ; ["result"]
+  nil))
 
 (reg-sub
   :msg-by-id-2

@@ -1013,3 +1013,29 @@
    ; {:fx [[:dispatch]]}
    ; {:fx [[(msg-cube.scene/update-msg-cube id level text)]]}
    {:fx [(msg-cube.scene/update-msg-cube id level text)]}))
+
+(reg-event-fx
+ :msg-cube.scene.add-msg-cube
+ (fn [cofx [_ msg]]
+   (println "events.msg-cube.scene.update-msg-cube: msg=" msg)
+   ; {:fx [[:dispatch]]}
+   ; {:fx [[(msg-cube.scene/update-msg-cube id level text)]]}
+   {:fx [(msg-cube.scene/add-msg-cube msg)]}))
+;; add a dummy element to div 'msg-box-proxies'
+; (reg-event-fx
+;  :msg-cube.add-element
+;  (fn [cofx [_]]
+;    (println "events.msg-cube.add-element:")
+;    {:fx [(msg-cube.msg/add-element)]}))
+
+(reg-event-db
+ :msg-cube.add-ints
+ (fn [db [_]]
+   (println "events.msg-cube.add-ints:")
+   (msg-cube.msg/add-ints db)))
+
+(reg-event-db
+ :msg-cube.update-input-id
+ (fn [db [_ id]]
+   (println "events.update-input-id: id=" id)
+   (assoc db :input-id id)))
