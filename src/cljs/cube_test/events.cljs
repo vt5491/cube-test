@@ -1,7 +1,8 @@
 ;; events is refer to many
 (ns cube-test.events
   (:require
-   [re-frame.core :refer [reg-event-db reg-event-fx reg-fx] :as re-frame]
+   [re-frame.core :refer [reg-event-db reg-event-fx reg-fx after] :as re-frame]
+   [cljs.spec.alpha :as s]
    [cube-test.db :as db]
    [cube-test.game :as game]
    [cube-test.main-scene :as main-scene]
@@ -24,15 +25,22 @@
    [cube-test.tic-tac-attack.cell :as cell]
    [cube-test.msg-cube.msg-cube-game :as msg-cube.game]
    [cube-test.msg-cube.msg-cube-scene :as msg-cube.scene]
-   [cube-test.msg-cube.data.msg :as msg-cube.msg]))
-
+   [cube-test.msg-cube.data.msg :as msg-cube.msg]
+   [cube-test.msg-cube.spec.db :as msg-cube.spec]))
 
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ _]
    db/default-db))
 
-;;
+;; method from the 'todomvc' example, to allow checking of the db spec as an interceptor
+(defn check-and-throw
+  "Throws an exception if `db` doesn't match the Spec `a-spec`."
+  [a-spec db]
+  (println "check-and-throw: a-spec=" a-spec ", db=" db)
+  (when-not (s/valid? a-spec db)
+    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
+
 ;; game
 ;;
 ; (re-frame/reg-event-db
@@ -946,6 +954,14 @@
     db))
 
 ;; msg-cube.data.msg events
+; (def msg-cube-check-spec-interceptor (after (partial check-and-throw :msg-cube.spec/db-spec)));
+(def msg-cube-check-spec-interceptor (after (partial check-and-throw ::msg-cube.spec/db-spec)));
+
+(re-frame/reg-event-db
+ ::initialize-msg-cube-db
+ (fn [db _]
+   db/default-db))
+
 (re-frame/reg-event-db
   :gen-msg
   (fn [db [_]]
@@ -1030,6 +1046,7 @@
 
 (reg-event-db
  :msg-cube.add-ints
+ [msg-cube-check-spec-interceptor]
  (fn [db [_]]
    (println "events.msg-cube.add-ints:")
    (msg-cube.msg/add-ints db)))
@@ -1039,3 +1056,13 @@
  (fn [db [_ id]]
    (println "events.update-input-id: id=" id)
    (assoc db :input-id id)))
+
+(reg-event-db
+ :msg-cube.init-db
+ (fn [db [_ id]]
+   (println ":msg-cube.init-db: now running")
+   (msg-cube.game/init-db db)))
+
+
+;;; now we create an interceptor using `after`
+; (def check-spec-interceptor (after (partial check-and-throw :todomvc.db/db)));

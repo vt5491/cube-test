@@ -1,4 +1,7 @@
-(ns test.cube-test.msg-cube.msg-cube-game-test
+;; (ns test.cube-test.msg-cube.msg-cube-game-test)
+; Note: do not specify "test" in the path, because "test" is a root dir in project.clj
+;; (ns cube-test.msg-cube.msg-cube-game-test)
+(ns cube-test.msg-cube.game-test
  (:require 
   [clojure.test :refer [is testing deftest run-tests]]
   ;; Note: :all doesn't seem to work
@@ -9,6 +12,8 @@
 ;; (ns cube-test.msg-cube.msg-cube-game
 ;;  (:require
 ;;   [clojure.test :refer :all]))
+
+(def dummy 7)
 
 (deftest dmy-test
   (testing "basic dummy test"
@@ -23,6 +28,10 @@
       (is (contains? r :msgs))
       (is (contains? r :max-id))
       (is (vector? (r :msgs))))))
+
+(deftest init-db
+  (testing "init-db works"
+    (is (= 1 1))))
 
 (comment
  (shadow.cljs.devtools.api/nrepl-select :app)

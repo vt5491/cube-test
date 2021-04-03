@@ -1,6 +1,8 @@
 (ns cube-test.msg-cube.msg-cube-game
   (:require
-   [re-frame.core :as re-frame]))
+   [re-frame.core :as re-frame]
+   [cube-test.msg-cube.spec.db :as msg-cube.spec]
+   [cube-test.utils :as utils]))
    ;; Note: since msg-cube-game is a pure "model", we should never explicitily or direclty access
    ;; the "view", thus there should never be a require for 'msg-cube-scene' here.
    ; [cube-test.msg-cube.msg-cube-scene :as msg-cube-scene]))
@@ -11,6 +13,10 @@
 (defn df []
   dummy)
 
+; (reduce #(do
+;            (println "%1=" %1 ", %2=" %2)
+;            (assoc %1 (first %2) (second %2)))
+;          ddb g-db)
 
 (defn inc-max-id [db]
   ; (js-debugger)
@@ -42,7 +48,10 @@
     (assoc db
            :msgs-2 (conj old-msgs new-msg)
            :max-id new-id)))
-           
+
+(defn init-db [db]
+  (utils/merge-dbs db cube-test.msg-cube.spec.db/default-db))
+
 (defn init [db]
   (println "msg-cube-game.init: entered")
   ; (js-debugger)

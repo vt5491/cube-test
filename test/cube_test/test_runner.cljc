@@ -9,7 +9,10 @@
  (:require
    [clojure.test :refer-macros [is testing deftest run-tests] :as t]
    [cube-test.msg-cube.data.msg :as msg]
-   [cube-test.msg-cube.msg-test :as msg-test]))
+   [cube-test.msg-cube.msg-test :as msg-test]
+   [cube-test.msg-cube.spec.db :as msg-cube.spec]
+   [cube-test.msg-cube.game-test :as game-test]
+   [cube-test.utils-test :as utils-test]))
 
 ;; hookup
 (comment
@@ -24,13 +27,36 @@
  msg-test/db
  (println msg/dummy)
  msg/get-by-id
+ utils-test/merge-dbs
  ,)
 
 ;; Note: if you update msg or msg-test, you have to re-eval the 'ns' statment in this file
-;; before re-running the 'run-test' cmd below.
+;; before re-running the 'run-test' cmd below. Use vi "`a" and then "``" to go back.
 (comment
  (run-tests 'cube-test.msg-cube.msg-test)
 
+ (run-tests 'cube-test.msg-cube.game-test)
+
+ (run-tests 'cube-test.utils-test)
+
  ;; run a single test
+ ;; Note: this doesn't work for me.
+ ;; Note: the best thing is to probably just select that single test in the ns
+ ;; and "ctrl-, s" it, so only that one test is known to the repl.
  (clojure.test/test-vars [#'cube-test.msg-cube.msg-test/inc-level-with-cap])
+
+ (clojure.test/test-vars [#'cube-test.msg-cube.msg-test/inc-level-with-cap])
+
+ (clojure.test/test-vars [#'cube-test.msg-cube.msg-cube-game-test/extract-id])
+
+ (clojure.test/test-vars [#'cube-test.msg-cube.game-test/dmy-test])
+
+ (clojure.test/test-vars game-test/dmy-test)
+
+ (println game-test/dummy)
+ game-test/dummy
+ game-test/dmy-test
+ (game-test/dmy-test)
  ,)
+ 
+ 

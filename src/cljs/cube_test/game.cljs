@@ -59,6 +59,7 @@
                            (println "top-level-scene=msg-cube")
                            (re-frame/dispatch [:init-main-scene
                                                (fn [] (do
+                                                        (re-frame/dispatch [:msg-cube.init-db])
                                                         (re-frame/dispatch [:init-msg-cube-game])
                                                         (re-frame/dispatch [:run-msg-cube-game])))])
                            (re-frame/dispatch [:init-fps-panel main-scene/scene]))))

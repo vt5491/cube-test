@@ -1,5 +1,6 @@
-(ns cube-test.tmp)
-;   (:require
+(ns cube-test.tmp
+   (:require
+     [cube-test.db :as db]))
 ;    ; [re-frame.core :as re-frame]
 ;    [babylonjs :as bjs]))
 
@@ -53,3 +54,12 @@ bd
  (+ 1 2))
 
 (vec '(1 2 3))
+
+cube-test.db
+
+(db/default-db)
+db/default-db
+
+(def ddb {:name "re-frame"})
+
+ddb
