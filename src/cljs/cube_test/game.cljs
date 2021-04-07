@@ -5,8 +5,9 @@
    [cube-test.main-scene :as main-scene]
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.base :as base]
-   [cube-test.dummy-base :as dummy-base]))
+   [cube-test.dummy-base :as dummy-base]
    ; [cube-test.dummy-base :as dummy-base]))
+   [cube-test.twizzlers.events :as twizzler-events]))
 
 (declare render-loop)
 
@@ -20,10 +21,10 @@
                                (re-frame/dispatch [:init-fps-panel main-scene/scene])
                                (re-frame/dispatch [:run-cube-spin-scene]))
     :face-slot-scene (do
-                       (println "top-level-scene= face-slot-scene")
-                       (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-face-slot-scene]))])
-                       (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                       (re-frame/dispatch [:run-face-slot-scene]))
+                         (println "top-level-scene= face-slot-scene")
+                         (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-face-slot-scene]))])
+                         (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                         (re-frame/dispatch [:run-face-slot-scene]))
     :tic-tac-attack-scene (do
                             (println "top-level-scene= tic-tac-attack-scene")
                             (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-tic-tac-attack-scene]))])
@@ -62,9 +63,23 @@
                                                         (re-frame/dispatch [:msg-cube.init-db])
                                                         (re-frame/dispatch [:init-msg-cube-game])
                                                         (re-frame/dispatch [:run-msg-cube-game])))])
-                           (re-frame/dispatch [:init-fps-panel main-scene/scene]))))
+                           (re-frame/dispatch [:init-fps-panel main-scene/scene]))
                            ; (re-frame/dispatch [:run-msg-cube-game]))))
                            ; (re-frame/dispatch [:run-msg-cube-scene]))))
+    :twizzlers (do
+                           (println "top-level-scene=twizzlers")
+                           (re-frame/dispatch [:init-main-scene
+                                               (fn [] (do
+                                                        (re-frame/dispatch [::twizzler-events/init-db])
+                                                        ; (re-frame/dispatch [::init-twizzlers-game])
+                                                        ; (re-frame/dispatch [:twizzler-events/init-twizzlers-game])
+                                                        ; (re-frame/dispatch [:init-twizzlers-game])
+                                                        (re-frame/dispatch [::twizzler-events/init-game])
+                                                        (re-frame/dispatch [::twizzler-events/run-game])))])
+                                                        ; (re-frame/dispatch [:init-twizzlers-game-fx])
+                                                        ; (re-frame/dispatch [:msg-cube.abc])))])
+                                                        ; (re-frame/dispatch [:run-msg-cube-game])))])
+                           (re-frame/dispatch [:init-fps-panel main-scene/scene]))))
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

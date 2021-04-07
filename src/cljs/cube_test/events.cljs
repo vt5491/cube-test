@@ -26,7 +26,8 @@
    [cube-test.msg-cube.msg-cube-game :as msg-cube.game]
    [cube-test.msg-cube.msg-cube-scene :as msg-cube.scene]
    [cube-test.msg-cube.data.msg :as msg-cube.msg]
-   [cube-test.msg-cube.spec.db :as msg-cube.spec]))
+   [cube-test.msg-cube.spec.db :as msg-cube.spec]
+   [cube-test.twizzlers.game :as twizzlers.game]))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -1066,3 +1067,23 @@
 
 ;;; now we create an interceptor using `after`
 ; (def check-spec-interceptor (after (partial check-and-throw :todomvc.db/db)));
+
+; (reg-event-db
+;  :init-twizzlers-game
+;  (fn [db [_ id]]
+;    (println ":msg-cube.init-db: now running")
+;    db))
+;    ; (msg-cube.game/init-db db)))
+;
+; (reg-event-fx
+;  :init-twizzlers-game-fx
+;  (fn [_]
+;    (twizzlers.game/init)))
+;
+; (reg-event-fx
+;  :msg-cube.abc
+;  (fn [db [_ id]]
+;    (println ":msg-cube.abc: now running")
+;    db))
+;    ; (msg-cube.game/init-db db)))
+; (println "at end of events")

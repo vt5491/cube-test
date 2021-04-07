@@ -1,8 +1,9 @@
-(ns cube-test.utils)
-  ; (:require))
+(ns cube-test.utils
+  (:require
    ;; Note: get circulard dep. warning if you include 'cube-test.core'
    ; [cube-test.core :as re-frame]))
    ; [cube-test.base :as base]))
+   [clojure.spec.alpha :as s]))
 
 ; (defn create-fps-panel [])
 ;; Convert ":17" to 17, for example
@@ -18,3 +19,11 @@
   (reduce #(do
              (assoc %1 (first %2) (second %2)))
           db1 db2))
+
+
+(defn check-and-throw
+  "Throws an exception if `db` doesn't match the Spec `a-spec`."
+  [a-spec db]
+  (println "check-and-throw: a-spec=" a-spec ", db=" db)
+  (when-not (s/valid? a-spec db)
+    (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
