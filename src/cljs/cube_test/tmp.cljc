@@ -62,4 +62,23 @@ db/default-db
 
 (def ddb {:name "re-frame"})
 
+(def g-db {:a 7 :b 8})
 ddb
+(assoc ddb :a 7)
+
+(assoc ddb)
+
+(get g-db 0)
+(keys g-db)
+(let [db ddb]
+  (for [k (keys g-db)]))
+
+(reduce #(do 
+          (assoc %1)))
+
+(second [:a 7])
+
+(reduce #(do 
+           (println "%1=" %1 ", %2=" %2)
+           (assoc %1 (first %2) (second %2)))
+         ddb g-db)

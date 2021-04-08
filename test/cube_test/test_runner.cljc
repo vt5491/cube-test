@@ -11,8 +11,9 @@
    [cube-test.msg-cube.data.msg :as msg]
    [cube-test.msg-cube.msg-test :as msg-test]
    [cube-test.msg-cube.spec.db :as msg-cube.spec]
-   [cube-test.msg-cube.game-test :as game-test]
-   [cube-test.utils-test :as utils-test]))
+  ;;  [cube-test.msg-cube.game-test :as game-test]
+   [cube-test.utils-test :as utils-test]
+   [cube-test.twizzlers.twizzler-test :as twizzler-test]))
 
 ;; hookup
 (comment
@@ -32,6 +33,7 @@
 
 ;; Note: if you update msg or msg-test, you have to re-eval the 'ns' statment in this file
 ;; before re-running the 'run-test' cmd below. Use vi "`a" and then "``" to go back.
+;; msg-test
 (comment
  (run-tests 'cube-test.msg-cube.msg-test)
 
@@ -59,4 +61,13 @@
  (game-test/dmy-test)
  ,)
  
+;; twizzlers
+(comment
+ (clojure.test/test-vars [#'cube-test.twizzlers.twizzler-test/add-twizzler-empty])
+ (clojure.test/test-vars [#'cube-test.twizzlers.twizzler-test/add-twizzler-one])
+
+ (run-tests 'cube-test.twizzlers.twizzler-test)
+;; (run-tests 'cube-test.utils-test
+  
+ ,)
  

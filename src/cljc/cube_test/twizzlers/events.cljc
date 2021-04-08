@@ -6,6 +6,7 @@
    [cube-test.twizzlers.game :as twizzlers.game]
    [cube-test.twizzlers.scene :as twizzlers.scene]
    [cube-test.twizzlers.db :as twizzlers.db]
+   [cube-test.twizzlers.twizzler :as twizzlers.twizzler]
    [cube-test.utils :as utils]))
 
 ; (re-frame/reg-fx
@@ -44,3 +45,9 @@
  (fn [db [_ id]]
    (println ":twizzlers.init-db: now running")
    (twizzlers.db/init-db db)))
+
+(reg-event-db
+ ::add-twizzler
+ (fn [db [_ id]]
+   (println ":twizzlers.init-db: now running")
+   (twizzlers.twizzler/add-twizzler db)))

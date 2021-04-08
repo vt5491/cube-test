@@ -5,7 +5,8 @@
    [cube-test.subs :as subs]
    [babylonjs :as bjs]
    [cube-test.ut-simp.msg :as msg]
-   [cube-test.msg-cube.views :as msg-cube.views]))
+   [cube-test.msg-cube.views :as msg-cube.views]
+   [cube-test.twizzlers.views :as twizzlers.views]))
 
 (defn main-panel []
   (let [name (re-frame/subscribe [::subs/name])
@@ -21,7 +22,6 @@
      ; [:button.user-action {:on-click #(re-frame/dispatch [:print-db])} "print-db"]
      ; (condp = base/top-level-scene)
      (case base/top-level-scene
-        :msg-cube (do
-                       (msg-cube.views/init-panel))
-        :twizzlers [:br]
+        :msg-cube (do (msg-cube.views/init-panel))
+        :twizzlers (do (twizzlers.views/init-panel)) 
         [:br])]))
