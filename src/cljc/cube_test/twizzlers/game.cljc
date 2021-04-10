@@ -9,6 +9,14 @@
    [cube-test.utils.fps-panel :as fps-panel]))
    ; [cube-test.twizzlers.events :as twizzler-events]))
 
+(def ^:dynamic *a* (atom 10))
+; (def ^:dynamic *a* (atom []))
+
+(defn update-atom []
+  (swap! *a* inc))
+  ; (swap! *a* (fn [x] (+ x 1)))
+  ; (swap! *a* (fn [x] (conj x 1))))
+
 (defn render-loop []
   (if (= main-scene/xr-mode "vr")
     (controller/tick)
@@ -23,6 +31,9 @@
 
 (defn init []
   (println "twizzlers.game.init: entered")
+  ; (re-frame.core/set-loggers!  {:warn utils/rf-override-logger})
+  ; (re-frame.core/set-loggers!  {:warn utils/rf-odoyle-warn-override-logger})
+  (re-frame/console :warn "console msg from twizzlers.game.init")
   ; (re-frame/dispatch [::twizzler-events/init-scene])
   ; (re-frame/dispatch [:cube-test.twizzlers.events/init-scene])
   (re-frame/dispatch [:cube-test.twizzlers.events/init-scene]))

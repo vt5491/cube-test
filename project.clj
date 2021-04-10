@@ -12,7 +12,8 @@
                  [re-frame "1.2.0"]
                  [funcool/promesa "5.1.0"]
                  ;;vt add
-                 [cljstache "2.0.6"]]
+                 [cljstache "2.0.6"]
+                 [net.sekao/odoyle-rules "0.8.0"]]
                  ; [proto-repl "1.4.24"]
                  ;; Note: proto-repl .jar has a different version than proto-repl the atom plugin
                  ;; so use "0.3.1" not "1.4.24"

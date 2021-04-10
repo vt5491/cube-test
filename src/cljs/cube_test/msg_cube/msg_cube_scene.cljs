@@ -1,6 +1,7 @@
 (ns cube-test.msg-cube.msg-cube-scene
   (:require
    [re-frame.core :as re-frame]
+   [cube-test.base :as base]
    [cube-test.subs :as subs]
    [babylonjs :as bjs]
    [babylonjs-gui :as bjs-gui]
@@ -33,52 +34,53 @@
 
 (defn ^:dev/after-load init-gui []
 ; (defn init-gui []
-  (println "now in init-gui")
-  ; (when gui-plane
-  ;   ())
-  (let [top-plane (.getMeshByID main-scene/scene "top-plane")]
-    (when top-plane
-      (.dispose top-plane)))
-  (let [top-plane (bjs/Mesh.CreatePlane. "top-plane" 5)
-        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 3048 2048)
-        top-pnl (bjs-gui/Grid.)
-        top-hdr (bjs-gui/TextBlock.)
-        add-msg-btn (bjs-gui/Button.CreateSimpleButton. "add-msg-btn" "add")
-        max-id-btn (bjs-gui/Button.CreateSimpleButton. "max-id-btn" "inc max-id")]
-    (set! (.-position top-plane)(bjs/Vector3. 0 6 2))
-    (set! (.-renderOutline top-plane) true)
-    (set! gui-plane top-plane)
-    (.addControl top-adv-texture top-pnl)
-    (set! (.-text top-hdr) "commands:")
-    ; (set! (.-height top-hdr) "120px")
-    (set! (.-fontSize top-hdr) "200")
-    (set! (.-color top-hdr) "white")
-    ; (set! (.-autoScale top-hdr) true)
-    ;; create 5 rows and 3 cols
-    (.addRowDefinition top-pnl 0.33 false)
-    (.addRowDefinition top-pnl 0.33)
-    (.addRowDefinition top-pnl 0.33)
-    ; (.addRowDefinition top-pnl 0.20)
-    ; (.addRowDefinition top-pnl 0.20)
-    (.addColumnDefinition top-pnl 0.5)
-    (.addColumnDefinition top-pnl 0.5)
-    ; (.addColumnDefinition top-pnl 0.33)
-    (.addControl top-pnl top-hdr 0 0)
-    ;; add-btn
-    ; (set! (.-autoScale add-msg-btn) true)
-    (set! (.-fontSize add-msg-btn) "150")
-    (set! (.-color add-msg-btn) "white")
-    (-> add-msg-btn .-onPointerUpObservable (.add (fn [value]
-                                                    (println "add-msg-btn clicked")
-                                                    (re-frame/dispatch [:msg-cube.add-msg { :text "hi"}]))))
-    (.addControl top-pnl add-msg-btn 1 2)
-    ;; max-id btn
-    (set! (.-fontSize max-id-btn) "150")
-    (set! (.-color max-id-btn) "white")
-    (-> max-id-btn .-onPointerUpObservable (.add (fn [value]
-                                                   (println "max-id-btn clicked")
-                                                   (re-frame/dispatch [:msg-cube.inc-max-id]))))
-    (.addControl top-pnl max-id-btn 0 1)))
+  (when (= base/top-level-scene :msg-cube)
+    (println "now in init-gui")
+    ; (when gui-plane
+    ;   ())
+    (let [top-plane (.getMeshByID main-scene/scene "top-plane")]
+      (when top-plane
+        (.dispose top-plane)))
+    (let [top-plane (bjs/Mesh.CreatePlane. "top-plane" 5)
+          top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 3048 2048)
+          top-pnl (bjs-gui/Grid.)
+          top-hdr (bjs-gui/TextBlock.)
+          add-msg-btn (bjs-gui/Button.CreateSimpleButton. "add-msg-btn" "add")
+          max-id-btn (bjs-gui/Button.CreateSimpleButton. "max-id-btn" "inc max-id")]
+      (set! (.-position top-plane)(bjs/Vector3. 0 6 2))
+      (set! (.-renderOutline top-plane) true)
+      (set! gui-plane top-plane)
+      (.addControl top-adv-texture top-pnl)
+      (set! (.-text top-hdr) "commands:")
+      ; (set! (.-height top-hdr) "120px")
+      (set! (.-fontSize top-hdr) "200")
+      (set! (.-color top-hdr) "white")
+      ; (set! (.-autoScale top-hdr) true)
+      ;; create 5 rows and 3 cols
+      (.addRowDefinition top-pnl 0.33 false)
+      (.addRowDefinition top-pnl 0.33)
+      (.addRowDefinition top-pnl 0.33)
+      ; (.addRowDefinition top-pnl 0.20)
+      ; (.addRowDefinition top-pnl 0.20)
+      (.addColumnDefinition top-pnl 0.5)
+      (.addColumnDefinition top-pnl 0.5)
+      ; (.addColumnDefinition top-pnl 0.33)
+      (.addControl top-pnl top-hdr 0 0)
+      ;; add-btn
+      ; (set! (.-autoScale add-msg-btn) true)
+      (set! (.-fontSize add-msg-btn) "150")
+      (set! (.-color add-msg-btn) "white")
+      (-> add-msg-btn .-onPointerUpObservable (.add (fn [value]
+                                                      (println "add-msg-btn clicked")
+                                                      (re-frame/dispatch [:msg-cube.add-msg { :text "hi"}]))))
+      (.addControl top-pnl add-msg-btn 1 2)
+      ;; max-id btn
+      (set! (.-fontSize max-id-btn) "150")
+      (set! (.-color max-id-btn) "white")
+      (-> max-id-btn .-onPointerUpObservable (.add (fn [value]
+                                                     (println "max-id-btn clicked")
+                                                     (re-frame/dispatch [:msg-cube.inc-max-id]))))
+      (.addControl top-pnl max-id-btn 0 1))))
 
 (defn init-max-id-sub []
   (println "init-max-id-sub: pre")

@@ -7,6 +7,7 @@
    [cube-test.twizzlers.scene :as twizzlers.scene]
    [cube-test.twizzlers.db :as twizzlers.db]
    [cube-test.twizzlers.twizzler :as twizzlers.twizzler]
+   [cube-test.twizzlers.rules :as twizzlers.rules]
    [cube-test.utils :as utils]))
 
 ; (re-frame/reg-fx
@@ -51,3 +52,30 @@
  (fn [db [_ id]]
    (println ":twizzlers.init-db: now running")
    (twizzlers.twizzler/add-twizzler db)))
+
+;; first odoyle rule
+(re-frame/reg-event-fx
+ ::update-time
+ ; [twizzlers-check-spec-interceptor]
+ (fn [_]
+   (prn "twizzler.events.update-time: entered")
+   (twizzlers.rules/update-time)))
+
+;; odoyle rule
+(re-frame/reg-event-fx
+ ::update-twiz-cnt
+ (fn [_ [_ new-cnt]]
+   (prn "twizzler.events.update-twiz-cnt: entered, new-cnt=" new-cnt)
+   (twizzlers.rules/update-twiz-cnt new-cnt)))
+
+(re-frame/reg-event-fx
+ ::update-dmy-atom
+ (fn [_]
+   (prn "twizzler.events.update-dmy-atom: entered")
+   (twizzlers.game/update-atom)))
+
+(reg-event-fx
+ :add-twiz-cube
+ (fn [cofx [_ twiz]]
+   (println "events.add-twiz-cube: twiz=" twiz)
+   {:fx [(twizzlers.scene/add-twiz-cube twiz)]}))

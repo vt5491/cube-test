@@ -24,7 +24,8 @@
 (def default-db
   {
   ;;  :name "re-frame"
-   ::twizzlers []})
+   ; ::twizzlers []
+   :twizzlers []})
    ; :msgs-2 []
    ; :ints [0 2]
    ; :max-id 0
@@ -52,8 +53,8 @@
 ;; (s/def ::twz
 ;;  (s/keys :req [:twz/id]))
 
-; (s/def ::db-spec (s/keys :req-un [::twizzlers]))
-(s/def ::db-spec (s/keys :req [::twizzlers]))
+(s/def ::db-spec (s/keys :req-un [::twizzlers]))
+; (s/def ::db-spec (s/keys :req [::twizzlers]))
 
 ;; collective twizzlers
 ; (s/def ::twizzlers vector?)

@@ -5,6 +5,7 @@
    [cube-test.main-scene :as main-scene]
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.base :as base]
+   [cube-test.utils :as utils]
    [cube-test.dummy-base :as dummy-base]
    ; [cube-test.dummy-base :as dummy-base]))
    [cube-test.twizzlers.events :as twizzler-events]))
@@ -13,6 +14,7 @@
 
 (defn init []
   (println "game.init: entered, top-level-scene=" base/top-level-scene)
+  (re-frame.core/set-loggers!  {:warn utils/rf-odoyle-warn-override-logger})
   (condp = base/top-level-scene
     :cube-spin-scene (do
                                (println "top-level-scene=cube-spin-scene")

@@ -1,5 +1,8 @@
 (ns cube-test.core
   (:require
+   ;; try calling rules early so re-frame doesnt hook it
+   ; [cube-test.twizzlers.rules]
+   ;;
    [reagent.core :as reagent]
    [reagent.dom :as rdom]
    [re-frame.core :as re-frame]
