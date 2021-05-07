@@ -9,6 +9,7 @@
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.msg-cube.data.msg :as msg]))
+   ; [cube-test.twizzlers.events :as twizzler-events]))
 
 (defn add-twiz-cube [twiz]
   (println "add-twizzler: entered, twiz=" twiz)
@@ -108,12 +109,17 @@
 
 (defn append-space-portal [path file]
   (.Append bjs/SceneLoader path file main-scene/scene
-           #(append-portal-loaded %1)))
+           ; #(append-portal-loaded %1)
+           #(do
+               ; (re-frame/dispatch [:twizzler.events/scene-loaded])
+               (re-frame/dispatch [:cube-test.twizzlers.events/scene-loaded :space-port])
+               ; (re-frame/dispatch [::twizzler.events/scene-loaded])
+               (append-portal-loaded %1))))
 
 
 
-(defn init []
-  (println "twizzlers.scene.init: entered")
+(defn init [db]
+  (println "twizzlers.scene.init: entered db=" db)
   (let [scene main-scene/scene]
       ; (let [light1 (bjs/HemisphericLight. "light1" (bjs/Vector3. 1 1 0) scene)
       ;       light2 (bjs/PointLight. "light2" (bjs/Vector3. 0 1 -1) scene)])
@@ -123,10 +129,15 @@
       ;  "space_portal"
       ;   move-camera)))
 
-      (append-space-portal
-       ; "models/tmp/"
-       "models/space_portal/"
-       "space_portal.glb")))
+      (let [path (get-in db [:scenes :space-port :path])
+            fn (get-in db [:scenes :space-port :fn])]
+        (prn "path=" path ", fn=" fn)
+        (append-space-portal
+         ; "models/tmp/"
+         ; "models/space_portal/"
+         ; "space_portal.glb"
+         path
+         fn))))
 
-          ; sph (bjs/MeshBuilder.CreateSphere "sphere" (js-obj "diameter" 1) scene)]
-        ; (set! sphere sph))))
+                ; sph (bjs/MeshBuilder.CreateSphere "sphere" (js-obj "diameter" 1) scene)]
+              ; (set! sphere sph))))

@@ -25,6 +25,7 @@
   {
   ;;  :name "re-frame"
    ; ::twizzlers []
+   :scenes {:space-port {:path "models/space_portal/" :fn "space_portal.glb" :loaded false}}
    :twizzlers []})
    ; :msgs-2 []
    ; :ints [0 2]

@@ -33,7 +33,9 @@
   (println "twizzlers.game.init: entered")
   ; (re-frame.core/set-loggers!  {:warn utils/rf-override-logger})
   ; (re-frame.core/set-loggers!  {:warn utils/rf-odoyle-warn-override-logger})
-  (re-frame/console :warn "console msg from twizzlers.game.init")
+  (re-frame/console :warn "console msg from twizzlers.game.init"))
   ; (re-frame/dispatch [::twizzler-events/init-scene])
   ; (re-frame/dispatch [:cube-test.twizzlers.events/init-scene])
-  (re-frame/dispatch [:cube-test.twizzlers.events/init-scene]))
+  ;; Note: we init the scene only through db updates.  We do not explicitly call.
+  ;vt-x (re-frame/dispatch [:cube-test.twizzlers.events/init-scene]))
+  ; (assoc))
