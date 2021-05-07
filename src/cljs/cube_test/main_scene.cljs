@@ -25,7 +25,9 @@
 (def env)
 (def camera)
 (def camera-rig)
-(def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
+; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
+(def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
+(def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
 (def vrHelper)
 (def xr)
 (def ground)
@@ -159,8 +161,15 @@
                                                     (let [cam-pos (.-position camera)
                                                           x (.-x cam-pos)
                                                           y (.-y cam-pos)
-                                                          z (.-z cam-pos)]
-                                                      (set! (.-position camera) (bjs/Vector3. x y -5))
+                                                          z (.-z cam-pos)
+                                                          ip @*camera-init-pos*]
+                                                      ; (set! (.-position camera) (bjs/Vector3. x y -5))
+                                                      ; (set! (.-position camera) (bjs/Vector3. (+ x (.-x ip)) (+ y (.-y ip) (z (.-z ip)))))
+                                                      (println "y=" y)
+                                                      (println "vr: ip=" ip)
+                                                      (println "vr: ip :x=" (:x ip) ",:y=" (:y ip) ", :z=" (:z ip))
+                                                      ; (set! (.-position camera) (bjs/Vector3. (+ x (:x ip)) (+ y (:y ip) (+ z (:z ip)))))
+                                                      (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
                                                       (prn "cam-rot c=" (.-rotation camera))))))
 
       ; (js-debugger)
