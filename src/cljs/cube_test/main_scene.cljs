@@ -138,14 +138,20 @@
   (if (= xr-mode "vr")
     (do
       (println "now setting up vr")
-      (set! vrHelper (.createDefaultVRExperience scene (js-obj "useXR" false)))
+      (set! vrHelper (.createDefaultVRExperience scene
+                          (js-obj "useXR" false)))
+                                  ; "floorMeshesCollection" (array))))
       (set! camera (.-webVRCamera vrHelper))
+      ;;vt
+      ; (.attachControl camera canvas true)
       (let [do-cam (.-deviceOrientationCamera vrHelper)]
         (set! (.-position do-cam) (bjs/Vector3. 0 4 -15)))
       (set! (.-id camera) "main-camera")
       (controller/init scene vrHelper camera)
       (controller/setup-controller-handlers vrHelper)
       (.enableTeleportation vrHelper (js-obj "floorMeshName" "ground"))
+      ; (.enableTeleportation vrHelper (js-obj "floorMeshName" "pool"))
+      ; (.enableTeleportation vrHelper (js-obj "floorMeshes" (array ground)))
       (.enableInteractions vrHelper)
       (-> vrHelper .-onAfterEnteringVRObservable (.add
                                                   (fn []

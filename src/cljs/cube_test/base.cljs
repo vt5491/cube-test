@@ -8,7 +8,7 @@
 
 ;; use-xr is actually defunct as main_scene.cljs simply sets based on browser.
 (def use-xr false)
-;(def use-xr true)
+; (def use-xr true)
 (def dummy 9)
 
 ; (def top-level-scene :cube-spin-scene)

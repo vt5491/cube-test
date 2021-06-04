@@ -119,3 +119,9 @@
  (fn [db [_ scene-id]]
    (prn "scene-loaded firing, scene-id=" scene-id)
    (assoc-in db [:scenes scene-id :loaded] true)))
+
+(reg-event-fx
+ ::init-exp-gui
+ (fn [cofx [_]]
+   (println "events.init-exp-gui:")
+   {:fx [(twizzlers.scene/init-exp-gui)]}))
