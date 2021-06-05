@@ -101,68 +101,73 @@
 
 (defn init-exp-gui []
   (prn "init-exp-gui: entered")
-  (let [top-plane (bjs/Mesh.CreatePlane. "top-plane" 2)
-        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 1024 1024)
+  (let [
+        ; top-plane (bjs/Mesh.CreatePlane. "top-plane" 2)
+        top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))
+        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 2048 1024)
         top-pnl (bjs-gui/Grid.)
         top-hdr (bjs-gui/TextBlock.)
         rot-btn (bjs-gui/Button.CreateSimpleButton. "rot-btn" "rotate")
         rot-btn-2 (bjs-gui/Button.CreateSimpleButton. "rot-btn-2" "rotate2")
         left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")
-        top-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "top-side-rot-btn" "top side rot")
-        ; tmp (js-debugger)
+        right-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "rigth-side-rot-btn" "right side rot")
         scene main-scene/scene
-        ; tmp (js-debugger)
         bldg-cube (.getMeshByID scene "bldg-cube")
         bldg-cube-pos (.-position bldg-cube)
         y-quat-neg-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG -90)))]
-    (set! (.-position top-plane) (.add bldg-cube-pos (bjs/Vector3. 0 8 0)))
-    ; (set! (.-rotation top-plane) (* base/ONE-DEG 90))))
-    ; (set! (-> top-plane (.-rotation) (.-y)) (* base/ONE-DEG 90))
+    ; (set! (.-position top-plane) (.add bldg-cube-pos (bjs/Vector3. 0 8 0)))
+    (set! (.-position top-plane) (.add bldg-cube-pos (bjs/Vector3. 0 0.5 7)))
     (set! (.-rotationQuaternion top-plane) y-quat-neg-90)
     (.enableEdgesRendering top-plane)
-  ;   ; (set! (.-edgesWidth top-plane) 3)
-  ;   ; (set! (-> top-plane (.-edgesRenderer) (.-isEnabled)) true)
-  ; ;   src.enableEdgesRendering(0.95, true));
-  ; ; src.edgesWidth = 5;
-  ; ; src.edgesColor = new BABYLON.Color4(1, 1, 1);
-  ;   ; (js-debugger)
-  ;
+
     (.addControl top-adv-texture top-pnl)
     (set! (.-text top-hdr) "commands")
-    (set! (.-height top-hdr) "100px")
-    (set! (.-fontSize top-hdr) "80")
+    (set! (.-height top-hdr) "500px")
+    (set! (.-fontSize top-hdr) "160")
     (set! (.-color top-hdr) "white")
-    ;; create 5 rows and 3 cols
+    ;; create 5 rows and 2 cols
     (.addRowDefinition top-pnl 0.20 false)
     (.addRowDefinition top-pnl 0.20)
     (.addRowDefinition top-pnl 0.20)
     (.addRowDefinition top-pnl 0.20)
     (.addRowDefinition top-pnl 0.20)
-    (.addColumnDefinition top-pnl 0.33)
-    (.addColumnDefinition top-pnl 0.33)
-    (.addColumnDefinition top-pnl 0.33)
+    (.addColumnDefinition top-pnl 0.5)
+    (.addColumnDefinition top-pnl 0.5)
+    ; (.addColumnDefinition top-pnl 0.33)
     (.addControl top-pnl top-hdr 0 0)
     ;; rot-btn
     (set! (.-autoScale rot-btn) true)
     (set! (.-fontSize rot-btn) "100")
-    (set! (.-color rot-btn) "red")))
+    (set! (.-color rot-btn) "red")
 
-    ; ;; left-side-rot-btn
-    ; (set! (.-autoScale left-side-rot-btn) true)
-    ; (set! (.-fontSize left-side-rot-btn) "100")
-    ; (set! (.-color left-side-rot-btn) "white")
-    ; (-> left-side-rot-btn .-onPointerUpObservable (.add (fn [value]
-    ;                                                       (println "left-side-rot-btn pressed")
-    ;                                                       (re-frame/dispatch [:vrubik-side-fwd :left]))))
-    ; (.addControl top-pnl left-side-rot-btn 4 0)
-    ; ;; top-side-rot-btn
-    ; (set! (.-autoScale top-side-rot-btn) true)
-    ; (set! (.-fontSize top-side-rot-btn) "100")
-    ; (set! (.-color top-side-rot-btn) "white")
-    ; (-> top-side-rot-btn .-onPointerUpObservable (.add (fn [value]
-    ;                                                       (println "top-side-rot-btn pressed")
+    ;; left-side-rot-btn
+    (set! (.-autoScale left-side-rot-btn) true)
+    (set! (.-fontSize left-side-rot-btn) "100")
+    (set! (.-color left-side-rot-btn) "white")
+    ; (def tmp (.-onPointerUpObservable left-side-rot-btn))
+    ; (.add tmp (fn [] (+ 1 1)))
+    ; (.add (.-onPointerUpObservable left-side-rot-btn) (fn [] (+ 1 1)))
+    ; (.add (.-onPointerUpObservable left-side-rot-btn) (fn [e x y] (+ 1 1)))))
+    ; (js-debugger)))
+    ; (-> (.-onPointerUpObservable left-side-rot-btn) (.add (fn [e x y] (+ 1 1))))))
+    ; (-> left-side-rot-btn .-onPointerUpObservable (.add #(prn "hi")))))
+    (-> left-side-rot-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "left-side-rot-btn pressed"))))
+    ; (-> left-side-rot-btn .-onPointerUpObservable
+    ;   (.add (fn [value]
+    ;           (println "left-side-rot-btn pressed"))))
+        ; (re-frame/dispatch [:vrubik-side-fwd :left]))))))
+    (.addControl top-pnl left-side-rot-btn 4 0)
+    ;; right-side-rot-btn
+    (set! (.-autoScale right-side-rot-btn) true)
+    (set! (.-fontSize right-side-rot-btn) "100")
+    (set! (.-color right-side-rot-btn) "white")
+    (-> right-side-rot-btn .-onPointerUpObservable
+        (.add (fn [value]
+                 (println "right-side-rot-btn pressed"))))
     ;                                                       (re-frame/dispatch [:vrubik-side-fwd :top]))))
-    ; (.addControl top-pnl top-side-rot-btn 4 2)))
+    (.addControl top-pnl right-side-rot-btn 4 1)))
 
 (defn hemisferic-loaded [loaded-scene]
   (println "hemisferic-loaded: loaded-scene=" loaded-scene)
@@ -307,8 +312,12 @@
            #(do
                (re-frame/dispatch [:cube-test.twizzlers.events/scene-loaded :hemisferic])
                (hemisferic-loaded %1)
-               (re-frame/dispatch [:cube-test.twizzlers.events/init-exp-gui]))))
-               ; (init-exp-gui))))
+               (init-exp-gui))))
+               ; (re-frame/dispatch [:cube-test.twizzlers.events/hemisferic-loaded %1]))))
+               ;; Note: get weird "nth not supported" warning when calling init-exp-gui
+               ;; with re-frame.  Note: get into trouble if not consistently callining
+               ;; natively or with re-frame.
+               ; (re-frame/dispatch [:cube-test.twizzlers.events/init-exp-gui]))))
 
 ; (defn vr-init []
 ;   (println "twizzlers/scene.vr-init entered")
@@ -318,6 +327,11 @@
 (defn init [db]
   (println "twizzlers.scene.init: entered db=" db)
   (let [scene main-scene/scene]
+      ;; override the initial position and rotation of the non-vr camera.
+      (let [do-cam (.-deviceOrientationCamera main-scene/vrHelper)
+            quat (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -93 base/ONE-DEG) 0)]
+        (set! (.-position do-cam) (bjs/Vector3. 46.37 0.96 45.53))
+        (set! (.-rotationQuaternion do-cam) quat))
       ; enable the pool for teleportation
       ; (.addFloorMesh scene.vrHelper (-> scene (.getMeshByName "pool")))
       ;; vrHelper is only accessible upon entry to vr, so set up a listener.

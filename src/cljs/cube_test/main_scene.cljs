@@ -28,6 +28,7 @@
 ; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
 (def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
 (def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
+; (def non-vr-camera)
 (def vrHelper)
 (def xr)
 (def ground)
@@ -143,6 +144,16 @@
                                   ; "floorMeshesCollection" (array))))
       (set! camera (.-webVRCamera vrHelper))
       ;;vt
+      ; (set! non-vr-camera (.getCameraByID scene "deviceOrientationVRHelper"))
+      ; (set! non-vr-camera (.-deviceOrientationCamera vrHelper))
+      ; (js-debugger)
+      ; (set! (.-position non-vr-camera) (bjs/Vector3. 46.37 0.96 45.53))
+      ; (set! (.-position (.currentCamera vrHelper))(bjs/Vector3. 46.37 0.96 45.53))
+      ; (-> vrHelper .-onControllerMeshLoadedObservable)
+      ; (-> vrHelper .-onEnteringVRObservable
+      ;     (.add (fn []
+      ;              (prn "onControllerMeshLoaded event observerd")
+      ;              (set! (.-position (.-currentVRCamera vrHelper))(bjs/Vector3. 46.37 0.96 45.53)))))
       ; (.attachControl camera canvas true)
       (let [do-cam (.-deviceOrientationCamera vrHelper)]
         (set! (.-position do-cam) (bjs/Vector3. 0 4 -15)))

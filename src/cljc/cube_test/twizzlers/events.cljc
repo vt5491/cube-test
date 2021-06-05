@@ -121,6 +121,12 @@
    (assoc-in db [:scenes scene-id :loaded] true)))
 
 (reg-event-fx
+ ::hemisferic-loaded
+ (fn [cofx [_ loaded-scene]]
+   (println "events.hemisferic-loaded:")
+   {:fx [(twizzlers.scene/hemisferic-loaded loaded-scene)]}))
+
+(reg-event-fx
  ::init-exp-gui
  (fn [cofx [_]]
    (println "events.init-exp-gui:")
