@@ -9,8 +9,15 @@
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.msg-cube.data.msg :as msg]
-   [cube-test.base :as base]))
+   [cube-test.base :as base]
+   [cube-test.utils :as utils]))
    ; [cube-test.twizzlers.events :as twizzler-events]))
+
+(declare init-mirror-sub-scene)
+(def bldg-cube)
+; (def bldg-cube-rot-speed (* base/ONE-DEG 0.1))
+(def bldg-cube-ang-delta (* base/ONE-DEG 0.01))
+(def bldg-cube-ang-vel (bjs/Vector3. 0 0 0))
 
 (defn add-twiz-cube [twiz]
   (println "add-twizzler: entered, twiz=" twiz)
@@ -30,10 +37,13 @@
 
 (defn move-camera []
   (println "now moving camera for space-portal")
-  ; (swap! main-scene/*camera-init-pos* (fn [x] {:x -47 :y 2 :z 0}))
-  ; (swap! main-scene/*camera-init-pos* (fn [x] {:x 36.585 :y 0.96 :z 37.27}))
   (swap! main-scene/*camera-init-pos* (fn [x] {:x 46.37 :y 0.96 :z 45.53}))
   (println "new-init-pos=" @main-scene/*camera-init-pos*))
+
+(defn update-bldg-cube-ang-vel [delta-y-vel]
+  (let [old-y-vel (.-y bldg-cube-ang-vel)
+        new-y-vel (+ old-y-vel delta-y-vel)]
+    (set! bldg-cube-ang-vel (bjs/Vector3. 0 new-y-vel 0))))
 
 (defn space-portal-loaded [meshes particle-systems skeletons anim-groups name user-cb]
   (println "space-portal-loaded")
@@ -53,56 +63,34 @@
                file
                main-scene/scene
                #(space-portal-loaded %1 %2 %3 %4 name user-cb)))
-; BABYLON.SceneLoader.Append("scenes/", "skull.babylon", scene, function (loadedScene) {})
-
-  ; // Shadows
-  ; var shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
-  ; shadowGenerator.addShadowCaster(torus);
-  ; shadowGenerator.useExponentialShadowMap = true);
 (defn append-portal-loaded [loaded-scene]
   (println "append-portal-loaded: loaded-scene=" loaded-scene)
-  ; (js-debugger)
-  ; light01 = scene.getLightByName("Light.000"));
   (println "Point light=" (.getLightByName loaded-scene "Point"))
-  (move-camera)
+  ; (move-camera)
   ;; turn off environmentTexture (ibl) so that only blender lights are in effect.
   (set! (.-environmentTexture main-scene/scene) nil)
   (let [light (.getLightByName loaded-scene "Point")
         glow-cube (.getMeshByID loaded-scene "glow_cube")
         shadow-gen (bjs/ShadowGenerator. 1024 light)
         room (.getMeshByID loaded-scene "room")]
-    ; (js-debugger)
     (.addShadowCaster shadow-gen glow-cube)
     (set! (.-useExponentialShadowMap shadow-gen) true)
     (set! (.-receiveShadows room) true))
-    ; var gl = new BABYLON.GlowLayer("glow", scene)));
   ;; hide the inner skybox since it blocks our view
   (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
   (let [gl (bjs/GlowLayer. "glow" main-scene/scene)]
     (set! (.-intensity gl) 0.5)))
 
-  ;; Note: blender lights are added as nodes.  We have to loop over them and create
-  ;; bjs equivalents.
-  ; (doall (map #(do
-  ;                (println "node id=" (.-id %1))))))
-  ; (println "Point light=" (.getNodeByID loaded-scene "Point"))
-  ; (println "Point light.pos=" (-> (.getNodeByID loaded-scene "Point") (.-position)))
-  ; (println "Sun=" (.getNodeByID loaded-scene "Sun")))
-
 
 (defn append-space-portal [path file]
   (.Append bjs/SceneLoader path file main-scene/scene
-           ; #(append-portal-loaded %1)
            #(do
-               ; (re-frame/dispatch [:twizzler.events/scene-loaded])
                (re-frame/dispatch [:cube-test.twizzlers.events/scene-loaded :space-port])
-               ; (re-frame/dispatch [::twizzler.events/scene-loaded])
                (append-portal-loaded %1))))
 
 (defn init-exp-gui []
   (prn "init-exp-gui: entered")
   (let [
-        ; top-plane (bjs/Mesh.CreatePlane. "top-plane" 2)
         top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))
         top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 2048 1024)
         top-pnl (bjs-gui/Grid.)
@@ -115,7 +103,6 @@
         bldg-cube (.getMeshByID scene "bldg-cube")
         bldg-cube-pos (.-position bldg-cube)
         y-quat-neg-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG -90)))]
-    ; (set! (.-position top-plane) (.add bldg-cube-pos (bjs/Vector3. 0 8 0)))
     (set! (.-position top-plane) (.add bldg-cube-pos (bjs/Vector3. 0 0.5 7)))
     (set! (.-rotationQuaternion top-plane) y-quat-neg-90)
     (.enableEdgesRendering top-plane)
@@ -133,7 +120,6 @@
     (.addRowDefinition top-pnl 0.20)
     (.addColumnDefinition top-pnl 0.5)
     (.addColumnDefinition top-pnl 0.5)
-    ; (.addColumnDefinition top-pnl 0.33)
     (.addControl top-pnl top-hdr 0 0)
     ;; rot-btn
     (set! (.-autoScale rot-btn) true)
@@ -144,20 +130,10 @@
     (set! (.-autoScale left-side-rot-btn) true)
     (set! (.-fontSize left-side-rot-btn) "100")
     (set! (.-color left-side-rot-btn) "white")
-    ; (def tmp (.-onPointerUpObservable left-side-rot-btn))
-    ; (.add tmp (fn [] (+ 1 1)))
-    ; (.add (.-onPointerUpObservable left-side-rot-btn) (fn [] (+ 1 1)))
-    ; (.add (.-onPointerUpObservable left-side-rot-btn) (fn [e x y] (+ 1 1)))))
-    ; (js-debugger)))
-    ; (-> (.-onPointerUpObservable left-side-rot-btn) (.add (fn [e x y] (+ 1 1))))))
-    ; (-> left-side-rot-btn .-onPointerUpObservable (.add #(prn "hi")))))
     (-> left-side-rot-btn .-onPointerUpObservable
         (.add (fn [value]
-                (println "left-side-rot-btn pressed"))))
-    ; (-> left-side-rot-btn .-onPointerUpObservable
-    ;   (.add (fn [value]
-    ;           (println "left-side-rot-btn pressed"))))
-        ; (re-frame/dispatch [:vrubik-side-fwd :left]))))))
+                (println "left-side-rot-btn pressed")
+                (update-bldg-cube-ang-vel (* -1 bldg-cube-ang-delta)))))
     (.addControl top-pnl left-side-rot-btn 4 0)
     ;; right-side-rot-btn
     (set! (.-autoScale right-side-rot-btn) true)
@@ -165,103 +141,79 @@
     (set! (.-color right-side-rot-btn) "white")
     (-> right-side-rot-btn .-onPointerUpObservable
         (.add (fn [value]
-                 (println "right-side-rot-btn pressed"))))
+                 (println "right-side-rot-btn pressed")
+                 (update-bldg-cube-ang-vel (* 1 bldg-cube-ang-delta)))))
     ;                                                       (re-frame/dispatch [:vrubik-side-fwd :top]))))
     (.addControl top-pnl right-side-rot-btn 4 1)))
 
 (defn hemisferic-loaded [loaded-scene]
-  (println "hemisferic-loaded: loaded-scene=" loaded-scene)
-  (move-camera)
   ; (js-debugger)
+  (println "hemisferic-loaded: loaded-scene=" loaded-scene)
+  ; (move-camera)
   (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
   ;; turn off environmentTexture (ibl) so that only blender lights are in effect.
-  ; (set! (.-environmentTexture main-scene/scene) nil))
-;   var probe = new BABYLON.ReflectionProbe("main", 512, scene));
-; probe.renderList.push(sphere2);
+  ;; if you don't change this you'll see a weird building in the pool reflection.
+  (set! (.-environmentTexture main-scene/scene) nil)
   (comment)
-  ; (prn "exp_plane=" (.getMeshByID))
   (let [scene main-scene/scene
         exp-plane (.getMeshByID scene "exp_plane")
-        ; exp-plane-mat (bjs/StandardMaterial. "exp-baked-diffuse" scene)
         exp-plane-mat (bjs/PBRMaterial. "exp-baked-diffuse" scene)
-        ; diffuse-text (bjs/Texture. "imgs/textures/exp_baked_diffuse.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
         diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
-        ; diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out_2.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
-        ; diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out_5.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
-        ; diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out_6.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
-        ; diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out_7.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
-        ; bump-text (bjs/Texture. "imgs/textures/exp_baked_bump_2.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
-        ; bump-text (bjs/Texture. "imgs/textures/exp_bump.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
-        ; bump-text (bjs/Texture. "imgs/textures/exp_circ_bump.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
         bump-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
-    ; (js-debugger))
-    ; (set! (.-sideOrientation exp-plane) bjs/Mesh.DOUBLESIDE)
-    ; (set! (.-sideOrientation exp-plane-mat) bjs/Mesh.DOUBLESIDE)
-    ; (set! (.-diffuseTexture exp-plane-mat) diffuse-text)
-    ; (set! (.-diffuseColor exp-plane-mat) (bjs/Color3. 0 1 0))
     (set! (.-bumpTexture exp-plane-mat) bump-text)
     (set! (.-backFaceCulling exp-plane-mat) false)
     (set! (.-material exp-plane) exp-plane-mat))
   (comment)
-  ; var reflector = new BABYLON.Plane.FromPositionAndNormal(glass.position, glassNormal.scale(-1));
-  ; glass.computeWorldMatrix(true);
-  ; var glass_worldMatrix = glass.getWorldMatrix();
-  ; glassNormal = new BABYLON.Vector3.TransformNormal(glassNormal, glass_worldMatrix)
-  ; var reflector = new BABYLON.Plane.FromPositionAndNormal(glass.position, glassNormal.scale(-1));
+  (prn "part 0")
   (let [scene main-scene/scene
         probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
         rList (.-renderList probe)
         suzanne (.getMeshByID scene "Suzanne")
         suzanne-pos (.-position suzanne)
-        sphere (.getMeshByID scene "Sphere")
-        tmp-sph (set! (.-material sphere) main-scene/red-mat)
+        red-sphere (.getMeshByID scene "Sphere")
+        tmp-rs (set! (.-position red-sphere) (bjs/Vector3. 2 1 0))
+        tmp-sph (set! (.-material red-sphere) main-scene/red-mat)
         pool (.getMeshByID scene "pool")
-        mirror-plane (bjs/MeshBuilder.CreatePlane "mirror_plane" (js-obj "height" 5 "width" 5) scene)
-        bldg-cube (bjs/MeshBuilder.CreateBox "bldg-cube" (js-obj "height" 5 "width" 5 "depth" 5) scene)
+        bldg-cube-tmp (bjs/MeshBuilder.CreateBox "bldg-cube" (js-obj "height" 5 "width" 5 "depth" 5) scene)
+        mirror-plane (bjs/MeshBuilder.CreatePlane "mirror-plane" (js-obj "height" 5 "width" 4) scene)
         tmp-mp (.computeWorldMatrix mirror-plane true)
         mirror-plane-world-matrix (.getWorldMatrix mirror-plane)
         mirror-plane-vertex-data (.getVerticesData mirror-plane "normal")
-        ; tmp-mp-1 (set! (.-position mirror-plane) (bjs/Vector3. 49.27 0.155 34.7))
-        tmp-mp-1 (set! (.-position mirror-plane) (bjs/Vector3. 40 0.155 30))
-        tmp-mp-2 (.rotate mirror-plane bjs/Axis.Y (* base/ONE-DEG 180))
-        mirror-plane-normal (bjs/Vector3. (aget mirror-plane-vertex-data 0) (aget mirror-plane-vertex-data 1) (aget mirror-plane-vertex-data 2))
-        mirror-plane-normal-2 (bjs/Vector3.TransformNormal. mirror-plane-normal mirror-plane-world-matrix)
+        mirror-plane-normal-vec (bjs/Vector3. (aget mirror-plane-vertex-data 0) (aget mirror-plane-vertex-data 1) (aget mirror-plane-vertex-data 2))
+        mirror-plane-normal (bjs/Vector3.TransformNormal. mirror-plane-normal-vec mirror-plane-world-matrix)
+        reflector-mp (bjs/Plane.FromPositionAndNormal. (.-position mirror-plane) (.scale mirror-plane-normal -1))
+        mirror-mp-mat (bjs/StandardMaterial. "mirror-mp-mat" scene)
         pool-baked-mat (bjs/StandardMaterial. "pool-baked" scene)
         pool-mat (.-material pool)
         tmp (.computeWorldMatrix pool true)
         pool-world-matrix (.getWorldMatrix pool)
         pool-vertex-data (.getVerticesData pool "normal")
-        ; tmp2 (prn "aget=" (aget pool-vertex-data 2))
         pool-normal (bjs/Vector3. (aget pool-vertex-data 0) (aget pool-vertex-data 1) (aget pool-vertex-data 2))
         pool-normal-2 (bjs/Vector3.TransformNormal. pool-normal pool-world-matrix)
         reflector (bjs/Plane.FromPositionAndNormal. (.-position pool) (.scale pool-normal-2 -1))
-        reflector-mp (bjs/Plane.FromPositionAndNormal. (.-position mirror-plane) (.scale mirror-plane-normal-2 -1))
         tmp4 (prn "tmp4")
         mirror-mat (bjs/StandardMaterial. "mirror" scene)
-        mirror-mp-mat (bjs/StandardMaterial. "mirror-mp-mat" scene)
         box-mat (bjs/StandardMaterial. "box-mat" scene)
         quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))]
 
     (prn "hello")
-    ; (set! (.-position mirror) (.add suzanne-pos (bjs/Vector3. 0 0 -5)))
-    (set! (.-reflectionTexture mirror-mat) (bjs/MirrorTexture. "mirror" 1024 scene true))
-    (set! (-> mirror-mat (.-reflectionTexture) (.-mirrorPlane)) reflector)
-    ; (set! (-> mirror-mat (.-reflectionTexture) (.-renderList)) #js [suzanne])
-    (set! (-> mirror-mat (.-reflectionTexture) (.-renderList)) (array suzanne sphere))
-    (set! (-> mirror-mat (.-reflectionTexture) (.-level)) 1)
-    ; (set! (-> mirror-mat (.-reflectionTexture) (.-refreshRate)) 1)
-    (set! (.-refreshRate (-> mirror-mat (.-reflectionTexture))) 1)
-    (set! (.-material pool) mirror-mat)
+    (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
+    (set! (.-rotation mirror-plane) (bjs/Vector3. 0 (* base/ONE-DEG 0) 0))
+    (prn "mirror-plane.position=" (.-position mirror-plane))
+    (prn "mirror-plane-normal-2=" mirror-plane-normal)
+    (set! bldg-cube bldg-cube-tmp)
 
-    ; (set! (.-reflectionTexture mirror-mp-mat) (bjs/MirrorTexture. "mirror-mat" 1024 scene true))
+    (prn "parta")
+    (set! (.-reflectionTexture mirror-mp-mat) (bjs/MirrorTexture. "mirror-mp-texture" 1024 scene true))
     ; (set! (.-activeCamera (.-reflectionTexture mirror-mp-mat)) main-scene/camera)
-    ; (prn "mirror-mat: reflectionTexture.activeCamera=" (-> mirror-mp-mat (.-reflectionTexture) (.-activeCamera)))
-    ; (set! (-> mirror-mp-mat (.-reflectionTexture) (.-mirrorPlane)) reflector-mp)
-    ; (set! (-> mirror-mp-mat (.-reflectionTexture) (.-renderList)) (array suzanne sphere pool))
-    ; (set! (-> mirror-mp-mat (.-reflectionTexture) (.-level)) 1)
-    ; ; (set! (.refreshRate (-> mirror-mp-mat (.-reflectionTexture))) 1)
-    ; ; (set! (.-refreshRate (-> mirror-mp-mat (.-reflectionTexture))) 0)
-    ; (set! (.-material mirror-plane) mirror-mp-mat)
+    (set! (-> mirror-mp-mat .-reflectionTexture .-mirrorPlane) reflector-mp)
+    ; (set! (-> mirror-mp-mat .-reflectionTexture .-renderList) (array suzanne red-sphere pool))
+    (.push (-> mirror-mp-mat .-reflectionTexture .-renderList) red-sphere)
+    (set! (-> mirror-mp-mat .-reflectionTexture .-level) 1)
+    (set! (.-material mirror-plane) mirror-mp-mat)
+    (prn "partb")
+
+    (set! (.-material pool) pool-mat)
 
     ;; box-mat
     (set! (.-backFaceCulling box-mat) true)
@@ -269,43 +221,17 @@
     (set! (-> box-mat (.-reflectionTexture) (.-coordinatesMode)) bjs/Texture.CUBIC_MODE)
     (set! (.-diffuseColor box-mat) (bjs/Color3. 0 0 0))
     (set! (.-specularColor box-mat) (bjs/Color3. 0 0 0))
-    (set! (.-material mirror-plane) box-mat)
+    ; (set! (.-material mirror-plane) box-mat)
 
     ;; bldg-cube
     (set! (.-position bldg-cube) (bjs/Vector3. 35 2.5 40))
     (set! (.-material bldg-cube) box-mat)
 
-    ; (js-debugger)
-    ; (-> probe (.renderList) (.push suzanne))
-    ; (.push rList suzanne)
-    ; (.push rList pool)
-    ; (set! (-> pool (.-material) (.-reflectionTexture)) (.-cubeTexture probe))
-    ; shapeMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.PLANAR_MODE;
-    ; new BABYLON.CubeTexture("textures/skybox", scene);
-    ; (set! (-> pool (.-material) (.-reflectionTexture)) (bjs/MirrorTexture. "pool-mirror" 1024 scene true))
-    ; (set! (-> pool-mat (.-reflectionTexture)) (bjs/CubeTexture. "textures/skybox/skybox" scene))
-    ; (set! (-> pool (.-material) (.-reflectionTexture) (.-mirrorPlane)) (bjs/Plane. 0 -1.0 0 -2.0))
-    ; (set! (-> pool-mat (.-reflectionTexture) (.-coordinatesMode)) bjs/Texture.PLANAR_MODE)
-    ; (.addFloorMesh main-scene/vrHelper (-> scene (.getMeshByName "pool")))
-    ;; add teloporation to the pool.
-    ; (js-debugger)
-    ; (prn "main-scene/xr-mode=" main-scene/xr-mode)
-    (when (= main-scene/xr-mode "vr")
-      ; (prn "setting up teleportation")
-      (.addFloorMesh main-scene/vrHelper pool))
-    ; sphere.material.reflectionTexture = probe.cubeTexture));
-    ; var mat = new BABYLON.StandardMaterial("wood", scene);
-    ; mat.diffuseTexture = new BABYLON.Texture('data:Laerche.jpg', scene, true, true, BABYLON.Texture.BILINEAR_SAMPLINGMODE, null, null, image, true)));
-    ; (set! (.-diffuseTexture pool-baked-mat)
-    ;   (bjs/Texture. "imgs/pool_baked.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true))
-    ; (set! (.-material pool) pool-baked-mat))
+    (case main-scene/xr-mode
+      "vr" (.addFloorMesh main-scene/vrHelper pool)
+      "xr" (->  main-scene/xr-helper .-teleportation (.addFloorMesh pool)))
+    (init-mirror-sub-scene)
     (prn "hi2")))
-
-    ; (-> (.renderList probe) (.push suzanne))))
-    ; (.rend)))
- ;    mirror.material.reflectionTexture = new BABYLON.MirrorTexture("mirror", 1024, scene, true));
- ; mirror.material.reflectionTexture.mirrorPlane = new BABYLON.Plane(0, -1.0, 0, -2.0);
- ; mirror.material.reflectionTexture.renderList = [greenSphere, yellowSphere, blueSphere, knot]);
 
 (defn append-hemisferic [path file]
   (.Append bjs/SceneLoader path file main-scene/scene
@@ -313,45 +239,48 @@
                (re-frame/dispatch [:cube-test.twizzlers.events/scene-loaded :hemisferic])
                (hemisferic-loaded %1)
                (init-exp-gui))))
-               ; (re-frame/dispatch [:cube-test.twizzlers.events/hemisferic-loaded %1]))))
-               ;; Note: get weird "nth not supported" warning when calling init-exp-gui
-               ;; with re-frame.  Note: get into trouble if not consistently callining
-               ;; natively or with re-frame.
-               ; (re-frame/dispatch [:cube-test.twizzlers.events/init-exp-gui]))))
 
-; (defn vr-init []
-;   (println "twizzlers/scene.vr-init entered")
-;   (let [scene main-scene/scene]
-;     (.addFloorMesh scene.vrHelper (-> scene (.getMeshByName "pool")))))
+(defn init-mirror-sub-scene []
+  (let [scene main-scene/scene]
+    (let [sphere (bjs/MeshBuilder.CreateSphere "sphere" (js-obj "diameter" 2, "segements" 32) scene)
+          red-sphere (.getMeshByID scene "Sphere")]
+      (prn "red-sphere=" red-sphere)
+      (set! (.-position sphere) (bjs/Vector3. 0 1 0))
+      (let [glass (bjs/MeshBuilder.CreatePlane "glass" (js-obj "width" 5, "height" 5) scene)]
+        (set! (.-position glass) (bjs/Vector3. -2 0 6))
+        (.computeWorldMatrix glass true)
+        (let [glass-worldMatrix (.getWorldMatrix glass)
+              glass-vertex-data (.getVerticesData glass "normal")
+              glass-normal-vec (bjs/Vector3. (aget glass-vertex-data 0) (aget glass-vertex-data 1) (aget glass-vertex-data 2))
+              glass-normal (bjs/Vector3.TransformNormal. glass-normal-vec glass-worldMatrix)
+              reflector (bjs/Plane.FromPositionAndNormal (.-position glass) (.scale glass-normal -1))
+              mirror-material (bjs/StandardMaterial. "mirror" scene)]
+          (set! (.-reflectionTexture mirror-material) (bjs/MirrorTexture. "mirror-texture" 1024 scene true))
+          (set! (-> mirror-material .-reflectionTexture .-mirrorPlane) reflector)
+          (set! (-> mirror-material .-reflectionTexture .-renderList) (array sphere red-sphere))
+          (set! (-> mirror-material .-reflectionTexture .-level) 1)
+          (set! (.-material glass) mirror-material)
+
+          (let [mirror-plane (.getMeshByID scene "mirror-plane")
+                mirror-plane-render-list (-> mirror-plane .-material .-reflectionTexture .-renderList)
+                tmp (prn "mirror-plane-render-list=" mirror-plane-render-list)
+                new-render-list (conj (js->clj mirror-plane-render-list) sphere)]
+            (.push (-> mirror-plane .-material .-reflectionTexture .-renderList) mirror-plane)))))))
+
 
 (defn init [db]
   (println "twizzlers.scene.init: entered db=" db)
+  ; (init-mirror-sub-scene)
   (let [scene main-scene/scene]
       ;; override the initial position and rotation of the non-vr camera.
-      (let [do-cam (.-deviceOrientationCamera main-scene/vrHelper)
-            quat (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -93 base/ONE-DEG) 0)]
-        (set! (.-position do-cam) (bjs/Vector3. 46.37 0.96 45.53))
-        (set! (.-rotationQuaternion do-cam) quat))
-      ; enable the pool for teleportation
-      ; (.addFloorMesh scene.vrHelper (-> scene (.getMeshByName "pool")))
-      ;; vrHelper is only accessible upon entry to vr, so set up a listener.
-      ; (-> main-scene/vrHelper .-onAfterEnteringVRObservable (.add vr-init))
-      ; (.addFloorMesh main-scene/vrHelper (-> scene (.getMeshByName "pool")))
-      ; (.enableTeleportation main-scene/vrHelper (js-obj "floorMeshes" [(-> scene (.getMeshByName "pool"))]))
-      ; (let [light1 (bjs/HemisphericLight. "light1" (bjs/Vector3. 1 1 0) scene)
-      ;       light2 (bjs/PointLight. "light2" (bjs/Vector3. 0 1 -1) scene)])
-      ; (load-space-portal
-      ;  "models/tmp/"
-      ;  "space_portal.glb"
-      ;  "space_portal"
-      ;   move-camera)))
-
-      ; (let [path (get-in db [:scenes :space-port :path])
-      ;       fn (get-in db [:scenes :space-port :fn])]
-      ;   (prn "path=" path ", fn=" fn)
-      ;   (append-space-portal
-      ;    path
-      ;    fn))))
+      (let [
+            ; do-cam (.-deviceOrientationCamera main-scene/vrHelper)
+            do-cam (utils/get-xr-camera)
+            ; tmp (js-debugger)
+            quat (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -3 base/ONE-DEG) 0)]
+        ; (set! (.-position do-cam) (bjs/Vector3. 46.37 0.96 45.53))
+        ; (set! (.-rotationQuaternion do-cam) quat)
+        (set! (.-position do-cam) (bjs/Vector3. 0 5 -10)))
 
       (let [path (get-in db [:scenes :hemisferic :path])
             fn (get-in db [:scenes :hemisferic :fn])]
@@ -360,5 +289,10 @@
          path
          fn))))
 
-                ; sph (bjs/MeshBuilder.CreateSphere "sphere" (js-obj "diameter" 1) scene)]
-              ; (set! sphere sph))))
+
+(defn tick []
+  (let [engine main-scene/engine
+        delta-time (.getDeltaTime engine)
+        bldg-cube-rot-y-delta (* (.-y bldg-cube-ang-vel) delta-time)]
+    (when bldg-cube
+      (.rotate bldg-cube bjs/Axis.Y bldg-cube-rot-y-delta bjs/Space.LOCAL))))

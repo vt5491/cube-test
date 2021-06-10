@@ -4,6 +4,7 @@
    ; [cube-test.msg-cube.spec.db :as msg-cube.spec]
    [cube-test.utils :as utils]
    [cube-test.main-scene :as main-scene]
+   [cube-test.twizzlers.scene :as twizzlers-scene]
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]))
@@ -23,6 +24,7 @@
     (controller-xr/tick))
   (if fps-panel/fps-pnl
     (fps-panel/tick main-scene/engine))
+  (twizzlers-scene/tick)
   (.render main-scene/scene))
 
 (defn run-game []

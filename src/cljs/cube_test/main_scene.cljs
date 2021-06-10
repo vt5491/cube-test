@@ -73,7 +73,7 @@
 ;   ;; not all scenes (e.g simp-scene) "inherit" off main-scene, so if no main-scene do not re-init it.
 ;   (if (not (nil? scene)) (init top-level-scene-init) nil))
 
-(defn  dummy2 [])
+; (defn  dummy2 [])
 ; (defn ^:dev/after-load create-grnd [])
 (defn init [top-level-scene-initializer]
 ; (defn ^:dev/after-load init [top-level-scene-initializer]
@@ -193,10 +193,20 @@
       (top-level-scene-initializer))
     (do
       ;; set up xr
+        ;; definitely where you set the non-xr and xr camera position.
         (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
+        (.setTarget camera (bjs/Vector3.Zero))
+        ; camera.setTarget(BABYLON.Vector3.Zero());
+        ; (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 46.37 0.96 45.53) scene))
         ;; note: ArcRotateCamera still does not give mouse rotate ability
         ; (set! camera (bjs/ArcRotateCamera. "arc-cam" (/ js/Math.PI 2) (/ js/Math.PI 2) 2 (bjs/Vector3.Zero) scene))
-        (-> (.createDefaultXRExperienceAsync scene (js-obj "floorMeshes" (array (.-ground env))))
+        ;; this fn gets control at startup, once the preliminary xr setup has been done
+        ;; i.e. it doesn't require the "enter xr" button be pressed.
+        ; (-> (.createDefaultXRExperienceAsync scene (js-obj "floorMeshes" (array (.-ground env)))))
+        (-> (.createDefaultXRExperienceAsync scene
+                                             (js-obj
+                                              "floorMeshes"
+                                              (array (.getMeshByID scene "ground"))))
             (p/then
              (fn [xr-default-exp]
                (set! xr-helper xr-default-exp)
@@ -205,8 +215,10 @@
                (set! features-manager (-> xr-default-exp (.-baseExperience) (.-featuresManager)))
                (println "xr features available=" (.GetAvailableFeatures js/BABYLON.WebXRFeaturesManager))
                (println "xr features acitve=" (-> xr-default-exp (.-baseExperience) (.-featuresManager) (.getEnabledFeatures)))
-               (set! camera (-> xr-default-exp (.-baseExperience) (.-camera)))
-               (set! (.-position camera) camera-init-pos)
+               ;;vt-x for 2
+               ; (set! camera (-> xr-default-exp (.-baseExperience) (.-camera)))
+               ; (set! (.-position camera) camera-init-pos)
+               ; (set! (.-position camera) (bjs/Vector3. 46.37 0.96 45.53))
                ;;Note: setting rotations on the xr camera here have no effect.  You have to do it
                ;; on the pre-xr camera (any rotations on that *will* propagate to the xr camera)
                (re-frame/dispatch [:init-xr xr-default-exp])
@@ -227,12 +239,19 @@
       ; BABYLON.Vector3.Zero(),
       ; scene))
   ;
+;; this gets control when the "enter xr" button is clicked.
 (defn enter-xr-handler [state]
   (println "enter-xr-handler: onStateChangedObservable: state=" state)
   (when (= state bjs/WebXRState.IN_XR)
     (println "onStateChangedObservable: state: in xr")
+    ;; important that we only assign camera to the xr-camera *after* entring
+    ;; full xr, so that downwind scenes can alter the non-xr camera as needed. The xr
+    ;; camera, will always start with wherever the non-xr is currently positioned.
+    (set! camera (-> xr-helper (.-baseExperience) (.-camera)))
     (println "state: old camera pos=" (.-position camera) ",camera-init-pos=" camera-init-pos)
-    (set! (.-position camera) (bjs/Vector3. 0 4 -10))
+    ; (set! (.-position camera) (bjs/Vector3. 0 4 -10))
+    ; (let [non-xr-cam-pos (.-position (.getCameraByID scene "uni-cam"))]
+    ;  (set! (.-position camera) non-xr-cam-pos))
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [ quat (-> camera .-rotationQuaternion)]
       ; cur-angles (.toEulerAngles quat)]

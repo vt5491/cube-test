@@ -4,7 +4,8 @@
    ; [cube-test.core :as re-frame]))
    ; [cube-test.base :as base]))
    [re-frame.loggers :as loggers]
-   [clojure.spec.alpha :as s]))
+   [clojure.spec.alpha :as s]
+   [cube-test.main-scene :as main-scene]))
 
 ; (defn create-fps-panel [])
 ;; Convert ":17" to 17, for example
@@ -43,3 +44,13 @@
     (if (re-matches #".*no handler registered for effect:.*Ignoring.*" text)
       (js/console.log "probable rf-odoyle interceptor no handler msg warning detected")
       (js/console.warn text))))
+
+(defn get-xr-camera []
+  (case main-scene/xr-mode
+    "vr" (.-deviceOrientationCamera main-scene/vrHelper)
+    ; "xr" (.-camera main-scene/xr-helper)
+    ; "xr" (-> main-scene/xr-helper .-baseExperience .-camera)
+    ;; note: our xr-mode basically makes sure that the main-scene camera
+    ;; has the appropriate xr or non-xr camera, so this is kind of a
+    ;; degenerate case i.e we simply return the main-scene camera.
+    "xr" (-> main-scene/camera)))
