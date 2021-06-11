@@ -154,6 +154,8 @@
   ;; turn off environmentTexture (ibl) so that only blender lights are in effect.
   ;; if you don't change this you'll see a weird building in the pool reflection.
   (set! (.-environmentTexture main-scene/scene) nil)
+  ;; disable one of the blender point lights so we can see reflections better.
+  (-> main-scene/scene (.getLightByID "Point.002") (.setEnabled false))
   (comment)
   (let [scene main-scene/scene
         exp-plane (.getMeshByID scene "exp_plane")
@@ -176,11 +178,14 @@
         pool (.getMeshByID scene "pool")
         bldg-cube-tmp (bjs/MeshBuilder.CreateBox "bldg-cube" (js-obj "height" 5 "width" 5 "depth" 5) scene)
         mirror-plane (bjs/MeshBuilder.CreatePlane "mirror-plane" (js-obj "height" 5 "width" 4) scene)
+        ;; Note: very important that you set the plane's position before calling 'computeWorldMatrix'
+        ;; if you set position afterward, the reflection may be on the "wrong"
+        tmp-mp-2 (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
         tmp-mp (.computeWorldMatrix mirror-plane true)
         mirror-plane-world-matrix (.getWorldMatrix mirror-plane)
         mirror-plane-vertex-data (.getVerticesData mirror-plane "normal")
-        mirror-plane-normal-vec (bjs/Vector3. (aget mirror-plane-vertex-data 0) (aget mirror-plane-vertex-data 1) (aget mirror-plane-vertex-data 2))
-        mirror-plane-normal (bjs/Vector3.TransformNormal. mirror-plane-normal-vec mirror-plane-world-matrix)
+        mirror-plane-normal-vec (bjs/Vector3. (aget mirror-plane-vertex-data 0) (* 1 (aget mirror-plane-vertex-data 1)) (* 1 (aget mirror-plane-vertex-data 2)))
+        mirror-plane-normal (bjs/Vector3.TransformNormal mirror-plane-normal-vec mirror-plane-world-matrix)
         reflector-mp (bjs/Plane.FromPositionAndNormal. (.-position mirror-plane) (.scale mirror-plane-normal -1))
         mirror-mp-mat (bjs/StandardMaterial. "mirror-mp-mat" scene)
         pool-baked-mat (bjs/StandardMaterial. "pool-baked" scene)
@@ -197,13 +202,14 @@
         quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))]
 
     (prn "hello")
-    (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
+    ; (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
     (set! (.-rotation mirror-plane) (bjs/Vector3. 0 (* base/ONE-DEG 0) 0))
     (prn "mirror-plane.position=" (.-position mirror-plane))
     (prn "mirror-plane-normal-2=" mirror-plane-normal)
     (set! bldg-cube bldg-cube-tmp)
 
     (prn "parta")
+    ; (.computeWorldMatrix mirror-plane true)
     (set! (.-reflectionTexture mirror-mp-mat) (bjs/MirrorTexture. "mirror-mp-texture" 1024 scene true))
     ; (set! (.-activeCamera (.-reflectionTexture mirror-mp-mat)) main-scene/camera)
     (set! (-> mirror-mp-mat .-reflectionTexture .-mirrorPlane) reflector-mp)
@@ -211,6 +217,9 @@
     (.push (-> mirror-mp-mat .-reflectionTexture .-renderList) red-sphere)
     (set! (-> mirror-mp-mat .-reflectionTexture .-level) 1)
     (set! (.-material mirror-plane) mirror-mp-mat)
+    ;; turn off backFaceCulling so we can see the backside as well.
+    ; (.setBackfaceCulling mirror-mp-mat false)
+    (set! (.-backFaceCulling mirror-mp-mat) false)
     (prn "partb")
 
     (set! (.-material pool) pool-mat)
@@ -231,6 +240,9 @@
       "vr" (.addFloorMesh main-scene/vrHelper pool)
       "xr" (->  main-scene/xr-helper .-teleportation (.addFloorMesh pool)))
     (init-mirror-sub-scene)
+
+    (let [cube (bjs/MeshBuilder.CreateBox "min-cube" (js-obj "width" 1 "height" 1))]
+      (set! (.-position cube) (bjs/Vector3. 0 2 0)))
     (prn "hi2")))
 
 (defn append-hemisferic [path file]
@@ -254,18 +266,23 @@
               glass-normal-vec (bjs/Vector3. (aget glass-vertex-data 0) (aget glass-vertex-data 1) (aget glass-vertex-data 2))
               glass-normal (bjs/Vector3.TransformNormal. glass-normal-vec glass-worldMatrix)
               reflector (bjs/Plane.FromPositionAndNormal (.-position glass) (.scale glass-normal -1))
-              mirror-material (bjs/StandardMaterial. "mirror" scene)]
-          (set! (.-reflectionTexture mirror-material) (bjs/MirrorTexture. "mirror-texture" 1024 scene true))
+              mirror-material (bjs/StandardMaterial. "mirror-works" scene)]
+          (set! (.-reflectionTexture mirror-material) (bjs/MirrorTexture. "mirror-works-texture" 1024 scene true))
           (set! (-> mirror-material .-reflectionTexture .-mirrorPlane) reflector)
           (set! (-> mirror-material .-reflectionTexture .-renderList) (array sphere red-sphere))
           (set! (-> mirror-material .-reflectionTexture .-level) 1)
           (set! (.-material glass) mirror-material)
 
           (let [mirror-plane (.getMeshByID scene "mirror-plane")
+                sphere (.getMeshByID scene "sphere")
                 mirror-plane-render-list (-> mirror-plane .-material .-reflectionTexture .-renderList)
                 tmp (prn "mirror-plane-render-list=" mirror-plane-render-list)
                 new-render-list (conj (js->clj mirror-plane-render-list) sphere)]
-            (.push (-> mirror-plane .-material .-reflectionTexture .-renderList) mirror-plane)))))))
+            (.push (-> mirror-plane .-material .-reflectionTexture .-renderList) sphere)))))))
+            ; mirrorMaterial.reflectionTexture.mirrorPlane = reflector))))));
+            ; setting the refletor to the glass's reflector fixes the "opposite side" problem.
+            ; (set! (-> mirror-plane .-material .-reflectionTexture .-mirrorPlane) reflector)))))))
+          ; (js-debugger))))))
 
 
 (defn init [db]
