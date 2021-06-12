@@ -12,7 +12,12 @@
    [cube-test.config :as config]
    [cube-test.game :as game]
    ;; game-level
-   [cube-test.twizzlers.events]))
+   ;; Note: if you are going to use global ns (e.g for events)
+   ;; like :cube-test.utils.events, you need to make sure at
+   ;; least one place in the code requires the ns, and that place
+   ;; is here.
+   [cube-test.twizzlers.events]
+   [cube-test.utils.events]))
 
 (defn dev-setup []
   (when config/debug?

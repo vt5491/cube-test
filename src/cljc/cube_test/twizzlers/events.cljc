@@ -33,7 +33,7 @@
  ; (fn [_])
  ; (fn [cofx _])
  (fn [cofx _]
-   (prn "::init-scene: cofx=" cofx)
+   ; (prn "::init-scene: cofx=" cofx)
    (twizzlers.scene/init (:db cofx))
    cofx))
 
@@ -50,7 +50,7 @@
  ::init-game
  (fn [cofx _]
    twizzlers.game/init
-   (prn "::init-game: cofx=" cofx)
+   ; (prn "::init-game: cofx=" cofx)
    {
     ; :db (twizzlers.game/init)
     ; :db (:db cofx)

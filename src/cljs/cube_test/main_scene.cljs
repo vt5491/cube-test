@@ -28,6 +28,7 @@
 ; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
 (def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
 (def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
+(def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z -5}))
 ; (def non-vr-camera)
 (def vrHelper)
 (def xr)
@@ -67,23 +68,16 @@
 (declare init-gui-2)
 (declare pointer-handler)
 (declare enter-xr-handler)
+(declare enter-vr-handler)
 
-; (defn ^:dev/after-load main-scene-reload []
-;   (println "main-scene: after-load event detected, scene=" scene)
-;   ;; not all scenes (e.g simp-scene) "inherit" off main-scene, so if no main-scene do not re-init it.
-;   (if (not (nil? scene)) (init top-level-scene-init) nil))
-
-; (defn  dummy2 [])
-; (defn ^:dev/after-load create-grnd [])
 (defn init [top-level-scene-initializer]
-; (defn ^:dev/after-load init [top-level-scene-initializer]
   (println "main-scene.init: entered")
   (set! top-level-scene-init top-level-scene-initializer)
+
   ;; following line necessary for mixamo animations.
   (set! bjs/Animation.AllowMatricesInterpolation true)
   (set! canvas (-> js/document (.getElementById "renderCanvas")))
   (set! engine (bjs/Engine. canvas true))
-  ; (set! scene (bjs/Scene. engine))
   ;; Note: even though scene is defined inside 'init' it has file level scope.
   (defonce scene (bjs/Scene. engine))
   (re-frame/dispatch [:set-main-scene scene])
@@ -143,66 +137,20 @@
                           (js-obj "useXR" false)))
                                   ; "floorMeshesCollection" (array))))
       (set! camera (.-webVRCamera vrHelper))
-      ;;vt
-      ; (set! non-vr-camera (.getCameraByID scene "deviceOrientationVRHelper"))
-      ; (set! non-vr-camera (.-deviceOrientationCamera vrHelper))
-      ; (js-debugger)
-      ; (set! (.-position non-vr-camera) (bjs/Vector3. 46.37 0.96 45.53))
-      ; (set! (.-position (.currentCamera vrHelper))(bjs/Vector3. 46.37 0.96 45.53))
-      ; (-> vrHelper .-onControllerMeshLoadedObservable)
-      ; (-> vrHelper .-onEnteringVRObservable
-      ;     (.add (fn []
-      ;              (prn "onControllerMeshLoaded event observerd")
-      ;              (set! (.-position (.-currentVRCamera vrHelper))(bjs/Vector3. 46.37 0.96 45.53)))))
-      ; (.attachControl camera canvas true)
       (let [do-cam (.-deviceOrientationCamera vrHelper)]
         (set! (.-position do-cam) (bjs/Vector3. 0 4 -15)))
       (set! (.-id camera) "main-camera")
       (controller/init scene vrHelper camera)
       (controller/setup-controller-handlers vrHelper)
       (.enableTeleportation vrHelper (js-obj "floorMeshName" "ground"))
-      ; (.enableTeleportation vrHelper (js-obj "floorMeshName" "pool"))
-      ; (.enableTeleportation vrHelper (js-obj "floorMeshes" (array ground)))
       (.enableInteractions vrHelper)
-      (-> vrHelper .-onAfterEnteringVRObservable (.add
-                                                  (fn []
-                                                    (prn "entered vr")
-                                                    (.setTarget camera (bjs/Vector3. 0 0 0))
-                                                    (prn "cam-rot a=" (.-rotation camera))
-                                                    ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
-                                                    ;; scruz adjustment
-                                                    ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -45) 0 0))
-                                                    (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG 0) 0 0))
-                                                    (.resetToCurrentRotation camera)
-                                                    (prn "cam-rot a=" (.-rotation camera))
-                                                    (let [cam-pos (.-position camera)
-                                                          x (.-x cam-pos)
-                                                          y (.-y cam-pos)
-                                                          z (.-z cam-pos)
-                                                          ip @*camera-init-pos*]
-                                                      ; (set! (.-position camera) (bjs/Vector3. x y -5))
-                                                      ; (set! (.-position camera) (bjs/Vector3. (+ x (.-x ip)) (+ y (.-y ip) (z (.-z ip)))))
-                                                      (println "y=" y)
-                                                      (println "vr: ip=" ip)
-                                                      (println "vr: ip :x=" (:x ip) ",:y=" (:y ip) ", :z=" (:z ip))
-                                                      ; (set! (.-position camera) (bjs/Vector3. (+ x (:x ip)) (+ y (:y ip) (+ z (:z ip)))))
-                                                      (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
-                                                      (prn "cam-rot c=" (.-rotation camera))))))
-
-      ; (js-debugger)
+      (-> vrHelper .-onAfterEnteringVRObservable (.add enter-vr-handler))
       (top-level-scene-initializer))
     (do
       ;; set up xr
         ;; definitely where you set the non-xr and xr camera position.
         (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
         (.setTarget camera (bjs/Vector3.Zero))
-        ; camera.setTarget(BABYLON.Vector3.Zero());
-        ; (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 46.37 0.96 45.53) scene))
-        ;; note: ArcRotateCamera still does not give mouse rotate ability
-        ; (set! camera (bjs/ArcRotateCamera. "arc-cam" (/ js/Math.PI 2) (/ js/Math.PI 2) 2 (bjs/Vector3.Zero) scene))
-        ;; this fn gets control at startup, once the preliminary xr setup has been done
-        ;; i.e. it doesn't require the "enter xr" button be pressed.
-        ; (-> (.createDefaultXRExperienceAsync scene (js-obj "floorMeshes" (array (.-ground env)))))
         (-> (.createDefaultXRExperienceAsync scene
                                              (js-obj
                                               "floorMeshes"
@@ -213,12 +161,6 @@
                (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
                ;; Note: baseExperience is of type WebXRExperienceHelper
                (set! features-manager (-> xr-default-exp (.-baseExperience) (.-featuresManager)))
-               (println "xr features available=" (.GetAvailableFeatures js/BABYLON.WebXRFeaturesManager))
-               (println "xr features acitve=" (-> xr-default-exp (.-baseExperience) (.-featuresManager) (.getEnabledFeatures)))
-               ;;vt-x for 2
-               ; (set! camera (-> xr-default-exp (.-baseExperience) (.-camera)))
-               ; (set! (.-position camera) camera-init-pos)
-               ; (set! (.-position camera) (bjs/Vector3. 46.37 0.96 45.53))
                ;;Note: setting rotations on the xr camera here have no effect.  You have to do it
                ;; on the pre-xr camera (any rotations on that *will* propagate to the xr camera)
                (re-frame/dispatch [:init-xr xr-default-exp])
@@ -229,29 +171,43 @@
 
                (println "main-scene: top-level scene=" top-level-scene-initializer)
                (top-level-scene-initializer)))))))
-               ; (init-part-2)))))))
 
-      ; var camera = new BABYLON.ArcRotateCamera()
-      ; "Camera",
-      ; Math.PI / 2,
-      ; Math.PI / 2,
-      ; 2,
-      ; BABYLON.Vector3.Zero(),
-      ; scene))
-  ;
+;; This gets control when the "enter vr" button is clicked.
+(defn enter-vr-handler []
+  (prn "entered vr")
+  (.setTarget camera (bjs/Vector3. 0 0 0))
+  (prn "cam-rot a=" (.-rotation camera))
+  ;; need a different rot when in vr
+  ; (swap! *camera-init-rot* (fn [x] {:x 0 :y (* base/ONE-DEG -90) :z 0}))
+  ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
+  ;; scruz adjustment
+  ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -45) 0 0))
+  ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG 0) 0 0))
+  (.resetToCurrentRotation camera)
+  (prn "cam-rot a=" (.-rotation camera))
+  ; (prn "dispatch-sync=" (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera]))
+  (let [cam-pos (.-position camera)
+        ; xr-cam (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera])
+        xr-cam (.-deviceOrientationCamera vrHelper)
+        x (.-x cam-pos)
+        y (.-y cam-pos)
+        z (.-z cam-pos)
+        ip @*camera-init-pos*
+        ir @*camera-init-rot*
+        quat (bjs/Quaternion.FromEulerAngles (:x ir) (+ (:y ir) (* 70 base/ONE-DEG)) (:z ir))]
+
+      (prn "xr-cam=" xr-cam)
+      (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+      (set! (.-rotationQuaternion camera) quat)
+      (prn "cam-rot c=" (.-rotation camera))))
+
 ;; this gets control when the "enter xr" button is clicked.
 (defn enter-xr-handler [state]
-  (println "enter-xr-handler: onStateChangedObservable: state=" state)
   (when (= state bjs/WebXRState.IN_XR)
-    (println "onStateChangedObservable: state: in xr")
     ;; important that we only assign camera to the xr-camera *after* entring
     ;; full xr, so that downwind scenes can alter the non-xr camera as needed. The xr
     ;; camera, will always start with wherever the non-xr is currently positioned.
     (set! camera (-> xr-helper (.-baseExperience) (.-camera)))
-    (println "state: old camera pos=" (.-position camera) ",camera-init-pos=" camera-init-pos)
-    ; (set! (.-position camera) (bjs/Vector3. 0 4 -10))
-    ; (let [non-xr-cam-pos (.-position (.getCameraByID scene "uni-cam"))]
-    ;  (set! (.-position camera) non-xr-cam-pos))
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [ quat (-> camera .-rotationQuaternion)])))
       ; cur-angles (.toEulerAngles quat)]
@@ -288,10 +244,5 @@
 ;; namespaces, thus violating the "refer to few, referenced by many" principle.  We can normally
 ;; use a re-frame event dispatch to get around this, but you do not want to call re-frame on a game
 ;; tick for performance rease.  Therefore, it's better to put into a module like 'game'.
-; (defn run-scene [render-loop]
-;   (.runRenderLoop engine (fn [] (render-loop))))
-; ;;
-; ;;
-; (defn render-loop []
 
 (defn tick [])

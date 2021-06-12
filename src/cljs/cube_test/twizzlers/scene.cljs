@@ -36,9 +36,12 @@
   nil)
 
 (defn move-camera []
-  (println "now moving camera for space-portal")
-  (swap! main-scene/*camera-init-pos* (fn [x] {:x 46.37 :y 0.96 :z 45.53}))
-  (println "new-init-pos=" @main-scene/*camera-init-pos*))
+  ; (println "now moving camera for space-portal")
+  ; (swap! main-scene/*camera-init-pos* (fn [x] {:x 46.37 :y 0.96 :z 45.53}))
+  (swap! main-scene/*camera-init-pos* (fn [x] {:x -0.5 :y 6.78 :z 69}))
+  ;; this is the non-xr camera rot.
+  (swap! main-scene/*camera-init-rot* (fn [x] {:x 0 :y (* base/ONE-DEG -180) :z 0})))
+  ; (println "new-init-pos=" @main-scene/*camera-init-pos*))
 
 (defn update-bldg-cube-ang-vel [delta-y-vel]
   (let [old-y-vel (.-y bldg-cube-ang-vel)
@@ -166,17 +169,16 @@
     (set! (.-backFaceCulling exp-plane-mat) false)
     (set! (.-material exp-plane) exp-plane-mat))
   (comment)
-  (prn "part 0")
   (let [scene main-scene/scene
         probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
         rList (.-renderList probe)
         suzanne (.getMeshByID scene "Suzanne")
-        suzanne-pos (.-position suzanne)
+        ; suzanne-pos (.-position suzanne)
         red-sphere (.getMeshByID scene "Sphere")
         tmp-rs (set! (.-position red-sphere) (bjs/Vector3. 2 1 0))
         tmp-sph (set! (.-material red-sphere) main-scene/red-mat)
-        pool (.getMeshByID scene "pool")
         bldg-cube-tmp (bjs/MeshBuilder.CreateBox "bldg-cube" (js-obj "height" 5 "width" 5 "depth" 5) scene)
+        ;; mirror-plane
         mirror-plane (bjs/MeshBuilder.CreatePlane "mirror-plane" (js-obj "height" 5 "width" 4) scene)
         ;; Note: very important that you set the plane's position before calling 'computeWorldMatrix'
         ;; if you set position afterward, the reflection may be on the "wrong"
@@ -188,15 +190,22 @@
         mirror-plane-normal (bjs/Vector3.TransformNormal mirror-plane-normal-vec mirror-plane-world-matrix)
         reflector-mp (bjs/Plane.FromPositionAndNormal. (.-position mirror-plane) (.scale mirror-plane-normal -1))
         mirror-mp-mat (bjs/StandardMaterial. "mirror-mp-mat" scene)
-        pool-baked-mat (bjs/StandardMaterial. "pool-baked" scene)
-        pool-mat (.-material pool)
-        tmp (.computeWorldMatrix pool true)
+        ;; pool
+        pool-blend (.getMeshByID scene "pool")
+        pool-tmp-h (set! (.-isVisible pool-blend) false)
+        pool (bjs/MeshBuilder.CreatePlane "pool-plane" (js-obj "height" 50 "width" 90) scene)
+        pool-tmp-p (set! (.-position pool) (bjs/Vector3. 35 -0.5 36))
+        pool-tmp-r  (set! (.-rotation pool) (bjs/Vector3. (* base/ONE-DEG 90) 0 0))
+        ; pool-baked-mat (bjs/StandardMaterial. "pool-baked" scene)
+        ; pool-mat (.-material pool)
+        pool-mat (bjs/StandardMaterial. "pool-mat" scene)
+        pool-tmp-cm (.computeWorldMatrix pool true)
         pool-world-matrix (.getWorldMatrix pool)
         pool-vertex-data (.getVerticesData pool "normal")
-        pool-normal (bjs/Vector3. (aget pool-vertex-data 0) (aget pool-vertex-data 1) (aget pool-vertex-data 2))
-        pool-normal-2 (bjs/Vector3.TransformNormal. pool-normal pool-world-matrix)
-        reflector (bjs/Plane.FromPositionAndNormal. (.-position pool) (.scale pool-normal-2 -1))
-        tmp4 (prn "tmp4")
+        pool-normal-vec (bjs/Vector3. (aget pool-vertex-data 0) (aget pool-vertex-data 1) (aget pool-vertex-data 2))
+        pool-normal (bjs/Vector3.TransformNormal. pool-normal-vec pool-world-matrix)
+        pool-reflector (bjs/Plane.FromPositionAndNormal. (.-position pool) (.scale pool-normal -1))
+        ;;
         mirror-mat (bjs/StandardMaterial. "mirror" scene)
         box-mat (bjs/StandardMaterial. "box-mat" scene)
         quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))]
@@ -208,7 +217,7 @@
     (prn "mirror-plane-normal-2=" mirror-plane-normal)
     (set! bldg-cube bldg-cube-tmp)
 
-    (prn "parta")
+    ;; mirror-plane
     ; (.computeWorldMatrix mirror-plane true)
     (set! (.-reflectionTexture mirror-mp-mat) (bjs/MirrorTexture. "mirror-mp-texture" 1024 scene true))
     ; (set! (.-activeCamera (.-reflectionTexture mirror-mp-mat)) main-scene/camera)
@@ -220,9 +229,20 @@
     ;; turn off backFaceCulling so we can see the backside as well.
     ; (.setBackfaceCulling mirror-mp-mat false)
     (set! (.-backFaceCulling mirror-mp-mat) false)
-    (prn "partb")
 
+    ;; pool
+    (set! (.-reflectionTexture pool-mat) (bjs/MirrorTexture. "pool-texture" 2048 scene true))
+    (set! (-> pool-mat .-reflectionTexture .-mirrorPlane) pool-reflector)
+    (.push (-> pool-mat .-reflectionTexture .-renderList) suzanne)
+    (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
+    (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "front_base.006"))
+    (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "eye_lid.007"))
+    ; (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
+    (set! (-> pool-mat .-reflectionTexture .-level) 1)
     (set! (.-material pool) pool-mat)
+    ;; turn off backFaceCulling so we can see the backside as well.
+    ; (set! (.-backFaceCulling pool-mat) false)
+    ; (js-debugger)
 
     ;; box-mat
     (set! (.-backFaceCulling box-mat) true)
@@ -288,16 +308,25 @@
 (defn init [db]
   (println "twizzlers.scene.init: entered db=" db)
   ; (init-mirror-sub-scene)
+  (move-camera)
   (let [scene main-scene/scene]
+      (prn "camera-init-pos=" @main-scene/*camera-init-pos*)
       ;; override the initial position and rotation of the non-vr camera.
       (let [
             ; do-cam (.-deviceOrientationCamera main-scene/vrHelper)
             do-cam (utils/get-xr-camera)
+            ip @main-scene/*camera-init-pos*
+            ir @main-scene/*camera-init-rot*
             ; tmp (js-debugger)
-            quat (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -3 base/ONE-DEG) 0)]
+            ; quat (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -3 base/ONE-DEG) 0)
+            ; quat (bjs/Quaternion.FromEulerAngles @main-scene/*camera-init-rot*)
+            quat (bjs/Quaternion.FromEulerAngles (:x ir) (:y ir) (:z ir))]
         ; (set! (.-position do-cam) (bjs/Vector3. 46.37 0.96 45.53))
-        ; (set! (.-rotationQuaternion do-cam) quat)
-        (set! (.-position do-cam) (bjs/Vector3. 0 5 -10)))
+        ; (set! (.-position do-cam) (bjs/Vector3. -0.5 6.78 69))
+        ; (set! (.-position do-cam) @main-scene/*camera-init-pos*)
+        (set! (.-position do-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+        (set! (.-rotationQuaternion do-cam) quat))
+        ; (set! (.-position do-cam) (bjs/Vector3. 0 5 -10)))
 
       (let [path (get-in db [:scenes :hemisferic :path])
             fn (get-in db [:scenes :hemisferic :fn])]
