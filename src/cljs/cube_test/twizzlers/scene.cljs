@@ -149,6 +149,34 @@
     ;                                                       (re-frame/dispatch [:vrubik-side-fwd :top]))))
     (.addControl top-pnl right-side-rot-btn 4 1)))
 
+    ; var material = new BABYLON.StandardMaterial("toto", scene);
+    ; box.material = material;
+    ; material.emissiveColor = new BABYLON.Color3(0,0.07,0.03);
+    ;
+    ; material.alpha = 0.1;
+    ; material.opacityFresnelParameters = new BABYLON.FresnelParameters();
+    ; material.opacityFresnelParameters.leftColor =  new BABYLON.Color3(1,1,0);
+    ; material.opacityFresnelParameters.rightColor = new BABYLON.Color3(1,0,1);
+    ; material.useSpecularOverAlpha = true));
+(defn init-win-glass []
+  (let [scene main-scene/scene
+        eye-lid (.getMeshByID scene "eye_lid.006_primitive1")
+        front-base (.getMeshByID scene "front_base.006_primitive1")
+        glass-mat (bjs/StandardMaterial. "glass-mat" scene)]
+    ; (set! (.-material eye-lid) main-scene/green-mat)
+    (prn "init-win-glass: eye-lid=" eye-lid)
+    ; (js-debugger)
+    (set! (.-emissiveColor glass-mat) (bjs/Color3. 0.0 0.07 0.03))
+    (set! (.-alpha glass-mat) 0.1)
+    (set! (.-opacityFresnelParameters glass-mat) (bjs/FresnelParameters.))
+    (set! (-> glass-mat .-opacityFresnelParameters .-leftColor) (bjs/Color3. 1 1 0))
+    (set! (-> glass-mat .-opacityFresnelParameters .-rightColor) (bjs/Color3. 1 0 1))
+    (set! (.-useSpecularOverAlpha glass-mat) true)
+    (set! (.-backFaceCulling glass-mat) false)
+    (set! (.-material eye-lid) glass-mat)
+    (set! (.-material front-base) glass-mat)))
+    ; (prn "init-win-glass: eye-lid mat=" (.-material eye-lid))))
+
 (defn hemisferic-loaded [loaded-scene]
   ; (js-debugger)
   (println "hemisferic-loaded: loaded-scene=" loaded-scene)
@@ -159,111 +187,146 @@
   (set! (.-environmentTexture main-scene/scene) nil)
   ;; disable one of the blender point lights so we can see reflections better.
   (-> main-scene/scene (.getLightByID "Point.002") (.setEnabled false))
+  ; (comment
+  ;  (let [scene main-scene/scene
+  ;        exp-plane (.getMeshByID scene "exp_plane")
+  ;        exp-plane-mat (bjs/PBRMaterial. "exp-baked-diffuse" scene)
+  ;        diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
+  ;        bump-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
+  ;    (set! (.-bumpTexture exp-plane-mat) bump-text)
+  ;    (set! (.-backFaceCulling exp-plane-mat) false)
+  ;    (set! (.-material exp-plane) exp-plane-mat)))
   (comment)
+  (prn "hello2")
   (let [scene main-scene/scene
-        exp-plane (.getMeshByID scene "exp_plane")
-        exp-plane-mat (bjs/PBRMaterial. "exp-baked-diffuse" scene)
-        diffuse-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
-        bump-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
-    (set! (.-bumpTexture exp-plane-mat) bump-text)
-    (set! (.-backFaceCulling exp-plane-mat) false)
-    (set! (.-material exp-plane) exp-plane-mat))
-  (comment)
-  (let [scene main-scene/scene
-        probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
-        rList (.-renderList probe)
-        suzanne (.getMeshByID scene "Suzanne")
-        ; suzanne-pos (.-position suzanne)
-        red-sphere (.getMeshByID scene "Sphere")
-        tmp-rs (set! (.-position red-sphere) (bjs/Vector3. 2 1 0))
-        tmp-sph (set! (.-material red-sphere) main-scene/red-mat)
-        bldg-cube-tmp (bjs/MeshBuilder.CreateBox "bldg-cube" (js-obj "height" 5 "width" 5 "depth" 5) scene)
-        ;; mirror-plane
-        mirror-plane (bjs/MeshBuilder.CreatePlane "mirror-plane" (js-obj "height" 5 "width" 4) scene)
-        ;; Note: very important that you set the plane's position before calling 'computeWorldMatrix'
-        ;; if you set position afterward, the reflection may be on the "wrong"
-        tmp-mp-2 (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
-        tmp-mp (.computeWorldMatrix mirror-plane true)
-        mirror-plane-world-matrix (.getWorldMatrix mirror-plane)
-        mirror-plane-vertex-data (.getVerticesData mirror-plane "normal")
-        mirror-plane-normal-vec (bjs/Vector3. (aget mirror-plane-vertex-data 0) (* 1 (aget mirror-plane-vertex-data 1)) (* 1 (aget mirror-plane-vertex-data 2)))
-        mirror-plane-normal (bjs/Vector3.TransformNormal mirror-plane-normal-vec mirror-plane-world-matrix)
-        reflector-mp (bjs/Plane.FromPositionAndNormal. (.-position mirror-plane) (.scale mirror-plane-normal -1))
-        mirror-mp-mat (bjs/StandardMaterial. "mirror-mp-mat" scene)
-        ;; pool
-        pool-blend (.getMeshByID scene "pool")
-        pool-tmp-h (set! (.-isVisible pool-blend) false)
-        pool (bjs/MeshBuilder.CreatePlane "pool-plane" (js-obj "height" 50 "width" 90) scene)
-        pool-tmp-p (set! (.-position pool) (bjs/Vector3. 35 -0.5 36))
-        pool-tmp-r  (set! (.-rotation pool) (bjs/Vector3. (* base/ONE-DEG 90) 0 0))
-        ; pool-baked-mat (bjs/StandardMaterial. "pool-baked" scene)
-        ; pool-mat (.-material pool)
-        pool-mat (bjs/StandardMaterial. "pool-mat" scene)
-        pool-tmp-cm (.computeWorldMatrix pool true)
-        pool-world-matrix (.getWorldMatrix pool)
-        pool-vertex-data (.getVerticesData pool "normal")
-        pool-normal-vec (bjs/Vector3. (aget pool-vertex-data 0) (aget pool-vertex-data 1) (aget pool-vertex-data 2))
-        pool-normal (bjs/Vector3.TransformNormal. pool-normal-vec pool-world-matrix)
-        pool-reflector (bjs/Plane.FromPositionAndNormal. (.-position pool) (.scale pool-normal -1))
-        ;;
-        mirror-mat (bjs/StandardMaterial. "mirror" scene)
-        box-mat (bjs/StandardMaterial. "box-mat" scene)
-        quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))]
+         probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
+         rList (.-renderList probe)
+         suzanne (.getMeshByID scene "Suzanne")
+         ; suzanne-pos (.-position suzanne)
+         ; red-sphere (.getMeshByID scene "Sphere")
+         ; tmp-rs (set! (.-position red-sphere) (bjs/Vector3. 2 1 0))
+         ; tmp-sph (set! (.-material red-sphere) main-scene/red-mat)
+         bldg-cube-tmp (bjs/MeshBuilder.CreateBox "bldg-cube" (js-obj "height" 5 "width" 5 "depth" 5) scene)
+         ;; mirror-plane
+         ; mirror-plane (bjs/MeshBuilder.CreatePlane "mirror-plane" (js-obj "height" 5 "width" 4) scene)
+         ;; Note: very important that you set the plane's position before calling 'computeWorldMatrix'
+         ;; if you set position afterward, the reflection may be on the "wrong"
+         ; tmp-mp-2 (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
+         ; tmp-mp (.computeWorldMatrix mirror-plane true)
+         ; mirror-plane-world-matrix (.getWorldMatrix mirror-plane)
+         ; mirror-plane-vertex-data (.getVerticesData mirror-plane "normal")
+         ; mirror-plane-normal-vec (bjs/Vector3. (aget mirror-plane-vertex-data 0) (* 1 (aget mirror-plane-vertex-data 1)) (* 1 (aget mirror-plane-vertex-data 2)))
+         ; mirror-plane-normal (bjs/Vector3.TransformNormal mirror-plane-normal-vec mirror-plane-world-matrix)
+         ; reflector-mp (bjs/Plane.FromPositionAndNormal. (.-position mirror-plane) (.scale mirror-plane-normal -1))
+         ; mirror-mp-mat (bjs/StandardMaterial. "mirror-mp-mat" scene)
+         ;; eye-lid
+         ; eye-lid (.getMeshByID scene "eye_lid.006")
+         ;; pool
+         ; pool-blend (.getMeshByID scene "pool")
+         pool (.getMeshByID scene "pool")
+         ; pool-tmp-r  (set! (.-rotation pool) (bjs/Vector3. (* base/ONE-DEG 180) 0 0))
+         ; pool-tmp-h (set! (.-isVisible pool-blend) false)
+         ; pool (bjs/MeshBuilder.CreatePlane "pool-plane" (js-obj "height" 50 "width" 90) scene)
+         ; pool-tmp-p (set! (.-position pool) (bjs/Vector3. 35 -0.5 36))
+         ; pool-tmp-r  (set! (.-rotation pool) (bjs/Vector3. (* base/ONE-DEG 90) 0 0))
+         ; pool-baked-mat (bjs/StandardMaterial. "pool-baked" scene)
+         ; pool-mat (.-material pool)
+         pool-mat (bjs/StandardMaterial. "pool-mat" scene)
+         pool-tmp-cm (.computeWorldMatrix pool true)
+         pool-world-matrix (.getWorldMatrix pool)
+         pool-vertex-data (.getVerticesData pool "normal")
+         pool-normal-vec (bjs/Vector3. (aget pool-vertex-data 0) (aget pool-vertex-data 1) (aget pool-vertex-data 2))
+         pool-normal (bjs/Vector3.TransformNormal. pool-normal-vec pool-world-matrix)
+         pool-reflector (bjs/Plane.FromPositionAndNormal. (.-position pool) (.scale pool-normal -1))
+         ;;
+         mirror-mat (bjs/StandardMaterial. "mirror" scene)
+         box-mat (bjs/StandardMaterial. "box-mat" scene)
+         quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))
+         ;; hemi-floor
+         hemi-floor (.getMeshByID scene "walkway")]
 
-    (prn "hello")
-    ; (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
-    (set! (.-rotation mirror-plane) (bjs/Vector3. 0 (* base/ONE-DEG 0) 0))
-    (prn "mirror-plane.position=" (.-position mirror-plane))
-    (prn "mirror-plane-normal-2=" mirror-plane-normal)
-    (set! bldg-cube bldg-cube-tmp)
+     (prn "hello")
+     ; (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
+     ; (set! (.-rotation mirror-plane) (bjs/Vector3. 0 (* base/ONE-DEG 0) 0))
+     ; (prn "mirror-plane.position=" (.-position mirror-plane))
+     ; (prn "mirror-plane-normal-2=" mirror-plane-normal)
+     (set! bldg-cube bldg-cube-tmp)
 
-    ;; mirror-plane
-    ; (.computeWorldMatrix mirror-plane true)
-    (set! (.-reflectionTexture mirror-mp-mat) (bjs/MirrorTexture. "mirror-mp-texture" 1024 scene true))
-    ; (set! (.-activeCamera (.-reflectionTexture mirror-mp-mat)) main-scene/camera)
-    (set! (-> mirror-mp-mat .-reflectionTexture .-mirrorPlane) reflector-mp)
-    ; (set! (-> mirror-mp-mat .-reflectionTexture .-renderList) (array suzanne red-sphere pool))
-    (.push (-> mirror-mp-mat .-reflectionTexture .-renderList) red-sphere)
-    (set! (-> mirror-mp-mat .-reflectionTexture .-level) 1)
-    (set! (.-material mirror-plane) mirror-mp-mat)
-    ;; turn off backFaceCulling so we can see the backside as well.
-    ; (.setBackfaceCulling mirror-mp-mat false)
-    (set! (.-backFaceCulling mirror-mp-mat) false)
+     ; ;; mirror-plane
+     ; ; (.computeWorldMatrix mirror-plane true)
+     ; (set! (.-reflectionTexture mirror-mp-mat) (bjs/MirrorTexture. "mirror-mp-texture" 1024 scene true))
+     ; ; (set! (.-activeCamera (.-reflectionTexture mirror-mp-mat)) main-scene/camera)
+     ; (set! (-> mirror-mp-mat .-reflectionTexture .-mirrorPlane) reflector-mp)
+     ; ; (set! (-> mirror-mp-mat .-reflectionTexture .-renderList) (array suzanne red-sphere pool))
+     ; (.push (-> mirror-mp-mat .-reflectionTexture .-renderList) red-sphere)
+     ; (set! (-> mirror-mp-mat .-reflectionTexture .-level) 1)
+     ; (set! (.-material mirror-plane) mirror-mp-mat)
+     ; ;; turn off backFaceCulling so we can see the backside as well.
+     ; ; (.setBackfaceCulling mirror-mp-mat false)
+     ; (set! (.-backFaceCulling mirror-mp-mat) false)
 
-    ;; pool
-    (set! (.-reflectionTexture pool-mat) (bjs/MirrorTexture. "pool-texture" 2048 scene true))
-    (set! (-> pool-mat .-reflectionTexture .-mirrorPlane) pool-reflector)
-    (.push (-> pool-mat .-reflectionTexture .-renderList) suzanne)
-    (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
-    (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "front_base.006"))
-    (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "eye_lid.007"))
-    ; (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
-    (set! (-> pool-mat .-reflectionTexture .-level) 1)
-    (set! (.-material pool) pool-mat)
-    ;; turn off backFaceCulling so we can see the backside as well.
-    ; (set! (.-backFaceCulling pool-mat) false)
-    ; (js-debugger)
+     ;; pool
+     (set! (.-reflectionTexture pool-mat) (bjs/MirrorTexture. "pool-texture" 2048 scene true))
+     (set! (-> pool-mat .-reflectionTexture .-mirrorPlane) pool-reflector)
+     (.push (-> pool-mat .-reflectionTexture .-renderList) suzanne)
+     (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
+     ; (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "front_base.006"))
+     ; (map (fn [x] (.push a x)) b)
+     ;; blender front_base is actually a TransformNode (with child meshes).
+     (prn "pool: children=" (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes))
+     ; (js-debugger)
+     (let [fb-meshes (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes)
+           eye-lid-meshes (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes)]
+       ; (prn "meshes=" meshes)
+       ; (prn "meshes.length=" (.-length meshes))
+       ; (prn (map inc [1 2 3]))
+        ; (prn (map inc meshes))
+        ; (prn (map (fn [x] (inc x)) meshes))
+        ; (doall (map (fn [x] (do (prn "hi") (inc x))) meshes)))
+       ; (doall (map (fn [x]
+       ;               (do
+       ;                 (prn "x=" x)
+       ;                 (.push (-> pool-mat .-reflectionTexture .-renderList) x)))
+       ;            (js->clj meshes)))
+       (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))
+                  fb-meshes))
+       (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))
+                  eye-lid-meshes)))
+        ; (-> (.getTransformNodeById scene "front_base.006") .getChildMeshes))
+     ;           (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "eye_lid.006"))
+            ; (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
+     (set! (-> pool-mat .-reflectionTexture .-level) 1)
+     (set! (.-material pool) pool-mat)
+     ;; turn off backFaceCulling so we can see the backside as well.
+     ; (set! (.-backFaceCulling pool-mat) false)
+     ; (js-debugger)
 
-    ;; box-mat
-    (set! (.-backFaceCulling box-mat) true)
-    (set! (.-reflectionTexture box-mat) (bjs/CubeTexture. "textures/cubic_texture_exp/bldg" scene))
-    (set! (-> box-mat (.-reflectionTexture) (.-coordinatesMode)) bjs/Texture.CUBIC_MODE)
-    (set! (.-diffuseColor box-mat) (bjs/Color3. 0 0 0))
-    (set! (.-specularColor box-mat) (bjs/Color3. 0 0 0))
-    ; (set! (.-material mirror-plane) box-mat)
+     ;; box-mat
+     (set! (.-backFaceCulling box-mat) true)
+     (set! (.-reflectionTexture box-mat) (bjs/CubeTexture. "textures/cubic_texture_exp/bldg" scene))
+     (set! (-> box-mat (.-reflectionTexture) (.-coordinatesMode)) bjs/Texture.CUBIC_MODE)
+     (set! (.-diffuseColor box-mat) (bjs/Color3. 0 0 0))
+     (set! (.-specularColor box-mat) (bjs/Color3. 0 0 0))
+     ; (set! (.-material mirror-plane) box-mat)
 
     ;; bldg-cube
     (set! (.-position bldg-cube) (bjs/Vector3. 35 2.5 40))
     (set! (.-material bldg-cube) box-mat)
 
     (case main-scene/xr-mode
-      "vr" (.addFloorMesh main-scene/vrHelper pool)
-      "xr" (->  main-scene/xr-helper .-teleportation (.addFloorMesh pool)))
-    (init-mirror-sub-scene)
+     "vr" (do
+            (.addFloorMesh main-scene/vrHelper pool)
+            (.addFloorMesh main-scene/vrHelper hemi-floor))
+     "xr" (do
+            (->  main-scene/xr-helper .-teleportation (.addFloorMesh pool))
+            (->  main-scene/xr-helper .-teleportation (.addFloorMesh hemi-floor)))))
+     ; (init-mirror-sub-scene))
 
-    (let [cube (bjs/MeshBuilder.CreateBox "min-cube" (js-obj "width" 1 "height" 1))]
-      (set! (.-position cube) (bjs/Vector3. 0 2 0)))
-    (prn "hi2")))
+    ; (let [cube (bjs/MeshBuilder.CreateBox "min-cube" (js-obj "width" 1 "height" 1))]
+    ;  (set! (.-position cube) (bjs/Vector3. 0 2 0))))
+  (prn "hi2")
+  (init-win-glass)
+  (prn "*** hemisferic model fully loaded"))
 
 (defn append-hemisferic [path file]
   (.Append bjs/SceneLoader path file main-scene/scene
@@ -271,6 +334,11 @@
                (re-frame/dispatch [:cube-test.twizzlers.events/scene-loaded :hemisferic])
                (hemisferic-loaded %1)
                (init-exp-gui))))
+
+;; Turn off or override things from the main-scene that we no longer need.
+(defn main-scene-overrides []
+  (let [scene main-scene/scene]
+    (set! (.-isVisible (.getMeshByID scene "ground")) false)))
 
 (defn init-mirror-sub-scene []
   (let [scene main-scene/scene]
@@ -291,14 +359,14 @@
           (set! (-> mirror-material .-reflectionTexture .-mirrorPlane) reflector)
           (set! (-> mirror-material .-reflectionTexture .-renderList) (array sphere red-sphere))
           (set! (-> mirror-material .-reflectionTexture .-level) 1)
-          (set! (.-material glass) mirror-material)
+          (set! (.-material glass) mirror-material))))))
 
-          (let [mirror-plane (.getMeshByID scene "mirror-plane")
-                sphere (.getMeshByID scene "sphere")
-                mirror-plane-render-list (-> mirror-plane .-material .-reflectionTexture .-renderList)
-                tmp (prn "mirror-plane-render-list=" mirror-plane-render-list)
-                new-render-list (conj (js->clj mirror-plane-render-list) sphere)]
-            (.push (-> mirror-plane .-material .-reflectionTexture .-renderList) sphere)))))))
+          ; (let [mirror-plane (.getMeshByID scene "mirror-plane")
+          ;       sphere (.getMeshByID scene "sphere")
+          ;       mirror-plane-render-list (-> mirror-plane .-material .-reflectionTexture .-renderList)
+          ;       tmp (prn "mirror-plane-render-list=" mirror-plane-render-list)
+          ;       new-render-list (conj (js->clj mirror-plane-render-list) sphere)]
+          ;   (.push (-> mirror-plane .-material .-reflectionTexture .-renderList) sphere)))))))
             ; mirrorMaterial.reflectionTexture.mirrorPlane = reflector))))));
             ; setting the refletor to the glass's reflector fixes the "opposite side" problem.
             ; (set! (-> mirror-plane .-material .-reflectionTexture .-mirrorPlane) reflector)))))))
@@ -333,7 +401,8 @@
         (prn "path=" path ", fn=" fn)
         (append-hemisferic
          path
-         fn))))
+         fn))
+    (main-scene-overrides)))
 
 
 (defn tick []
