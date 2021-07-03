@@ -21,7 +21,8 @@
 ; (def gripFactor 1.8)
 ; (def gripFactor 1.9)
 ;; the number goes bonkers at 2.0 and above.
-(def gripFactor 1.98)
+; (def gripFactor 1.98)
+(def gripFactor 1.95)
 (def lastGripTime)
 ; (def vrHelper)
 ; (def camera)

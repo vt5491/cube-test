@@ -160,11 +160,12 @@
     ; material.useSpecularOverAlpha = true));
 (defn init-win-glass []
   (let [scene main-scene/scene
-        eye-lid (.getMeshByID scene "eye_lid.006_primitive1")
-        front-base (.getMeshByID scene "front_base.006_primitive1")
+        ; eye-lid (.getMeshByID scene "eye_lid.006_primitive1")
+        ; front-base (.getMeshByID scene "front_base.006_primitive1")
+        front-base (.getMeshByID scene "egg_dome.009_primitive2")
         glass-mat (bjs/StandardMaterial. "glass-mat" scene)]
     ; (set! (.-material eye-lid) main-scene/green-mat)
-    (prn "init-win-glass: eye-lid=" eye-lid)
+    ; (prn "init-win-glass: eye-lid=" eye-lid)
     ; (js-debugger)
     (set! (.-emissiveColor glass-mat) (bjs/Color3. 0.0 0.07 0.03))
     (set! (.-alpha glass-mat) 0.1)
@@ -173,9 +174,9 @@
     (set! (-> glass-mat .-opacityFresnelParameters .-rightColor) (bjs/Color3. 1 0 1))
     (set! (.-useSpecularOverAlpha glass-mat) true)
     (set! (.-backFaceCulling glass-mat) false)
-    (set! (.-material eye-lid) glass-mat)
+    ; (set! (.-material eye-lid) glass-mat)
     (set! (.-material front-base) glass-mat)))
-    ; (prn "init-win-glass: eye-lid mat=" (.-material eye-lid))))
+
 
 (defn hemisferic-loaded [loaded-scene]
   ; (js-debugger)
@@ -186,7 +187,7 @@
   ;; if you don't change this you'll see a weird building in the pool reflection.
   (set! (.-environmentTexture main-scene/scene) nil)
   ;; disable one of the blender point lights so we can see reflections better.
-  (-> main-scene/scene (.getLightByID "Point.002") (.setEnabled false))
+  ; (-> main-scene/scene (.getLightByID "Point.002") (.setEnabled false))
   ; (comment
   ;  (let [scene main-scene/scene
   ;        exp-plane (.getMeshByID scene "exp_plane")
@@ -201,7 +202,7 @@
   (let [scene main-scene/scene
          probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
          rList (.-renderList probe)
-         suzanne (.getMeshByID scene "Suzanne")
+         suzanne (.getMeshByID scene "Suzanne.001")
          ; suzanne-pos (.-position suzanne)
          ; red-sphere (.getMeshByID scene "Sphere")
          ; tmp-rs (set! (.-position red-sphere) (bjs/Vector3. 2 1 0))
@@ -223,7 +224,7 @@
          ; eye-lid (.getMeshByID scene "eye_lid.006")
          ;; pool
          ; pool-blend (.getMeshByID scene "pool")
-         pool (.getMeshByID scene "pool")
+         pool (.getMeshByID scene "pool.001")
          ; pool-tmp-r  (set! (.-rotation pool) (bjs/Vector3. (* base/ONE-DEG 180) 0 0))
          ; pool-tmp-h (set! (.-isVisible pool-blend) false)
          ; pool (bjs/MeshBuilder.CreatePlane "pool-plane" (js-obj "height" 50 "width" 90) scene)
@@ -243,7 +244,7 @@
          box-mat (bjs/StandardMaterial. "box-mat" scene)
          quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))
          ;; hemi-floor
-         hemi-floor (.getMeshByID scene "walkway")]
+         hemi-floor (.getMeshByID scene "walkway.002")]
 
      (prn "hello")
      ; (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
@@ -266,6 +267,7 @@
      ; (set! (.-backFaceCulling mirror-mp-mat) false)
 
      ;; pool
+     ; (js-debugger)
      (set! (.-reflectionTexture pool-mat) (bjs/MirrorTexture. "pool-texture" 2048 scene true))
      (set! (-> pool-mat .-reflectionTexture .-mirrorPlane) pool-reflector)
      (.push (-> pool-mat .-reflectionTexture .-renderList) suzanne)
@@ -273,33 +275,23 @@
      ; (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "front_base.006"))
      ; (map (fn [x] (.push a x)) b)
      ;; blender front_base is actually a TransformNode (with child meshes).
-     (prn "pool: children=" (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes))
+     ; (prn "pool: children=" (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes))
      ; (js-debugger)
-     (let [fb-meshes (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes)
-           eye-lid-meshes (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes)]
-       ; (prn "meshes=" meshes)
-       ; (prn "meshes.length=" (.-length meshes))
-       ; (prn (map inc [1 2 3]))
-        ; (prn (map inc meshes))
-        ; (prn (map (fn [x] (inc x)) meshes))
-        ; (doall (map (fn [x] (do (prn "hi") (inc x))) meshes)))
-       ; (doall (map (fn [x]
-       ;               (do
-       ;                 (prn "x=" x)
-       ;                 (.push (-> pool-mat .-reflectionTexture .-renderList) x)))
-       ;            (js->clj meshes)))
+     ; (let [egg-dome-meshes (-> (.getTransformNodeByID scene "egg_dome.008") .getChildMeshes)])
+     (let [egg-dome-meshes (-> (.getTransformNodeByID scene "egg_dome.009") .getChildMeshes)]
+           ; fb-meshes (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes)])
+
+     ;       eye-lid-meshes (-> (.getTransformNodeByID scene "front_base.006") .getChildMeshes)]
        (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))
-                  fb-meshes))
-       (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))
-                  eye-lid-meshes)))
-        ; (-> (.getTransformNodeById scene "front_base.006") .getChildMeshes))
-     ;           (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "eye_lid.006"))
-            ; (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
+                egg-dome-meshes)))
+     ; (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))
+     ;            fb-meshes)))
+     ;   (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))
+     ;              eye-lid-meshes)))
+     (when (.getMeshByID scene "imax_pupil.001")
+       (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "imax_pupil.001")))
      (set! (-> pool-mat .-reflectionTexture .-level) 1)
      (set! (.-material pool) pool-mat)
-     ;; turn off backFaceCulling so we can see the backside as well.
-     ; (set! (.-backFaceCulling pool-mat) false)
-     ; (js-debugger)
 
      ;; box-mat
      (set! (.-backFaceCulling box-mat) true)
