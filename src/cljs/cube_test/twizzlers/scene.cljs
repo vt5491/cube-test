@@ -67,8 +67,8 @@
                main-scene/scene
                #(space-portal-loaded %1 %2 %3 %4 name user-cb)))
 (defn append-portal-loaded [loaded-scene]
-  (println "append-portal-loaded: loaded-scene=" loaded-scene)
-  (println "Point light=" (.getLightByName loaded-scene "Point"))
+  ; (println "append-portal-loaded: loaded-scene=" loaded-scene)
+  ; (println "Point light=" (.getLightByName loaded-scene "Point"))
   ; (move-camera)
   ;; turn off environmentTexture (ibl) so that only blender lights are in effect.
   (set! (.-environmentTexture main-scene/scene) nil)
@@ -177,10 +177,21 @@
     ; (set! (.-material eye-lid) glass-mat)
     (set! (.-material front-base) glass-mat)))
 
+(defn walkway-texture-loaded [tex]
+  (let [scene main-scene/scene
+        ; ww-l (.getMeshByID scene "walkway_l")
+        walkway-l (.getMeshByID scene "walkway_l")
+        walkway-l-mat (bjs/StandardMaterial. "walkway-l-mat" scene)]
+        ; mat (.-material ww-l)]
+    ; (prn "walkway-texture-loaded: args=" args)
+    (prn "walkway-texture-loaded: tex=" tex)))
+    ; (set! (.-diffuseTexture walkway-l-mat) tex)
+    ; (set! (.-backFaceCulling walkway-l-mat) false)
+    ; (set! (.-material walkway-l) walkway-l-mat)))
 
 (defn hemisferic-loaded [loaded-scene]
   ; (js-debugger)
-  (println "hemisferic-loaded: loaded-scene=" loaded-scene)
+  ; (println "hemisferic-loaded: loaded-scene=" loaded-scene)
   ; (move-camera)
   (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
   ;; turn off environmentTexture (ibl) so that only blender lights are in effect.
@@ -197,8 +208,48 @@
   ;    (set! (.-bumpTexture exp-plane-mat) bump-text)
   ;    (set! (.-backFaceCulling exp-plane-mat) false)
   ;    (set! (.-material exp-plane) exp-plane-mat)))
+  ; s.material.diffuseTexture.onLoadObservable.add(tex => {})
+  ;   console.log('url',tex.url)
+  (let [scene main-scene/scene
+        walkway-l (.getMeshByID scene "walkway_l")
+        ; walkway-l-mat (bjs/PBRMaterial. "walkway-l-diffuse" scene)
+        walkway-l-mat (bjs/StandardMaterial. "walkway-l-mat" scene)
+        walkway-r (.getMeshByID scene "walkway_r")
+        walkway-r-mat (bjs/StandardMaterial. "walkway-r-mat" scene)
+        ; walkway-l2 (.getMeshByID scene "walkway_l.003")
+        ; walkway-l2-mat (bjs/StandardMaterial. "walkway-l-mat" scene)
+        ; diffuse-text (bjs/Texture. "textures/geb_cube_wood.jpg" scene)
+        ; diffuse-text (bjs/Texture. "textures/hemi_walkway_texture.png" scene)
+        plane (.getMeshByID scene "Plane.008")
+        plane-mat (bjs/StandardMaterial. "plane-mat" scene)
+        diffuse-text (bjs/Texture. "textures/hemi_walkway_texture.png" scene
+                             true true bjs/Texture.BILINEAR_SAMPLINGMODE)]
+                             ; (fn [tex] (walkway-texture-loaded tex))
+                             ; #(walkway-texture-loaded %1)
+                             ; nil
+                             ; nil nil true)]
+    ; (-> diffuse-text .-onLoadObservable (.add (fn [tex] (prn "tex=" tex))))
+    (-> diffuse-text .-onLoadObservable (.add (fn [tex] (walkway-texture-loaded tex))))
+        ; bump-text (bjs/Texture. "imgs/textures/exp_circ_out.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
+    ; (set! (.-bumpTexture exp-plane-mat) bump-text)
+    ; (set! (.-albedoTexture walkway-l-mat) diffuse-text)
+    (set! (.-diffuseTexture walkway-l-mat) diffuse-text)
+    (set! (.-backFaceCulling walkway-l-mat) false)
+    (set! (.-material walkway-l) walkway-l-mat)
+
+    (set! (.-diffuseTexture walkway-r-mat) diffuse-text)
+    (set! (.-backFaceCulling walkway-r-mat) false)
+    (set! (.-material walkway-r) walkway-r-mat)
+    ; (set! (.-material walkway-l2) walkway-l-mat)
+
+    (set! (.-diffuseTexture plane-mat) diffuse-text)
+    (set! (.-backFaceCulling plane-mat) false)
+    (set! (.-material plane) plane-mat))
+
+    ; (set! (.-material walkway-l) plane-mat))
+    ; (set! (.-material walkway-l2) plane-mat))
   (comment)
-  (prn "hello2")
+  ; (prn "hello2")
   (let [scene main-scene/scene
          probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
          rList (.-renderList probe)
@@ -244,7 +295,10 @@
          box-mat (bjs/StandardMaterial. "box-mat" scene)
          quat180 (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 180))
          ;; hemi-floor
-         hemi-floor (.getMeshByID scene "walkway.002")]
+         ; hemi-floor (.getMeshByID scene "walkway.002")
+         hemi-floor (.getMeshByID scene "hemi_floor")
+         walkway-l (.getMeshByID scene "walkway_l")
+         walkway-r (.getMeshByID scene "walkway_r")]
 
      (prn "hello")
      ; (set! (.-position mirror-plane) (bjs/Vector3. 0 2 5))
@@ -308,15 +362,19 @@
     (case main-scene/xr-mode
      "vr" (do
             (.addFloorMesh main-scene/vrHelper pool)
-            (.addFloorMesh main-scene/vrHelper hemi-floor))
+            (.addFloorMesh main-scene/vrHelper hemi-floor)
+            (.addFloorMesh main-scene/vrHelper walkway-l)
+            (.addFloorMesh main-scene/vrHelper walkway-r))
      "xr" (do
             (->  main-scene/xr-helper .-teleportation (.addFloorMesh pool))
-            (->  main-scene/xr-helper .-teleportation (.addFloorMesh hemi-floor)))))
+            (->  main-scene/xr-helper .-teleportation (.addFloorMesh hemi-floor))
+            (->  main-scene/xr-helper .-teleportation (.addFloorMesh walkway-l))
+            (->  main-scene/xr-helper .-teleportation (.addFloorMesh walkway-r)))))
      ; (init-mirror-sub-scene))
 
     ; (let [cube (bjs/MeshBuilder.CreateBox "min-cube" (js-obj "width" 1 "height" 1))]
     ;  (set! (.-position cube) (bjs/Vector3. 0 2 0))))
-  (prn "hi2")
+  ; (prn "hi2")
   (init-win-glass)
   (prn "*** hemisferic model fully loaded"))
 
@@ -329,8 +387,11 @@
 
 ;; Turn off or override things from the main-scene that we no longer need.
 (defn main-scene-overrides []
-  (let [scene main-scene/scene]
-    (set! (.-isVisible (.getMeshByID scene "ground")) false)))
+  (let [scene main-scene/scene
+        fps-pnl (.getMeshByID scene "fps-panel")
+        fps-pnl-pos (.-position fps-pnl)]
+    (set! (.-isVisible (.getMeshByID scene "ground")) false)
+    (set! (.-position fps-pnl) (bjs/Vector3. (.-x fps-pnl-pos) (-> fps-pnl-pos .-y (+ 5)) (.-z fps-pnl-pos)))))
 
 (defn init-mirror-sub-scene []
   (let [scene main-scene/scene]
@@ -382,11 +443,14 @@
             ; quat (bjs/Quaternion.FromEulerAngles @main-scene/*camera-init-rot*)
             quat (bjs/Quaternion.FromEulerAngles (:x ir) (:y ir) (:z ir))]
         ; (set! (.-position do-cam) (bjs/Vector3. 46.37 0.96 45.53))
+        (set! (.-position do-cam) (bjs/Vector3. 58.6 7.9 12.7))
+        ; (set! (.-rotationQuaternion do-cam) (bjs/Quaternion.FromEulerAngles (bjs/Vector3. 0 (* base/ONE-DEG 0) 0))))
+        ; (set! (.-rotationQuaternion do-cam) (bjs/Quaternion.FromEulerAngles ir))
+        (set! (.-rotationQuaternion do-cam) quat))
         ; (set! (.-position do-cam) (bjs/Vector3. -0.5 6.78 69))
         ; (set! (.-position do-cam) @main-scene/*camera-init-pos*)
-        (set! (.-position do-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
-        (set! (.-rotationQuaternion do-cam) quat))
-        ; (set! (.-position do-cam) (bjs/Vector3. 0 5 -10)))
+        ; (set! (.-position do-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+        ; (set! (.-rotationQuaternion do-cam) quat))
 
       (let [path (get-in db [:scenes :hemisferic :path])
             fn (get-in db [:scenes :hemisferic :fn])]

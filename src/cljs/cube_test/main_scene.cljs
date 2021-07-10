@@ -28,6 +28,7 @@
 ; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
 (def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
 (def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
+; (def ^:dynamic *camera-init-pos* (atom {:x 58.6, :y 7.9, :z 12.7}))
 (def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z -5}))
 ; (def non-vr-camera)
 (def vrHelper)
