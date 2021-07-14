@@ -27,9 +27,10 @@
 (def camera-rig)
 ; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
 (def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
-(def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
-; (def ^:dynamic *camera-init-pos* (atom {:x 58.6, :y 7.9, :z 12.7}))
-(def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z -5}))
+; (def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
+(def ^:dynamic *camera-init-pos* (atom {:x 58.6, :y 7.9, :z 12.7}))
+; (def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z -5}))
+(def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z 0}))
 ; (def non-vr-camera)
 (def vrHelper)
 (def xr)
@@ -189,7 +190,7 @@
   ; (prn "dispatch-sync=" (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera]))
   (let [cam-pos (.-position camera)
         ; xr-cam (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera])
-        xr-cam (.-deviceOrientationCamera vrHelper)
+        vr-cam (.-deviceOrientationCamera vrHelper)
         x (.-x cam-pos)
         y (.-y cam-pos)
         z (.-z cam-pos)
@@ -197,10 +198,14 @@
         ir @*camera-init-rot*
         quat (bjs/Quaternion.FromEulerAngles (:x ir) (+ (:y ir) (* 70 base/ONE-DEG)) (:z ir))]
 
-      (prn "xr-cam=" xr-cam)
-      (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
-      (set! (.-rotationQuaternion camera) quat)
-      (prn "cam-rot c=" (.-rotation camera))))
+      (prn "vr-cam=" vr-cam)
+      ; (prn "xr-cam pre.pos=" xr-cam)
+      ; (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+      ; (set! (.-rotationQuaternion camera) quat)
+      ; (prn "cam-rot c=" (.-rotation camera))
+      (set! (.-position vr-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+      (set! (.-rotationQuaternion vr-cam) quat)
+      (prn "cam-rot c=" (.-rotation vr-cam))))
 
 ;; this gets control when the "enter xr" button is clicked.
 (defn enter-xr-handler [state]

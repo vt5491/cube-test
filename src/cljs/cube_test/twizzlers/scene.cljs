@@ -199,6 +199,8 @@
   (set! (.-environmentTexture main-scene/scene) nil)
   ;; disable one of the blender point lights so we can see reflections better.
   ; (-> main-scene/scene (.getLightByID "Point.002") (.setEnabled false))
+  ;; turn off 'dome_light_top' to better see reflections on the walkway.
+  (-> main-scene/scene (.getLightByID "Point.009") (.setEnabled false))
   ; (comment
   ;  (let [scene main-scene/scene
   ;        exp-plane (.getMeshByID scene "exp_plane")
@@ -214,6 +216,13 @@
         walkway-l (.getMeshByID scene "walkway_l")
         ; walkway-l-mat (bjs/PBRMaterial. "walkway-l-diffuse" scene)
         walkway-l-mat (bjs/StandardMaterial. "walkway-l-mat" scene)
+        walkway-l-world-matrix (.getWorldMatrix walkway-l)
+        walkway-l-tmp-cm (.computeWorldMatrix walkway-l true) walkway-l-world-matrix (.getWorldMatrix walkway-l)
+        walkway-l-vertex-data (.getVerticesData walkway-l "normal")
+        walkway-l-normal-vec (bjs/Vector3. (aget walkway-l-vertex-data 0) (aget walkway-l-vertex-data 1) (aget walkway-l-vertex-data 2))
+        walkway-l-normal (bjs/Vector3.TransformNormal. walkway-l-normal-vec walkway-l-world-matrix)
+        walkway-l-reflector (bjs/Plane.FromPositionAndNormal. (.-position walkway-l) (.scale walkway-l-normal -1))
+
         walkway-r (.getMeshByID scene "walkway_r")
         walkway-r-mat (bjs/StandardMaterial. "walkway-r-mat" scene)
         ; walkway-l2 (.getMeshByID scene "walkway_l.003")
@@ -222,7 +231,7 @@
         ; diffuse-text (bjs/Texture. "textures/hemi_walkway_texture.png" scene)
         plane (.getMeshByID scene "Plane.008")
         plane-mat (bjs/StandardMaterial. "plane-mat" scene)
-        diffuse-text (bjs/Texture. "textures/hemi_walkway_texture.png" scene
+        diffuse-text (bjs/Texture. "textures/hemi_walkway_texture_2k.png" scene
                              true true bjs/Texture.BILINEAR_SAMPLINGMODE)]
                              ; (fn [tex] (walkway-texture-loaded tex))
                              ; #(walkway-texture-loaded %1)
@@ -236,6 +245,10 @@
     (set! (.-diffuseTexture walkway-l-mat) diffuse-text)
     (set! (.-backFaceCulling walkway-l-mat) false)
     (set! (.-material walkway-l) walkway-l-mat)
+
+    (set! (.-reflectionTexture walkway-l-mat) (bjs/MirrorTexture. "walkway-l-texture" 2048 scene true))
+    (set! (-> walkway-l-mat .-reflectionTexture .-mirrorPlane) walkway-l-reflector)
+    (.push (-> walkway-l-mat .-reflectionTexture .-renderList) (.getMeshByID scene "sky-box"))
 
     (set! (.-diffuseTexture walkway-r-mat) diffuse-text)
     (set! (.-backFaceCulling walkway-r-mat) false)
@@ -326,6 +339,7 @@
      (set! (-> pool-mat .-reflectionTexture .-mirrorPlane) pool-reflector)
      (.push (-> pool-mat .-reflectionTexture .-renderList) suzanne)
      (.push (-> pool-mat .-reflectionTexture .-renderList) bldg-cube)
+     (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "sky-box"))
      ; (.push (-> pool-mat .-reflectionTexture .-renderList) (.getMeshByID scene "front_base.006"))
      ; (map (fn [x] (.push a x)) b)
      ;; blender front_base is actually a TransformNode (with child meshes).
