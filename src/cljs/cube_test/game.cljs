@@ -8,7 +8,8 @@
    [cube-test.utils :as utils]
    [cube-test.dummy-base :as dummy-base]
    ; [cube-test.dummy-base :as dummy-base]))
-   [cube-test.twizzlers.events :as twizzler-events]))
+   [cube-test.twizzlers.events :as twizzler-events]
+   [cube-test.beat-club.events :as beat-club-events]))
 
 (declare render-loop)
 
@@ -81,7 +82,16 @@
                                                         ; (re-frame/dispatch [:init-twizzlers-game-fx])
                                                         ; (re-frame/dispatch [:msg-cube.abc])))])
                                                         ; (re-frame/dispatch [:run-msg-cube-game])))])
-                           (re-frame/dispatch [:init-fps-panel main-scene/scene]))))
+                           (re-frame/dispatch [:init-fps-panel main-scene/scene]))
+    :beat-club (do
+                            (println "top-level-scene=beat-club")
+                            (re-frame/dispatch [:init-main-scene
+                                                (fn [] (do
+                                                         (re-frame/dispatch [::beat-club-events/init-db])
+                                                         (re-frame/dispatch [::beat-club-events/init-game])
+                                                         (re-frame/dispatch [::beat-club-events/run-game])))])
+                            (re-frame/dispatch [:init-fps-panel main-scene/scene]))))
+
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)
 ;; instead of main_scene (refer to few, referred by many) since we will

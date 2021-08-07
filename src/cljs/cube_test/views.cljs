@@ -6,7 +6,8 @@
    [babylonjs :as bjs]
    [cube-test.ut-simp.msg :as msg]
    [cube-test.msg-cube.views :as msg-cube.views]
-   [cube-test.twizzlers.views :as twizzlers.views]))
+   [cube-test.twizzlers.views :as twizzlers.views]
+   [cube-test.beat-club.views :as beat-club.views]))
 
 (defn main-panel []
   (let [name (re-frame/subscribe [::subs/name])
@@ -23,5 +24,6 @@
      ; (condp = base/top-level-scene)
      (case base/top-level-scene
         :msg-cube (do (msg-cube.views/init-panel))
-        :twizzlers (do (twizzlers.views/init-panel)) 
+        :twizzlers (do (twizzlers.views/init-panel))
+        :beat-club (do (beat-club.views/init-panel)) 
         [:br])]))

@@ -7,6 +7,7 @@
 
 
 (defn init-panel []
+  (prn "twizzlers.view: init-panel entered")
   [:div
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.twizzlers.events/add-twizzler])} "add twizzler"]
     [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-time])} "update time rule"]

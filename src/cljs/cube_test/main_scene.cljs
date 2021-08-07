@@ -147,6 +147,7 @@
       (.enableTeleportation vrHelper (js-obj "floorMeshName" "ground"))
       (.enableInteractions vrHelper)
       (-> vrHelper .-onAfterEnteringVRObservable (.add enter-vr-handler))
+      (prn "main-scene: about to call top-level-scene-initializer")
       (top-level-scene-initializer))
     (do
       ;; set up xr

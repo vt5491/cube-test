@@ -1,13 +1,19 @@
 (defproject cube-test "0.1.0-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.10.1"]
-                 [org.clojure/clojurescript "1.10.764"
-                  :exclusions [com.google.javascript/closure-compiler-unshaded
+  :dependencies [
+                 ; [org.clojure/clojure "1.10.1"]
+                 [org.clojure/clojure "1.10.3"]
+                 ; [org.clojure/clojurescript "1.10.764"]
+                 [org.clojure/clojurescript "1.10.879"
+                  :exclusions [
+                               ; com.google.javascript/closure-compiler-unshaded
                                org.clojure/google-closure-library
                                org.clojure/google-closure-library-third-party]]
                  ; [thheller/shadow-cljs "2.9.3"]
-                 [thheller/shadow-cljs "2.11.7"]
+                 ; [thheller/shadow-cljs "2.11.7"]
                  ; [thheller/shadow-cljs "2.11.20"]
-                 [reagent "0.10.0"]
+                 [thheller/shadow-cljs "2.15.2"]
+                 ; [reagent "0.10.0"]
+                 [reagent "1.1.0"]
                  ; [re-frame "0.12.0"]
                  [re-frame "1.2.0"]
                  [funcool/promesa "5.1.0"]
@@ -37,7 +43,7 @@
   ;;vt add for re-frame-10x
   :compiler    {
                  :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
-                 ;vt-x :preloads             [day8.re-frame-10x.preload]
+                 :preloads             [day8.re-frame-10x.preload]
                  :main                 "re-con.core"}
   ;;vt end
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
@@ -61,15 +67,20 @@
                                :output-dir "resources/public/js/compiled"
                                :asset-path "/js/compiled"
                                :modules {:app {:init-fn cube-test.core/init
-                                               :preloads [devtools.preload]}}
+                                               :preloads [devtools.preload
                                                           ;;vt add
-                                                          ;vt-x day8.re-frame-10x.preload]}}
+                                                          day8.re-frame-10x.preload]}}
                                ;;vt add
                                ; :js-options {:ignore-asset-requires true}
                                ;;vt end
                                ;;vt add
                                :dev {:compiler-options {
                                                         :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}}}
+                                                        ;;vt add
+                                                        ;; don't optimize fn names so we can use cljs as native js cb handlers
+                                                        ; :output-feature-set :es6}}
+                                                        ; :optimizations :simple
+                                                        ; :optimizations :none}}
                                                         ;vt-x :preloads             [day8.re-frame-10x.preload]}}
                                ;;vt end
                                :devtools {:http-root "resources/public"
@@ -101,16 +112,18 @@
 
   :profiles
   {:dev
-    {:dependencies [[binaryage/devtools "1.0.0"]]
+    {:dependencies [[binaryage/devtools "1.0.0"]
                     ;;vt add
-                    ;;vt-x[day8.re-frame/re-frame-10x "0.7.0"]]
+                    [day8.re-frame/tracing      "0.6.2"]
+                    [day8.re-frame/re-frame-10x "1.0.2"]]
+                    ; [day8.re-frame/re-frame-10x "0.7.0"]]
                         ; [day8.re-frame/re-frame-10x "0.4.7"]]
                         ; [day8.re-frame/tracing "0.5.3"]]
                         ; [proto-repl/proto-repl "0.3.1"]]
                         ;;vt end
      :source-paths ["dev"]}
    ;; vt add for re-frame-10x
-   ; [day8.re-frame/re-frame-10x "0.7.0"]}
+   ; [day8.re-frame/re-frame-10x "0.7.0"]
    ; [day8.re-frame/tracing "0.5.3"]}
    ;;vt end
    ;;vt add
