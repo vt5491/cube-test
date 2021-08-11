@@ -9,8 +9,9 @@
    [cube-test.controller-xr :as controller-xr]
    [cube-test.cube-fx :as cube-fx]
    [cube-test.utils.fps-panel :as fps-panel]
-   [cube-test.beat-club.note-twitch :as note-twitch]
-   [goog.object :as g]))
+   [cube-test.beat-club.note-twitch :as note-twitch]))
+   ; [goog.object :as g]
+   ; [clojure.data.json :as json]))
 
 (declare twitch-stream)
 (def rock-candy-track)
@@ -29,10 +30,10 @@
         light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
     (prn "scene.blue-mat=" main-scene/blue-mat)
     (set! (.-material snare-drum) main-scene/blue-mat)
-    (set! (.-position snare-drum) (bjs/Vector3. 0 1 0))
-    (g/set js/window "cube_test.beat_club.scene.mutha3" (fn [x] (prn "mutha3")))
-    (g/set js/window "cube_test.beat_club.scene.dummyadd" dummyadd)
-    (g/set js/window "abc" dummyadd)))
+    (set! (.-position snare-drum) (bjs/Vector3. 0 1 0))))
+    ; (g/set js/window "cube_test.beat_club.scene.mutha3" (fn [x] (prn "mutha3")))
+    ; (g/set js/window "cube_test.beat_club.scene.dummyadd" dummyadd)
+    ; (g/set js/window "abc" dummyadd)))
 ;
 ; (defn render-loop []
 ;   (if (= main-scene/xr-mode "vr")
@@ -98,28 +99,21 @@
   (prn "twitch-stream: intervals=" intervals)
   (twitch-interval voice (first intervals) (rest intervals)))
 
-(defn play-song-anim []
-  (prn "hello from play-song-anim")
-  ; (let [snare-intervals [1000 1000 2000 1000]])
-  ; (let [snare-intervals [780,1531,1533,1535,1534,1532,1538,384,193,384]])
-  (let [snare-intervals [772,1541,1522,1536,1530,1531,1524,382,191,379,2115,1539,1525,1541,1531,1538,1532,1535,1527,1540,1520]]
-  ; (let [snare-intervals [5,199,2863,391,1643,142,318,567,191,2873,382,2681,385,2691,388,1645,129,331,577,373,2690,383,1656,128,331,562,385,2687,377]]  ; (let [snare-intervals [500 500 1000 500]]
-    (twitch-stream :SNARE snare-intervals))
-  (let [kick-intervals [5,199,2863,391,1643,142,318,567,191,2873,382,2681,385,2691,388,1645,129,331,577,373,2690,383,1656,128,331,562,385,2687,377]]  ; (let [snare-intervals [500 500 1000 500]]
-    (twitch-stream :KICK kick-intervals)))
-    ; (prn "hi there"))
-  ; (prn "bye there"))
-    ; (js/setTimeout twitch-snare))
-  ;   (doall (map #(js/setTimeout twitch-snare))))
-  ; (twitch-snare))
-
-; (defn play-song-2 [db]
-;   (prn "abc")
-;   (prn "def")
-;   db)
+(defn play-song-anim [db]
+  (prn "hello from play-song-anim, db=" db)
+  (prn "play-song-anim: snare-stream from db=" (-> db :intervals :snare))
+  (twitch-stream :SNARE (-> db :intervals :snare))
+  (twitch-stream :KICK (-> db :intervals :kick)))
+  ; (let [snare-intervals [772,1541,1522,1536,1530,1531,1524,382,191,379,2115,1539,1525,1541,1531,1538,1532,1535,1527,1540,1520]]
+  ;   (twitch-stream :SNARE snare-intervals))
+  ; (let [kick-intervals [5,199,2863,391,1643,142,318,567,191,2873,382,2681,385,2691,388,1645,129,331,577,373,2690,383,1656,128,331,562,385,2687,377]]  ; (let [snare-intervals [500 500 1000 500]]
+  ;   (twitch-stream :KICK kick-intervals)))
 
 (defn mp3-loaded []
   (prn "mp3-loaded2: rock-candy ready to roll, rock-candy-track=" rock-candy-track)
+  (prn "mp3-loaded: about to dispatch inc-twitch-load-status")
+  (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status])
+  (prn "mp3-loaded: about to dispatch song-loaded")
   (re-frame/dispatch [:song-loaded]))
   ; (.play rock-candy-track))
   ; (bjs/Sound. ))
@@ -150,16 +144,16 @@
    ; (js-debugger)
    (let [
          ; f (g/get js/window "cube_test.beat_club.scene.mutha3")
-         f (g/get js/window "cube_test.beat_club.scene.dummyadd")
+         ; f (g/get js/window "cube_test.beat_club.scene.dummyadd")
          ; g (g/get js/window "cube_test.beat_club.scene.mp3_loaded")]
-         g (g/get js/window "cube-test.beat-club.scene.mp3-loaded")
+         ; g (g/get js/window "cube-test.beat-club.scene.mp3-loaded")
          ; tmp (js/cube_test.beat_club.scene.mp3_loaded)
          ; tmp js/cube_test.beat_club.scene.mp3_loaded]
          ; tmp js/cube_test.beat_club.scene.dummyadd
          ;; native js func in index.html
          tmp js/mutha4]
-     (prn "f=" f ",g=" g)
-     (prn "tmp=" tmp)
+     ; (prn "f=" f ",g=" g)
+     ; (prn "tmp=" tmp)
      ; (prn "dummy_add fq=" js/window.cube_test.beat_club.scene.dummyadd)
      ; (prn "console.log=" (g/get js/window "console.log"))
      ; (prn "mutha3=" (g/get js/window "cube_test.beat_club.scene.mutha3"))
@@ -209,3 +203,13 @@
   (re-frame/dispatch [:cube-test.beat-club.events/create-drum-twitches])
   (prn "point c")
   (re-frame/dispatch [:cube-test.beat-club.events/play-track]))
+
+(defn load-intervals [json]
+  (prn "beat-club.scene: json=" json)
+  ; (def a (.parse js/JSON json))
+  ; (js->clj a :keywordize-keys true)
+  ; (let [intervals (js->clj json)])
+  (let [intervals-2 (.parse js/JSON json)
+        intervals (js->clj (.parse js/JSON json) :keywordize-keys true)]
+    (prn "scene.load-intervals: intervals=" intervals ", snare intervals=" (:snare intervals))
+    intervals))

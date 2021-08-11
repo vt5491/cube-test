@@ -9,7 +9,9 @@
    ; [cube-test.twizzlers.twizzler :as twizzlers.twizzler]
    ; [cube-test.twizzlers.rules :as twizzlers.rules]
    [cube-test.utils :as utils]
-   [goog.object :as g]))
+   [goog.object :as g]
+   [ajax.core :as ajax]))
+   ; [ajax.core :refer [GET]]))
 
 (re-frame/reg-event-fx
  ::init-scene
@@ -37,11 +39,15 @@
    (println ":beat-club.init-db: now running")
    (beat-club.db/init-db db)))
 
+   ; {:keys [db]}))
 (reg-event-fx
  ::play-song-anim
- (fn [cofx [_]]
-   (println "events.play-song:")
-   {:fx [(beat-club.scene/play-song-anim)]}))
+ ; (fn [cofx [_ ])
+ (fn [{:keys [db]} _]
+   (println "events.play-song-anim: db=" db)
+   ; {:fx [(beat-club.scene/play-song-anim (:db cofx))]}
+   {:fx [(beat-club.scene/play-song-anim db)]}
+   db))
    ; (beat-club.scene/play-song)))
    ; (beat-club.scene/ps2)))
    ; {:fx [(beat-club.scene/ps2)]}))
@@ -93,9 +99,11 @@
    (println "events.start-twitch-seq:")
    {:fx [(beat-club.scene/load-mp3
           "rock-candy"
-          "sounds/music_tracks/montrose-rock-candy.mp3"
+          ; "sounds/music_tracks/montrose-rock-candy.mp3"
+          "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3"
           beat-club.scene/mp3-loaded)
-         (beat-club.scene/create-drum-twitches)]}))
+         (beat-club.scene/create-drum-twitches)
+         (re-frame/dispatch [::load-intervals])]}))
 
    ; (re-frame/dispatch [:cube-test.beat-club.events/load-rock-candy])
    ; (re-frame/dispatch [:cube-test.beat-club.events/create-drum-twitches])))
@@ -107,29 +115,120 @@
    ;       ; (js/setTimeout #(beat-club.scene/play-track) 500)]}))
    ;       (beat-club.scene/play-track)]}))
 
+; (reg-event-fx
+;  ::dummy
+;  (fn [cofx [_]]
+;    (println "events.dummy: mutha=" (g/get js/window "console.log"))
+;    ; (g/set js/window "my-js-property" false)
+;    ; (g/set js/window "my-js-property" (fn [] (+ 1 1)))
+;    (g/set js/window "my-js-property" (fn [x] (+ 1 x)))
+;    (prn "my-js-propery=" ((g/get js/window "my-js-property") 7))
+;    ; ((g/get js/window "console.log") "hi")
+;    {:fx [(beat-club.scene/load-mp3
+;           "rock-candy"
+;           "sounds/music_tracks/montrose-rock-candy.mp3"
+;           (js/cube_test.beat_club.scene.mutha2))]}))
+;           ; (fn [] (prn "song loaded mutha"))
+;           ; #(prn "song loaded mutha"))]}))
+;           ; beat-club.scene/mutha)]}))
+;           ; cube-test.beat-club.scene/mutha
+;           ; (g/get js/window "cube_test.beat_club.scene.mutha2"))]}))
+;           ; (fn [](. js/window cube_test.beat_club.scene.mutha)))]}))
+;           ; (js/cube_test.beat_club.scene.mutha2))]}))
+
 (reg-event-fx
  ::dummy
  (fn [cofx [_]]
-   (println "events.dummy: mutha=" (g/get js/window "console.log"))
-   ; (g/set js/window "my-js-property" false)
-   ; (g/set js/window "my-js-property" (fn [] (+ 1 1)))
-   (g/set js/window "my-js-property" (fn [x] (+ 1 x)))
-   (prn "my-js-propery=" ((g/get js/window "my-js-property") 7))
-   ; ((g/get js/window "console.log") "hi")
-   {:fx [(beat-club.scene/load-mp3
-          "rock-candy"
-          "sounds/music_tracks/montrose-rock-candy.mp3"
-          (js/cube_test.beat_club.scene.mutha2))]}))
-          ; (fn [] (prn "song loaded mutha"))
-          ; #(prn "song loaded mutha"))]}))
-          ; beat-club.scene/mutha)]}))
-          ; cube-test.beat-club.scene/mutha
-          ; (g/get js/window "cube_test.beat_club.scene.mutha2"))]}))
-          ; (fn [](. js/window cube_test.beat_club.scene.mutha)))]}))
-          ; (js/cube_test.beat_club.scene.mutha2))]}))
+   (prn "dummy: cofx=" cofx)
+   (prn "db@intevals=" (:intervals (:db cofx)))))
 
 (re-frame/reg-event-db
  :song-loaded
  (fn [db [_]]
    (prn "events: song-loaded")
    (assoc db :song-loaded true)))
+
+(reg-event-fx
+ ::load-intervals-old
+ ; (fn [cofx [_]])
+ (fn [_ [_ json-file]]
+   (println "events.load-intervals: json-file=" json-file)
+   {:fx [(beat-club.scene/load-intervals json-file)]}))
+
+(reg-event-db
+  ::success-http-result
+  (fn [db [_ result]]
+    (prn "success-http-result: result=" result)
+    ; (assoc db :success-http-result result)))
+    db))
+
+(reg-event-db
+  ::failure-http-result
+  (fn [db [_ result]]
+    ;; result is a map containing details of the failure
+    ; (assoc db :failure-http-result result)
+    (prn "failure-http-result: result=" result)
+    db))
+
+(reg-event-fx                             ;; note the trailing -fx
+  ::handler-with-http                      ;; usage:  (dispatch [:handler-with-http])
+  (fn [{:keys [db]} _]                    ;; the first param will be "world"
+    (prn "events.handler-with-http entered: db=" db)
+    {
+     :db   (assoc db :show-twirly true)   ;; causes the twirly-waiting-dialog to show??
+     :http-xhrio {:method          :get
+                  :uri             "https://api.github.com/orgs/day8"
+                  ; :uri             "https://localhost:8281/sounds/rock_candy_intervals.txt"
+                  :timeout         8000                                           ;; optional see API docs
+                  :response-format (ajax/json-response-format {:keywords? true})  ;; IMPORTANT!: You must provide this.
+                  ; :on-success      [::success-http-result]
+                  :on-success      [:cube-test.beat-club.events/success-http-result]
+                  ; :on-failure      [::failure-http-result]
+                  :on-failure      [:cube-test.beat-club.events/failure-http-result]}}))
+
+; (reg-event-fx
+;  ::process-intervals-json
+;  ; (fn [cofx [_]])
+;  (fn [_ [_ json db]]
+;    ; (js-debugger)
+;    (println "events.process-response: json=" json)
+;    {:fx [(beat-club.scene/load-intervals json)]}))
+(reg-event-db
+  ::process-intervals-json
+  (fn
+    [db [_ json]]
+    (let [intervals (beat-club.scene/load-intervals json)]
+      (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status])
+      (assoc db :intervals intervals))))
+    ; (-> db
+    ;     (assoc :loading? false) ;; take away that "Loading ..." UI
+    ;     (assoc :data (js->clj response)))))  ;; fairly lame processing
+
+(reg-event-db
+  ::bad-response
+  (fn [db [_ result]]
+    (prn "bad-response: result=" result)
+    ; (assoc db :success-http-result result)))
+    db))
+
+(reg-event-db
+  ::load-intervals
+  (fn
+    [db _]
+    (ajax/GET
+      ; "https://api.github.com/orgs/day8"
+      "https://localhost:8281/sounds/rock_candy_intervals.txt"
+      {:handler       #(re-frame/dispatch [::process-intervals-json %1 db])
+       :error-handler #(re-frame/dispatch [::bad-response %1])})
+
+    ; (assoc db :loading? true)
+    db))
+
+(reg-event-db
+  ::inc-twitch-load-status
+  (fn [db _]
+   (let [current-twitch-load-status (:twitch-load-status db)]
+      (prn "event: inc-twitch-load-status: current-twitch-load-status=" current-twitch-load-status)
+      (assoc db :twitch-load-status (+ current-twitch-load-status 1)))))
+      ; (assoc db :name "dummy"))))
+      ; db)))

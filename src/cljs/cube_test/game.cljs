@@ -15,7 +15,7 @@
 
 (defn init []
   (println "game.init: entered, top-level-scene=" base/top-level-scene)
-  (re-frame.core/set-loggers!  {:warn utils/rf-odoyle-warn-override-logger})
+  ; (re-frame.core/set-loggers!  {:warn utils/rf-odoyle-warn-override-logger})
   (condp = base/top-level-scene
     :cube-spin-scene (do
                                (println "top-level-scene=cube-spin-scene")

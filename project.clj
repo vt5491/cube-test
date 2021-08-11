@@ -19,7 +19,11 @@
                  [funcool/promesa "5.1.0"]
                  ;;vt add
                  [cljstache "2.0.6"]
-                 [net.sekao/odoyle-rules "0.8.0"]]
+                 [net.sekao/odoyle-rules "0.8.0"]
+                 [cljs-ajax "0.8.3"]
+                 [day8.re-frame/http-fx "0.2.3"]]
+                 ; [org.clojure/data.json "2.4.0"]]
+                 ;;vt end
                  ; [proto-repl "1.4.24"]
                  ;; Note: proto-repl .jar has a different version than proto-repl the atom plugin
                  ;; so use "0.3.1" not "1.4.24"
@@ -34,8 +38,14 @@
             ; [lein-shadow "0.2.0"]
             [lein-shadow "0.3.1"]
             [lein-shell "0.5.0"]]
+            ;;vt add
+            ; [lein-npm "0.6.2"]]
+            ;;vt end
 
   :min-lein-version "2.9.0"
+  ;;vt add
+  ; :npm {:dependencies [[json-server "0.17.0"]]}
+  ;;vt end
 
   ;;:source-paths ["src/clj" "src/cljs"]
   :source-paths ["src/clj" "src/cljs" "src/cljc" "src/test" "test2" "test"]

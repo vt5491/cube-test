@@ -8,6 +8,9 @@
 
 (defn init-panel []
   (prn "beat-club-views.init-panel")
+  (let [
+        song-loaded         @(subscribe [:song-loaded])
+        twitch-load-status  @(subscribe [:twitch-load-status])])
   [:div
      ; [:br] hi from beat-club.views])
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])} "play song anim"]
@@ -19,12 +22,14 @@
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/create-drum-twitches])} "create drum twitches"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/start-twitch-seq])} "full twitch seq"]
     [:br]
+    ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/handler-with-http])} "load intervals"]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-intervals])} "load intervals"]
+    [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/dummy])} "dummy"]
     ; (let [song-load-status @(subscribe [:beat-club.subs/sl])])
     ; (let [song-load-status @(subscribe [:cube-test.beat-club.subs/sl])])
     ; (let [song-load-status @(subscribe [::sl])])
-    [:br]
-    (let [load-status  @(subscribe [:loaded])])])
+    [:br]])
     ; [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-time])} "update time rule"]
     ; [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-dmy-atom])} "update dummy atom"]
     ; (let [tc-1 @(subscribe [:twiz-cnt])])

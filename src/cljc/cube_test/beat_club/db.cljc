@@ -9,7 +9,8 @@
 (def default-db
   {
    :interval-map {}
-   :song-loaded false})
+   :song-loaded false
+   :twitch-load-status 0})
   ;;  :name "re-frame"
    ; ::twizzlers []})
    ; :scenes {
