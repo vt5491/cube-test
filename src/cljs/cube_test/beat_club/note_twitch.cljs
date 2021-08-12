@@ -12,8 +12,18 @@
 ; (def twitch-mesh)
 (defrecord NoteTwitch [mesh])
 
-(defn init [id width height pos]
-  (let [mesh (bjs/MeshBuilder.CreateBox id (js-obj "width" width "height" height) main-scene/scene)
-        twitch (NoteTwitch. mesh)]
-      (set! (.-position mesh) pos)
-      (assoc twitch :mesh mesh)))
+(defn init
+  ([id width height pos]
+   (init id width height pos :CUBE))
+  ([id width height pos type]
+   (case type
+     :CUBE (do
+             (let [mesh (bjs/MeshBuilder.CreateBox id (js-obj "width" width "height" height) main-scene/scene)
+                   twitch (NoteTwitch. mesh)]
+              (set! (.-position mesh) pos)
+              (assoc twitch :mesh mesh)))
+     :SPHERE (do
+               (let [mesh (bjs/MeshBuilder.CreateSphere id (js-obj "width" width "height" height) main-scene/scene)
+                     twitch (NoteTwitch. mesh)]
+                (set! (.-position mesh) pos)
+                (assoc twitch :mesh mesh))))))

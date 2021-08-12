@@ -20,10 +20,12 @@
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/play-track])} "play track"]
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/create-drum-twitches])} "create drum twitches"]
-    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/start-twitch-seq])} "full twitch seq"]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/full-twitch-seq])} "full twitch seq"]
     [:br]
     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/handler-with-http])} "load intervals"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-intervals])} "load intervals"]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/stop-song-anim])} "stop song anim"]
+    ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/twitch-streaming-active false])} "stop song anim"]
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/dummy])} "dummy"]
     ; (let [song-load-status @(subscribe [:beat-club.subs/sl])])

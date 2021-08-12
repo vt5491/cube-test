@@ -10,6 +10,7 @@
   {
    :interval-map {}
    :song-loaded false
+   :twitch-streaming-active false
    :twitch-load-status 0})
   ;;  :name "re-frame"
    ; ::twizzlers []})

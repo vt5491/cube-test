@@ -14,11 +14,23 @@
 ;    7))
 
 ; (re-frame.core/reg-sub)  ;; a part of the re-frame API
+;; extractors
+(reg-sub
+ :get-song-loaded
+ (fn [db _]
+   (:song-loaded db)))
+
+(reg-sub
+ :get-twitch-load-status
+ (fn [db _]
+   (:twitch-load-status db)))
+
+;; computations
 (reg-sub
  :song-loaded
- ; :<- [:song-loaded]
+ :<- [:get-song-loaded]
  (fn [db query-v]
-  (prn "subs: song-loaded entered, db=" db)))
+  (prn "subs: song-loaded entered")))
   ; (prn "subs.song-loaded: about to dispatch event")
   ; (if (< (:twitch-load-status db) 10)
   ;   (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status]))
@@ -29,10 +41,13 @@
 
 (reg-sub
  :twitch-load-status
- ; :<- [:twitch-load-status]
- (fn [db query-v]
-   (prn "subs: twitch-load-status entered")
-   (when (= (:twitch-load-status db) 2)
+ :<- [:get-twitch-load-status]
+ ; (fn [db query-v])
+ (fn [load-status query-v]
+   ; (prn "subs: twitch-load-status entered, db=" db)
+   (prn "subs: twitch-load-status entered, load-status=" load-status)
+   ; (when (= (:twitch-load-status db) 2))
+   (when (= load-status 2)
      (re-frame/dispatch [:cube-test.beat-club.events/play-track])
      (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim]))))
    ; (prn "subs: twitch-load-status=" (:twitch-load-status db))))
