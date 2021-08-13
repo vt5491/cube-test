@@ -27,6 +27,8 @@
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/stop-song-anim])} "stop song anim"]
     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/twitch-streaming-active false])} "stop song anim"]
     [:br]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/firework])} "firework"]
+    [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/dummy])} "dummy"]
     ; (let [song-load-status @(subscribe [:beat-club.subs/sl])])
     ; (let [song-load-status @(subscribe [:cube-test.beat-club.subs/sl])])

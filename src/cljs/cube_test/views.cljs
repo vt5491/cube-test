@@ -15,9 +15,9 @@
         input-id @(re-frame/subscribe [:input-id])]
     [:div
      [:button.debug-view {:on-click #(re-frame/dispatch [:debug-view])} "debug-view"]
-     [:br]
-     [:button.print-grid {:on-click #(re-frame/dispatch [:pretty-print-grid])} "pprint-grid"]
-     [:button.print-grid {:on-click #(re-frame/dispatch [:print-vrubik-grid])} "print-grid"]
+     ; [:br]
+     ; [:button.print-grid {:on-click #(re-frame/dispatch [:pretty-print-grid])} "pprint-grid"]
+     ; [:button.print-grid {:on-click #(re-frame/dispatch [:print-vrubik-grid])} "print-grid"]
      [:br]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:vrubik-user-action])} "user action 1"]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:print-db])} "print-db"]
@@ -25,5 +25,5 @@
      (case base/top-level-scene
         :msg-cube (do (msg-cube.views/init-panel))
         :twizzlers (do (twizzlers.views/init-panel))
-        :beat-club (do (beat-club.views/init-panel)) 
+        :beat-club (do (beat-club.views/init-panel))
         [:br])]))

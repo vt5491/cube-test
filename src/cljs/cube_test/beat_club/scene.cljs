@@ -9,7 +9,9 @@
    [cube-test.controller-xr :as controller-xr]
    [cube-test.cube-fx :as cube-fx]
    [cube-test.utils.fps-panel :as fps-panel]
-   [cube-test.beat-club.note-twitch :as note-twitch]))
+   [cube-test.beat-club.note-twitch :as note-twitch]
+   [cube-test.base :as base]
+   [cube-test.utils :as utils]))
    ; [goog.object :as g]
    ; [clojure.data.json :as json]))
 
@@ -19,20 +21,13 @@
 (def kick-twitch)
 (def hi-hat-twitch)
 ;;TODO: turn into an atom?
-(def twitch-streaming-active)
+; (def twitch-streaming-active)
 (def ^:dynamic *twitch-streaming-active* (atom false))
+(def particle-helper)
 
 (defn ^:export dummyadd [x]
   (prn "now in dummyadd, x=" x)
   (+ 1 7))
-
-(defn init [db]
-  (let [scene main-scene/scene
-        snare-drum (bjs/MeshBuilder.CreateBox "snare-drum" (js-obj "width" 2 "height" 2) scene)
-        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
-    (prn "scene.blue-mat=" main-scene/blue-mat)
-    (set! (.-material snare-drum) main-scene/blue-mat)
-    (set! (.-position snare-drum) (bjs/Vector3. 0 1 0))))
 
 (defn set-mat-2 [mesh-id mat]
   (let [scene main-scene/scene
@@ -46,12 +41,12 @@
 
 (defn twitch-note [voice]
   (let [scene main-scene/scene
-        snare (.getMeshByID scene "snare-drum")
+        ; snare (.getMeshByID scene "snare-drum")
         snare-twitch (.getMeshByID scene "snare-twitch")
         kick-twitch (.getMeshByID scene "kick-twitch")
         hi-hat-twitch (.getMeshByID scene "hi-hat-twitch")]
-    (set! (.-material snare) main-scene/green-mat)
-    (js/setTimeout #(set-mat-2 "snare-drum" main-scene/blue-mat) 200)
+    ; (set! (.-material snare) main-scene/green-mat)
+    ; (js/setTimeout #(set-mat-2 "snare-drum" main-scene/blue-mat) 200)
 
     (case voice
       :SNARE (do
@@ -177,3 +172,79 @@
         ; intervals-2 (.parse js/JSON json)]
     ; (prn "scene.load-intervals: intervals=" intervals ", snare intervals=" (:snare intervals))
     intervals))
+
+(defn init-gui []
+  (let [
+        top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))
+        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 2048 1024)
+        top-pnl (bjs-gui/Grid.)
+        top-hdr (bjs-gui/TextBlock.)
+        play-twitch-btn (bjs-gui/Button.CreateSimpleButton. "play-twitch-btn" "play twitch")
+        stop-twitch-btn (bjs-gui/Button.CreateSimpleButton. "stop-twitch-btn" "stop twitch")
+        firework-btn (bjs-gui/Button.CreateSimpleButton. "firework-btn" "firework")]
+        ; left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")]
+        ; y-quat-neg-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG -90)))]
+    (set! (.-position top-plane) (bjs/Vector3. 0 3 8))
+    ; (set! (.-rotationQuaternion top-plane) y-quat-neg-90)
+    (.enableEdgesRendering top-plane)
+
+    (.addControl top-adv-texture top-pnl)
+    (set! (.-text top-hdr) "commands")
+    (set! (.-height top-hdr) "500px")
+    (set! (.-fontSize top-hdr) "160")
+    (set! (.-color top-hdr) "white")
+
+    ;; create 4 rows and 2 cols
+    (.addRowDefinition top-pnl 0.25 false)
+    (.addRowDefinition top-pnl 0.25)
+    (.addRowDefinition top-pnl 0.25)
+    (.addRowDefinition top-pnl 0.25)
+    (.addColumnDefinition top-pnl 0.5)
+    (.addColumnDefinition top-pnl 0.5)
+    (.addControl top-pnl top-hdr 0 0)
+
+    ;; play-twitch-btn
+    (set! (.-autoScale play-twitch-btn) true)
+    (set! (.-fontSize play-twitch-btn) "100")
+    (set! (.-color play-twitch-btn) "white")
+    (-> play-twitch-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "play-twitch-btn pressed")
+                (re-frame/dispatch [:cube-test.beat-club.events/full-twitch-seq]))))
+    (.addControl top-pnl play-twitch-btn 1 0)
+
+    ;; stop-twitch-btn
+    (set! (.-autoScale stop-twitch-btn) true)
+    (set! (.-fontSize stop-twitch-btn) "100")
+    (set! (.-color stop-twitch-btn) "white")
+    (-> stop-twitch-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "stop-twitch-btn pressed")
+                (re-frame/dispatch [:cube-test.beat-club.events/stop-song-anim]))))
+    (.addControl top-pnl stop-twitch-btn 1 1)
+
+    ;; firework-btn
+    (set! (.-autoScale firework-btn) true)
+    (set! (.-fontSize firework-btn) "100")
+    (set! (.-color firework-btn) "white")
+    (-> firework-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "firework-btn pressed")
+                (re-frame/dispatch [:cube-test.beat-club.events/firework]))))
+    (.addControl top-pnl firework-btn 3 0)))
+
+;BABYLON.ParticleHelper.CreateDefault(new BABYLON.Vector3(0, 0.5, 0)).start());
+(defn firework []
+  (prn "beat-club.scene: firework entered")
+  ; (set! particle-helper (bjs/ParticleHelper.CreateDefault. (bjs/Vector3 0 3 0)))
+  (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
+    (.start ph)))
+
+(defn init [db]
+  (let [scene main-scene/scene
+        ; snare-drum (bjs/MeshBuilder.CreateBox "snare-drum" (js-obj "width" 2 "height" 2) scene)
+        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
+    (init-gui)))
+    ; (prn "scene.blue-mat=" main-scene/blue-mat)
+    ; (set! (.-material snare-drum) main-scene/blue-mat)
+    ; (set! (.-position snare-drum) (bjs/Vector3. 0 1 0))))

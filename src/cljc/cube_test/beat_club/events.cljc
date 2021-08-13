@@ -180,17 +180,23 @@
 (reg-event-fx
  ::full-twitch-seq
  (fn [cofx [_]]
-   (println "events.start-twitch-seq:")
+   ; (println "events.start-twitch-seq: db=" (:db cofx))
    ; (re-frame/dispatch [::load-intervals])
-   {:fx [(do (beat-club.scene/load-mp3
-              "rock-candy"
-              ; "sounds/music_tracks/montrose-rock-candy.mp3"
-              "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3"
-              beat-club.scene/mp3-loaded)
-           (beat-club.scene/create-drum-twitches)
-           (prn "about to dispatch load-intervals")
-           (re-frame/dispatch [::load-intervals])
-           (prn "back from dispatch to load-intervals"))]}))
+   ; (if (:twitch-load-status (:db cofx)))
+   (if (-> cofx :db :twitch-load-status (= 2))
+     (do
+       (re-frame/dispatch [:cube-test.beat-club.events/play-track])
+       (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim]))
+     ;; else
+     {:fx [(do (beat-club.scene/load-mp3
+                "rock-candy"
+                ; "sounds/music_tracks/montrose-rock-candy.mp3"
+                "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3"
+                beat-club.scene/mp3-loaded)
+             (beat-club.scene/create-drum-twitches)
+             (prn "about to dispatch load-intervals")
+             (re-frame/dispatch [::load-intervals])
+             (prn "back from dispatch to load-intervals"))]})))
 
 (reg-event-db
   ::twitch-streaming-active
@@ -211,3 +217,8 @@
    {:fx [(do
            (re-frame/dispatch [::twitch-streaming-active false])
            (re-frame/dispatch [::stop-song]))]}))
+
+(reg-event-fx
+ ::firework
+ (fn [cofx [_]]
+   {:fx [(beat-club.scene/firework)]}))
