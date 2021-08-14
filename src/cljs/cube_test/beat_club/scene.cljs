@@ -20,8 +20,10 @@
 (def snare-twitch)
 (def kick-twitch)
 (def hi-hat-twitch)
-;;TODO: turn into an atom?
-; (def twitch-streaming-active)
+(def tom-1-twitch)
+(def tom-2-twitch)
+(def tom-3-twitch)
+(def crash-twitch)
 (def ^:dynamic *twitch-streaming-active* (atom false))
 (def particle-helper)
 
@@ -44,7 +46,11 @@
         ; snare (.getMeshByID scene "snare-drum")
         snare-twitch (.getMeshByID scene "snare-twitch")
         kick-twitch (.getMeshByID scene "kick-twitch")
-        hi-hat-twitch (.getMeshByID scene "hi-hat-twitch")]
+        hi-hat-twitch (.getMeshByID scene "hi-hat-twitch")
+        tom-1-twitch (.getMeshByID scene "tom-1-twitch")
+        tom-2-twitch (.getMeshByID scene "tom-2-twitch")
+        tom-3-twitch (.getMeshByID scene "tom-3-twitch")
+        crash-twitch (.getMeshByID scene "crash-twitch")]
     ; (set! (.-material snare) main-scene/green-mat)
     ; (js/setTimeout #(set-mat-2 "snare-drum" main-scene/blue-mat) 200)
 
@@ -57,51 +63,48 @@
                (js/setTimeout #(set-mat-2 "kick-twitch" main-scene/blue-mat) 200))
       :HI-HAT  (do
                   (set! (.-material hi-hat-twitch) main-scene/orange-mat)
-                  (js/setTimeout #(set-mat-2 "hi-hat-twitch" main-scene/blue-mat) 200)))))
+                  (js/setTimeout #(set-mat-2 "hi-hat-twitch" main-scene/blue-mat) 200))
+      :TOM-1 (do
+                (set! (.-material tom-1-twitch) main-scene/orange-mat)
+                (js/setTimeout #(set-mat-2 "tom-1-twitch" main-scene/blue-mat) 200))
+      :TOM-2 (do
+                (set! (.-material tom-2-twitch) main-scene/orange-mat)
+                (js/setTimeout #(set-mat-2 "tom-2-twitch" main-scene/blue-mat) 200))
+      :TOM-3 (do
+                (set! (.-material tom-3-twitch) main-scene/orange-mat)
+                (js/setTimeout #(set-mat-2 "tom-3-twitch" main-scene/blue-mat) 200))
+      :CRASH (do
+                (set! (.-material crash-twitch) main-scene/orange-mat)
+                (js/setTimeout #(set-mat-2 "crash-twitch" main-scene/blue-mat) 200)))))
 
 
 (defn twitch-interval [voice interval intervals]
-  ; (prn "twitch-snare-interval: interval=" interval ", intervals=" intervals ",
-     ; (nil? intervals=)" (nil? intervals) ", (empty? intervals)" (empty? intervals))
-  ; (when interval
-    ; (if intervals)
   (cond
     (and (not (nil? interval)) (not (empty? intervals)))
     (js/setTimeout #(do
                       (twitch-note voice)
                       (twitch-stream voice intervals))
-                      ; (prn "hi"))
                    interval)
     (and (not (nil? interval)) (empty? intervals))
     (do
-      ; (prn "path b, interval=" interval)
       (js/setTimeout #(do
-                         ; (prn "path-b2")
                          (twitch-note voice))
-                         ; (set! (.-material (.getMeshByID main-scene/scene "snare-drum")) main-scene/red-mat)
-                         ; (println "streaming done"))
                       interval))
     :else (prn "nulls all around")))
 
 (defn twitch-stream [voice intervals]
-  ; (prn "twitch-stream: intervals=" intervals)
   (when @*twitch-streaming-active*
     (twitch-interval voice (first intervals) (rest intervals))))
 
 (defn play-song-anim [db]
-  ; (prn "hello from play-song-anim, db=" db)
-  ; (prn "play-song-anim: snare-stream from db=" (-> db :intervals :snare))
-
-  ; (set! twitch-streaming-active true)
   (swap! *twitch-streaming-active* (fn [x] true))
   (twitch-stream :SNARE (-> db :intervals :snare))
   (twitch-stream :KICK (-> db :intervals :kick))
-  (twitch-stream :HI-HAT (-> db :intervals :hi-hat)))
-  ; (assoc db :twitch-streaming-active true))
-  ; (let [snare-intervals [772,1541,1522,1536,1530,1531,1524,382,191,379,2115,1539,1525,1541,1531,1538,1532,1535,1527,1540,1520]]
-  ;   (twitch-stream :SNARE snare-intervals))
-  ; (let [kick-intervals [5,199,2863,391,1643,142,318,567,191,2873,382,2681,385,2691,388,1645,129,331,577,373,2690,383,1656,128,331,562,385,2687,377]]  ; (let [snare-intervals [500 500 1000 500]]
-  ;   (twitch-stream :KICK kick-intervals)))
+  (twitch-stream :HI-HAT (-> db :intervals :hi-hat))
+  (twitch-stream :TOM-1 (-> db :intervals :tom-1))
+  (twitch-stream :TOM-2 (-> db :intervals :tom-2))
+  (twitch-stream :TOM-3 (-> db :intervals :tom-3))
+  (twitch-stream :CRASH (-> db :intervals :crash)))
 
 (defn stop-song-anim [db]
   (assoc db :twitch-streaming-active false))
@@ -153,24 +156,20 @@
   ; (prn "create-drum-twitchs: snare-twitch=" snare-twitch)
   (set! kick-twitch (note-twitch/init "kick-twitch" 2 2 (bjs/Vector3. 3 1 0)))
   ; (prn "create-drum-twitchs: kick-twitch=" kick-twitch)
-  (set! hi-hat-twitch (note-twitch/init "hi-hat-twitch" 1.5 1.5 (bjs/Vector3. 0 4 0) :SPHERE)))
+  (set! hi-hat-twitch (note-twitch/init "hi-hat-twitch" 1.5 1.5 (bjs/Vector3. 0 4 0) :SPHERE))
+  (set! tom-1-twitch (note-twitch/init "tom-1-twitch" 0.75 0.75 (bjs/Vector3. 5 4 0) :CUBE))
+  (set! tom-2-twitch (note-twitch/init "tom-2-twitch" 0.75 0.75 (bjs/Vector3. 6 4 0) :CUBE))
+  (set! tom-3-twitch (note-twitch/init "tom-3-twitch" 0.75 0.75 (bjs/Vector3. 7 4 0) :CUBE))
+  (set! crash-twitch (note-twitch/init "crash-twitch" 1 1 (bjs/Vector3. 7 6 0) :CUBE)))
 
 (defn start-twitch-seq []
   (re-frame/dispatch [:cube-test.beat-club.events/load-rock-candy])
-  (prn "point b")
   (re-frame/dispatch [:cube-test.beat-club.events/create-drum-twitches])
-  (prn "point c")
   (re-frame/dispatch [:cube-test.beat-club.events/play-track]))
 
 (defn parse-intervals [json]
-  ; (prn "beat-club.scene.load-intervals: json=" json)
   (prn "beat-club.scene.load-intervals: entered")
-  ; (def a (.parse js/JSON json))
-  ; (js->clj a :keywordize-keys true)
-  ; (let [intervals (js->clj json)])
   (let [ intervals (js->clj (.parse js/JSON json) :keywordize-keys true)]
-        ; intervals-2 (.parse js/JSON json)]
-    ; (prn "scene.load-intervals: intervals=" intervals ", snare intervals=" (:snare intervals))
     intervals))
 
 (defn init-gui []
@@ -182,10 +181,7 @@
         play-twitch-btn (bjs-gui/Button.CreateSimpleButton. "play-twitch-btn" "play twitch")
         stop-twitch-btn (bjs-gui/Button.CreateSimpleButton. "stop-twitch-btn" "stop twitch")
         firework-btn (bjs-gui/Button.CreateSimpleButton. "firework-btn" "firework")]
-        ; left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")]
-        ; y-quat-neg-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG -90)))]
     (set! (.-position top-plane) (bjs/Vector3. 0 3 8))
-    ; (set! (.-rotationQuaternion top-plane) y-quat-neg-90)
     (.enableEdgesRendering top-plane)
 
     (.addControl top-adv-texture top-pnl)
@@ -233,10 +229,8 @@
                 (re-frame/dispatch [:cube-test.beat-club.events/firework]))))
     (.addControl top-pnl firework-btn 3 0)))
 
-;BABYLON.ParticleHelper.CreateDefault(new BABYLON.Vector3(0, 0.5, 0)).start());
 (defn firework []
   (prn "beat-club.scene: firework entered")
-  ; (set! particle-helper (bjs/ParticleHelper.CreateDefault. (bjs/Vector3 0 3 0)))
   (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
     (.start ph)))
 
