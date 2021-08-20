@@ -1,6 +1,7 @@
 (ns cube-test.beat-club.subs
   (:require
-   [re-frame.core :as re-frame :refer [reg-sub subscribe]]))
+   [re-frame.core :as re-frame :refer [reg-sub subscribe]]
+   [cube-test.beat-club.events :as events]))
 
 ; (reg-sub
 ;  ; :sl
@@ -49,7 +50,9 @@
    ; (when (= (:twitch-load-status db) 2))
    (when (= load-status 2)
      (re-frame/dispatch [:cube-test.beat-club.events/play-track])
-     (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim]))))
+     (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])
+     (re-frame/dispatch [:cube-test.beat-club.events/start-animation]))))
+     ; (re-frame/dispatch [:events/play-song-anim]))))
    ; (prn "subs: twitch-load-status=" (:twitch-load-status db))))
    ; (let [song-status (:song-loaded db)]
    ;   (prn "song-status=" song-status))))   ;; trivial extraction - no computationk

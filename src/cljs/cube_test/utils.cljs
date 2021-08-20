@@ -1,3 +1,5 @@
+;; this is for utils that need to be .cljs.  If it's a generic
+;; util not dependent on cljs, consider using 'cljc/cube_test/utils/common.cljc
 (ns cube-test.utils
   (:require
    ;; Note: get circulard dep. warning if you include 'cube-test.core'

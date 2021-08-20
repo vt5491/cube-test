@@ -1,7 +1,7 @@
 ;; events is refer to many
 (ns cube-test.beat-club.events
   (:require
-   [re-frame.core :refer [reg-event-db reg-event-fx reg-fx after ] :as re-frame]
+   [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx after ] :as re-frame]
    ; [cube-test.events :as events]
    [cube-test.beat-club.game :as beat-club.game]
    [cube-test.beat-club.scene :as beat-club.scene]
@@ -91,20 +91,14 @@
  ::dummy
  (fn [cofx [_]]
    (prn "dummy: cofx=" cofx)
-   (prn "db@intevals=" (:intervals (:db cofx)))))
+   (prn "db@intevals=" (:intervals (:db cofx)))
+   {}))
 
 (re-frame/reg-event-db
- :song-loaded
+ ::song-loaded
  (fn [db [_]]
    (prn "events: song-loaded")
    (assoc db :song-loaded true)))
-
-; (reg-event-fx
-;  ::load-intervals-old
-;  ; (fn [cofx [_]])
-;  (fn [_ [_ json-file]]
-;    (println "events.load-intervals: json-file=" json-file)
-;    {:fx [(beat-club.scene/parse-intervals json-file)]}))
 
 (reg-event-db
   ::success-http-result
@@ -121,51 +115,46 @@
     (prn "failure-http-result: result=" result)
     db))
 
-(reg-event-fx                             ;; note the trailing -fx
-  ::handler-with-http                      ;; usage:  (dispatch [:handler-with-http])
-  (fn [{:keys [db]} _]                    ;; the first param will be "world"
-    (prn "events.handler-with-http entered: db=" db)
-    {
-     :db   (assoc db :show-twirly true)   ;; causes the twirly-waiting-dialog to show??
-     :http-xhrio {:method          :get
-                  :uri             "https://api.github.com/orgs/day8"
-                  ; :uri             "https://localhost:8281/sounds/rock_candy_intervals.txt"
-                  :timeout         8000                                           ;; optional see API docs
-                  :response-format (ajax/json-response-format {:keywords? true})  ;; IMPORTANT!: You must provide this.
-                  ; :on-success      [::success-http-result]
-                  :on-success      [:cube-test.beat-club.events/success-http-result]
-                  ; :on-failure      [::failure-http-result]
-                  :on-failure      [:cube-test.beat-club.events/failure-http-result]}}))
+; (reg-event-fx                             ;; note the trailing -fx
+;   ::handler-with-http                      ;; usage:  (dispatch [:handler-with-http])
+;   (fn [{:keys [db]} _]                    ;; the first param will be "world"
+;     (prn "events.handler-with-http entered: db=" db)
+;     {
+;      :db   (assoc db :show-twirly true)   ;; causes the twirly-waiting-dialog to show??
+;      :http-xhrio {:method          :get
+;                   :uri             "https://api.github.com/orgs/day8"
+;                   ; :uri             "https://localhost:8281/sounds/rock_candy_intervals.txt"
+;                   :timeout         8000                                           ;; optional see API docs
+;                   :response-format (ajax/json-response-format {:keywords? true})  ;; IMPORTANT!: You must provide this.
+;                   ; :on-success      [::success-http-result]
+;                   :on-success      [:cube-test.beat-club.events/success-http-result]
+;                   ; :on-failure      [::failure-http-result]
+;                   :on-failure      [:cube-test.beat-club.events/failure-http-result]}}))
 
 (reg-event-db
   ::process-intervals-json
   (fn
     [db [_ json]]
     (let [intervals (beat-club.scene/parse-intervals json)]
-      (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status])
+      (prn "events.process-intervals-json: about to call inc-twitch-load-status")
+      ; (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status])
+      (re-frame/dispatch [::inc-twitch-load-status])
       (assoc db :intervals intervals))))
-    ; (-> db
-    ;     (assoc :loading? false) ;; take away that "Loading ..." UI
-    ;     (assoc :data (js->clj response)))))  ;; fairly lame processing
 
 (reg-event-db
   ::bad-response
   (fn [db [_ result]]
     (prn "bad-response: result=" result)
-    ; (assoc db :success-http-result result)))
     db))
 
 (reg-event-db
   ::load-intervals
   (fn [db _]
-    (prn "events.load-intervals: entered")
     (ajax/GET
-      ; "https://api.github.com/orgs/day8"
       "https://localhost:8281/sounds/rock_candy_intervals.txt"
       {:handler       #(re-frame/dispatch [::process-intervals-json %1 db])
        :error-handler #(re-frame/dispatch [::bad-response %1])})
 
-    ; (assoc db :loading? true)
     db))
 
 (reg-event-db
@@ -174,29 +163,51 @@
    (let [current-twitch-load-status (:twitch-load-status db)]
       (prn "event: inc-twitch-load-status: current-twitch-load-status=" current-twitch-load-status)
       (assoc db :twitch-load-status (+ current-twitch-load-status 1)))))
-      ; (assoc db :name "dummy"))))
-      ; db)))
 
 (reg-event-fx
  ::full-twitch-seq
  (fn [cofx [_]]
-   ; (println "events.start-twitch-seq: db=" (:db cofx))
-   ; (re-frame/dispatch [::load-intervals])
-   ; (if (:twitch-load-status (:db cofx)))
    (if (-> cofx :db :twitch-load-status (= 2))
      (do
-       (re-frame/dispatch [:cube-test.beat-club.events/play-track])
-       (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim]))
+       {:fx [ [:dispatch [::play-track]]
+              [:dispatch [::play-song-anim]]
+              [:dispatch [::start-animation]]]})
+     ; (do
+     ;   (re-frame/dispatch [:cube-test.beat-club.events/play-track])
+     ;   (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])
+     ;   (re-frame/dispatch [:cube-test.beat-club.events/start-animation])
+     ;   {})
+               ; (re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb"]))
      ;; else
-     {:fx [(do (beat-club.scene/load-mp3
-                "rock-candy"
-                ; "sounds/music_tracks/montrose-rock-candy.mp3"
-                "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3"
-                beat-club.scene/mp3-loaded)
-             (beat-club.scene/create-drum-twitches)
-             (prn "about to dispatch load-intervals")
-             (re-frame/dispatch [::load-intervals])
-             (prn "back from dispatch to load-intervals"))]})))
+     (do
+       ; (re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"])
+       {:fx [
+             ; [(do
+             ;    (beat-club.scene/load-mp3
+             ;     "rock-candy"
+             ;     ; "sounds/music_tracks/montrose-rock-candy.mp3"
+             ;     "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3")
+             ;    beat-club.scene/mp3-loaded
+             ;    (beat-club.scene/create-drum-twitches))]
+             ;;vt-x2
+             [(beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)]
+             [(beat-club.scene/create-drum-twitches)]
+             ; [(beat-club.scene/load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang")]
+             ; [:dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
+             ; [:dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
+             ;; unknown as to why we have to do a dispatch-later to get the second model loaded
+             [:dispatch-later {:ms 200 :dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]}]
+             [:dispatch [::load-intervals]]
+             ; [:dispatch [::dummy]]
+             [:dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"]]]}))))
+             ; [(re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"])]]}))))
+             ; [(re-frame/dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])]
+              ; (beat-club.scene/load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"))]}))))
+              ; (beat-club.scene/load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"))]}))))
+              ; (re-frame/dispatch [::load-intervals]))]}))))
+              ; (re-frame/dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]))]}))))
+       ; {:fx [(re-frame/dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])]}))))
+
 
 (reg-event-db
   ::twitch-streaming-active
@@ -216,9 +227,38 @@
    ; {:fx []}))
    {:fx [(do
            (re-frame/dispatch [::twitch-streaming-active false])
-           (re-frame/dispatch [::stop-song]))]}))
+           (re-frame/dispatch [::stop-song])
+           (re-frame/dispatch [::stop-animation]))]}))
 
 (reg-event-fx
  ::firework
  (fn [cofx [_]]
    {:fx [(beat-club.scene/firework)]}))
+
+(reg-event-fx
+ ::load-model
+ (fn [cofx [_ path file name]]
+   {:fx [(beat-club.scene/load-model path file name)]}))
+
+(reg-event-fx
+ ::load-model-2
+ (fn [cofx [_ path file name]]
+   {:fx [(beat-club.scene/load-model-2 path file name)]}))
+
+(reg-event-fx
+ ::start-animation
+ (fn [cofx [_ path file]]
+   {:fx [(beat-club.scene/start-animation)]}))
+
+(reg-event-fx
+ ::stop-animation
+ (fn [cofx [_ path file]]
+   {:fx [[(beat-club.scene/stop-animation)]]}))
+
+(reg-event-db
+  ::model-loaded
+  (fn [db [_ model-id is-loaded is-playing]]
+    (prn "events.update-models: model-id=" model-id)
+    (assoc-in db [:models (keyword model-id)]
+              {:is-loaded is-loaded
+               :is-playing is-playing})))

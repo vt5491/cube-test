@@ -11,7 +11,8 @@
    [cube-test.utils.fps-panel :as fps-panel]
    [cube-test.beat-club.note-twitch :as note-twitch]
    [cube-test.base :as base]
-   [cube-test.utils :as utils]))
+   [cube-test.utils :as utils]
+   [cube-test.beat-club.twitch-stream :as twitch-stream]))
    ; [goog.object :as g]
    ; [clojure.data.json :as json]))
 
@@ -114,7 +115,7 @@
   (prn "mp3-loaded: about to dispatch inc-twitch-load-status")
   (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status])
   (prn "mp3-loaded: about to dispatch song-loaded")
-  (re-frame/dispatch [:song-loaded]))
+  (re-frame/dispatch [:cube-test.beat-club.events/song-loaded]))
   ; (.play rock-candy-track))
   ; (bjs/Sound. ))
 
@@ -233,6 +234,63 @@
   (prn "beat-club.scene: firework entered")
   (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
     (.start ph)))
+
+(defn model-loaded [new-meshes particle-systems skeletons name]
+  (prn "model-loaded: count new-meshes=" (count new-meshes))
+  ; (js-debugger)
+  (doall (map #(set! (.-scaling %1) (-> (js/BABYLON.Vector3.One) (.scale 2))) new-meshes))
+  ;; use the following on the original boxing
+  (let [scene main-scene/scene])
+  (doall (map #(set! (.-rotation %1) (js/BABYLON.Vector3. (-> %1 .-rotation .-x)
+                                                        (* base/ONE-DEG 180)
+                                                        (-> %1 .-rotation .-z))) new-meshes))
+  (doall (map #(do
+                 (when (re-matches #"__root__" (.-id %1))
+                     (set! (.-name %1) name)
+                     (set! (.-id %1) name)))
+              new-meshes))
+  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name true true])
+  (re-frame/dispatch [:cube-test.beat-club.events/stop-animation]))
+
+(defn load-model [path file name]
+  (prn "scene.load-model: name=" name)
+  (.ImportMesh js/BABYLON.SceneLoader ""
+             path
+             file
+             main-scene/scene
+             #(model-loaded %1 %2 %3 name)))
+
+(defn load-model-2 [path file name]
+  ; (load-model path file name))
+  (prn "scene.load-model-2: name=" name)
+  ; (js/setTimeout #(set-mat-2 "tom-1-twitch" main-scene/blue-mat) 200)
+  (js/setTimeout #(.then (.ImportMeshAsync js/BABYLON.SceneLoader ""
+                                              path
+                                              file
+                                              main-scene/scene
+                                              (fn [](prn "on-progress")))
+                         (fn [obj] (prn "model-2 loaded")))))
+                         ; (fn [obj] (model-loaded (.-meshes obj)
+                         ;                         (.-particleSystems obj)
+                         ;                         (.-skeletons obj)
+                         ;                         name))) 2000))
+                         ;                   ; #(model-loaded %1 %2 %3 name)))
+                                           ; #(prn "load-model-2: async handler running")))
+                                                       ; #(model-loaded %1 %2 %3 name))))
+
+(defn start-animation []
+ (let [scene main-scene/scene
+       ag (nth (.-animationGroups scene) 0)]
+       ; beat-sy]
+   (.start ag)
+   (set! (.-loopAnimation ag) true)
+   (set! (.-speedRatio ag) 1.6)))
+   ; (set! (.-speedRatio ag) 1.0)))
+
+(defn stop-animation []
+ (let [scene main-scene/scene]
+       ; ags (.-animationGroups scene)]
+   (-> (nth (.-animationGroups scene) 0) .stop)))
 
 (defn init [db]
   (let [scene main-scene/scene
