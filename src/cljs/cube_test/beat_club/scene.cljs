@@ -119,11 +119,11 @@
   ; (.play rock-candy-track))
   ; (bjs/Sound. ))
 
-(defn ^:export mutha []
-  (prn "mutha"))
-
-(defn ^:export mutha2 []
-  (prn "mutha2"))
+; (defn ^:export mutha []
+;   (prn "mutha"))
+;
+; (defn ^:export mutha2 []
+;   (prn "mutha2"))
 
 
 (defn load-mp3
@@ -235,7 +235,9 @@
   (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
     (.start ph)))
 
-(defn model-loaded [new-meshes particle-systems skeletons name]
+; (defn post-process-model [is-visible is-playing])
+
+(defn model-loaded [new-meshes particle-systems skeletons name is-visible is-playing]
   (prn "model-loaded: count new-meshes=" (count new-meshes))
   ; (js-debugger)
   (doall (map #(set! (.-scaling %1) (-> (js/BABYLON.Vector3.One) (.scale 2))) new-meshes))
@@ -249,16 +251,16 @@
                      (set! (.-name %1) name)
                      (set! (.-id %1) name)))
               new-meshes))
-  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name true true])
-  (re-frame/dispatch [:cube-test.beat-club.events/stop-animation]))
+  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-visible is-playing])
+  (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name]))
 
-(defn load-model [path file name]
-  (prn "scene.load-model: name=" name)
+(defn load-model [path file name is-visible is-playing]
+  (prn "scene.load-model: name= " name)
   (.ImportMesh js/BABYLON.SceneLoader ""
              path
              file
              main-scene/scene
-             #(model-loaded %1 %2 %3 name)))
+             #(model-loaded %1 %2 %3 name is-visible is-playing)))
 
 (defn load-model-2 [path file name]
   ; (load-model path file name))
@@ -278,19 +280,26 @@
                                            ; #(prn "load-model-2: async handler running")))
                                                        ; #(model-loaded %1 %2 %3 name))))
 
-(defn start-animation []
+(defn start-animation [anim-name]
  (let [scene main-scene/scene
-       ag (nth (.-animationGroups scene) 0)]
+       anim-name-fq (str (name anim-name) "-anim")
+       ag (.getAnimationGroupByName scene anim-name-fq)]
+       ; ag (nth (.-animationGroups scene) 0)]
        ; beat-sy]
    (.start ag)
    (set! (.-loopAnimation ag) true)
    (set! (.-speedRatio ag) 1.6)))
    ; (set! (.-speedRatio ag) 1.0)))
 
-(defn stop-animation []
- (let [scene main-scene/scene]
-       ; ags (.-animationGroups scene)]
-   (-> (nth (.-animationGroups scene) 0) .stop)))
+(defn stop-animation [anim-name]
+  (prn "scene.stop-animation: anim-name=" anim-name)
+  ; (js-debugger)
+  (let [scene main-scene/scene
+        anim-name-fq (str (name anim-name) "-anim")
+        ag (.getAnimationGroupByName scene anim-name-fq)]
+      (prn "scene.stop-animation: anim-name-fq=" anim-name-fq)
+      (.stop ag)))
+    ; (-> (nth (.-animationGroups scene) 0) .stop)))
 
 (defn init [db]
   (let [scene main-scene/scene

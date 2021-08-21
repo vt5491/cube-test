@@ -171,7 +171,7 @@
      (do
        {:fx [ [:dispatch [::play-track]]
               [:dispatch [::play-song-anim]]
-              [:dispatch [::start-animation]]]})
+              [:dispatch [::start-animation :ybot-rumba]]]})
      ; (do
      ;   (re-frame/dispatch [:cube-test.beat-club.events/play-track])
      ;   (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])
@@ -196,10 +196,22 @@
              ; [:dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
              ; [:dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
              ;; unknown as to why we have to do a dispatch-later to get the second model loaded
-             [:dispatch-later {:ms 200 :dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]}]
+             [:dispatch-later {:ms 200
+                               :dispatch [::load-model
+                                          "models/beat_club/"
+                                          "ybot_head_bang.glb"
+                                          "ybot-head-bang"
+                                          false
+                                          false]}]
              [:dispatch [::load-intervals]]
              ; [:dispatch [::dummy]]
-             [:dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"]]]}))))
+             [:dispatch
+              [::load-model
+               "models/beat_club/"
+               "ybot_rumba.glb"
+               "ybot-rumba"
+               true
+               false]]]}))))
              ; [(re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"])]]}))))
              ; [(re-frame/dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])]
               ; (beat-club.scene/load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"))]}))))
@@ -228,7 +240,8 @@
    {:fx [(do
            (re-frame/dispatch [::twitch-streaming-active false])
            (re-frame/dispatch [::stop-song])
-           (re-frame/dispatch [::stop-animation]))]}))
+           (re-frame/dispatch [::stop-animation "ybot-rumba"])
+           (re-frame/dispatch [::stop-animation "ybot-head-bang"]))]}))
 
 (reg-event-fx
  ::firework
@@ -237,8 +250,8 @@
 
 (reg-event-fx
  ::load-model
- (fn [cofx [_ path file name]]
-   {:fx [(beat-club.scene/load-model path file name)]}))
+ (fn [cofx [_ path file name is-visible is-playing]]
+   {:fx [[(beat-club.scene/load-model path file name is-visible is-playing)]]}))
 
 (reg-event-fx
  ::load-model-2
@@ -247,18 +260,28 @@
 
 (reg-event-fx
  ::start-animation
- (fn [cofx [_ path file]]
-   {:fx [(beat-club.scene/start-animation)]}))
+ (fn [cofx [_ name]]
+   {:fx [(beat-club.scene/start-animation name)]}))
 
 (reg-event-fx
  ::stop-animation
- (fn [cofx [_ path file]]
-   {:fx [[(beat-club.scene/stop-animation)]]}))
+ (fn [cofx [_ name]]
+   (prn "events: stop-animation: name=" name)
+   {:fx [[(beat-club.scene/stop-animation name)]]}))
 
 (reg-event-db
   ::model-loaded
-  (fn [db [_ model-id is-loaded is-playing]]
+  (fn [db [_ model-id is-visible is-playing]]
     (prn "events.update-models: model-id=" model-id)
     (assoc-in db [:models (keyword model-id)]
-              {:is-loaded is-loaded
+              {:is-loaded true
+               :is-visible is-visible
                :is-playing is-playing})))
+
+(reg-event-db
+  ::toggle-model-visibility
+  (fn [db [_ model-id]]
+    (prn "events.toggle-model-visibility: entered")
+    (let [model-kw (keyword model-id)
+          current-visibility (-> db :models model-kw :is-visible)]
+      (assoc-in db [:models model-kw :is-visible] (not current-visibility)))))

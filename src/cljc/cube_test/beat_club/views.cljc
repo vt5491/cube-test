@@ -10,7 +10,9 @@
   (prn "beat-club-views.init-panel")
   (let [
         song-loaded         @(subscribe [:song-loaded])
-        twitch-load-status  @(subscribe [:twitch-load-status])])
+        twitch-load-status  @(subscribe [:twitch-load-status])
+        models              @(subscribe [:model-changed])])
+        ; [items  @(subscribe [:items])]])
   [:div
      ; [:br] hi from beat-club.views])
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])} "play song anim"]
@@ -29,6 +31,7 @@
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/firework])} "firework"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])} "load-model-2"]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-visibility :ybot-rumba])} "toggle visibility"]
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/dummy])} "dummy"]
     ; (let [song-load-status @(subscribe [:beat-club.subs/sl])])
