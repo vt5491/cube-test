@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as re-frame :refer [reg-sub subscribe]]
    [cube-test.beat-club.events :as events]
+   [cube-test.utils :as utils]
    [clojure.data :as clj-data]))
 
 (def ^:dynamic *last-models* (atom nil))
@@ -82,9 +83,12 @@
    (prn "subs: model-changed: models=" models ",query-v=" query-v)
    (let [diff (first (clj-data/diff models @*last-models*))]
      (when (and diff (-> diff empty? not))
-       (let [ model-id (first (keys diff))
-              property-changed (-> diff model-id keys first)]
-         (prn "subs: changed-model-id=" model-id
+       (let [ model-kw (first (keys diff))
+              property-changed (-> diff model-kw keys first)
+              new-val (-> models model-kw property-changed)]
+         (prn "subs: changed-model-id=" model-kw
               ",property-changed=" property-changed
-              ",new value=" (-> models model-id property-changed))))
-     (swap! *last-models* (fn [x] models)))))
+              ",new value=" (-> models model-kw property-changed))
+         (when (= property-changed :is-enabled)
+           (utils/set-visibility (name model-kw) new-val)))
+       (swap! *last-models* (fn [x] models))))))

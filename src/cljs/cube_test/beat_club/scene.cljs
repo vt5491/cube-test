@@ -17,6 +17,7 @@
    ; [clojure.data.json :as json]))
 
 (declare twitch-stream)
+(declare twitch-control-stream)
 (def rock-candy-track)
 (def snare-twitch)
 (def kick-twitch)
@@ -97,6 +98,25 @@
   (when @*twitch-streaming-active*
     (twitch-interval voice (first intervals) (rest intervals))))
 
+(defn twitch-control-interval [obj interval intervals action]
+  (cond
+    (and (not (nil? interval)) (not (empty? intervals)))
+    (js/setTimeout
+      #(do
+         (apply action [1])
+         (prn "hello from control-interval, action=" action)
+         (twitch-control-stream obj intervals action))
+       interval)
+    (and (not (nil? interval)) (empty? intervals))
+    (js/setTimeout #(do action)
+                      ; (twitch-control-stream obj intervals action))
+                   interval)))
+
+(defn twitch-control-stream [obj intervals action]
+  (prn "scene.twitch-control-stream: obj=" obj ",intervals=" intervals)
+  (when @*twitch-streaming-active*
+    (twitch-control-interval obj (first intervals) (rest intervals) action)))
+
 (defn play-song-anim [db]
   (swap! *twitch-streaming-active* (fn [x] true))
   (twitch-stream :SNARE (-> db :intervals :snare))
@@ -105,7 +125,16 @@
   (twitch-stream :TOM-1 (-> db :intervals :tom-1))
   (twitch-stream :TOM-2 (-> db :intervals :tom-2))
   (twitch-stream :TOM-3 (-> db :intervals :tom-3))
-  (twitch-stream :CRASH (-> db :intervals :crash)))
+  (twitch-stream :CRASH (-> db :intervals :crash))
+  ;; control intervals
+  (when (-> db :control-intervals :toggle-model)
+    (twitch-control-stream :TOGGLE-MODEL
+                           (-> db :control-intervals :toggle-model :intervals)
+                           ; (fn [] (prn "toggle model cb activated"))
+                           ; #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled :ybot-rumba])
+                           #(utils/toggle-enabled "ybot-rumba"))))
+                           ; #(do (prn "toggle model cb activated"))
+                           ; dummyadd)))
 
 (defn stop-song-anim [db]
   (assoc db :twitch-streaming-active false))
@@ -237,7 +266,7 @@
 
 ; (defn post-process-model [is-visible is-playing])
 
-(defn model-loaded [new-meshes particle-systems skeletons name is-visible is-playing]
+(defn model-loaded [new-meshes particle-systems skeletons name is-enabled is-playing]
   (prn "model-loaded: count new-meshes=" (count new-meshes))
   ; (js-debugger)
   (doall (map #(set! (.-scaling %1) (-> (js/BABYLON.Vector3.One) (.scale 2))) new-meshes))
@@ -251,16 +280,16 @@
                      (set! (.-name %1) name)
                      (set! (.-id %1) name)))
               new-meshes))
-  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-visible is-playing])
+  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-enabled is-playing])
   (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name]))
 
-(defn load-model [path file name is-visible is-playing]
+(defn load-model [path file name is-enabled is-playing]
   (prn "scene.load-model: name= " name)
   (.ImportMesh js/BABYLON.SceneLoader ""
              path
              file
              main-scene/scene
-             #(model-loaded %1 %2 %3 name is-visible is-playing)))
+             #(model-loaded %1 %2 %3 name is-enabled is-playing)))
 
 (defn load-model-2 [path file name]
   ; (load-model path file name))

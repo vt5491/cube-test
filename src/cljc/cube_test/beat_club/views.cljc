@@ -31,7 +31,7 @@
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/firework])} "firework"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])} "load-model-2"]
-    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-visibility :ybot-rumba])} "toggle visibility"]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled :ybot-rumba])} "toggle enabled"]
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/dummy])} "dummy"]
     ; (let [song-load-status @(subscribe [:beat-club.subs/sl])])

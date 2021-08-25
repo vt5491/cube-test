@@ -98,7 +98,8 @@
  ::song-loaded
  (fn [db [_]]
    (prn "events: song-loaded")
-   (assoc db :song-loaded true)))
+   (-> (assoc db :song-loaded true)
+       (assoc-in [:song-status :loaded] true))))
 
 (reg-event-db
   ::success-http-result
@@ -192,6 +193,7 @@
              ;;vt-x2
              [(beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)]
              [(beat-club.scene/create-drum-twitches)]
+             [:dispatch [::init-song "rock-candy"]]
              ; [(beat-club.scene/load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang")]
              ; [:dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
              ; [:dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
@@ -204,6 +206,7 @@
                                           false
                                           false]}]
              [:dispatch [::load-intervals]]
+             [:dispatch [::twitch-post-process "rock-candy"]]
              ; [:dispatch [::dummy]]
              [:dispatch
               [::load-model
@@ -250,8 +253,8 @@
 
 (reg-event-fx
  ::load-model
- (fn [cofx [_ path file name is-visible is-playing]]
-   {:fx [[(beat-club.scene/load-model path file name is-visible is-playing)]]}))
+ (fn [cofx [_ path file name is-enabled is-playing]]
+   {:fx [[(beat-club.scene/load-model path file name is-enabled is-playing)]]}))
 
 (reg-event-fx
  ::load-model-2
@@ -271,17 +274,36 @@
 
 (reg-event-db
   ::model-loaded
-  (fn [db [_ model-id is-visible is-playing]]
+  (fn [db [_ model-id is-enabled is-playing]]
     (prn "events.update-models: model-id=" model-id)
     (assoc-in db [:models (keyword model-id)]
               {:is-loaded true
-               :is-visible is-visible
+               :is-enabled is-enabled
                :is-playing is-playing})))
 
 (reg-event-db
-  ::toggle-model-visibility
+  ::toggle-model-enabled
   (fn [db [_ model-id]]
     (prn "events.toggle-model-visibility: entered")
     (let [model-kw (keyword model-id)
-          current-visibility (-> db :models model-kw :is-visible)]
-      (assoc-in db [:models model-kw :is-visible] (not current-visibility)))))
+          current-visibility (-> db :models model-kw :is-enabled)]
+      (assoc-in db [:models model-kw :is-enabled] (not current-visibility)))))
+
+(reg-event-db
+  ::init-song
+  (fn [db [_ active-song]]
+    (prn "events.set-active-song: active-song= " active-song)
+    (-> (assoc-in db [:song-status :name] active-song)
+        (assoc-in [:song-status :loaded] false))))
+
+(reg-event-db
+  ::twitch-post-process
+  (fn [db [_ active-song]]
+    (prn "events.twitch-post-process: active-song= " active-song)
+    ; (-> (assoc-in db [:song-status :name] active-song)
+    ;     (assoc-in [:song-status :loaded] false))))
+    (case active-song
+      "rock-candy"
+        (do
+          (assoc-in db [:control-intervals :toggle-model]
+                    {:obj  :ybot-head-bang :intervals [2000 2000 2000 2000 2000 2000 2000 2000]})))))

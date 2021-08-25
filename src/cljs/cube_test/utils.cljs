@@ -56,3 +56,32 @@
     ;; has the appropriate xr or non-xr camera, so this is kind of a
     ;; degenerate case i.e we simply return the main-scene camera.
     "xr" (-> main-scene/camera)))
+
+(defn toggle-visibility [mesh-id]
+  (let [scene main-scene/scene
+        mesh (.getMeshByID scene mesh-id)
+        current-visibility (.-isVisble mesh)]
+    ; (js-debugger)
+    ; (set! (.-isVisible mesh) (not current-visibility))
+    (.setEnabled mesh (not current-visibility))))
+
+(defn toggle-enabled [mesh-id]
+  (let [scene main-scene/scene
+        mesh (.getMeshByID scene mesh-id)
+        current-enabled (.isEnabled mesh)]
+    ; (js-debugger)
+    ; (set! (.-isVisible mesh) (not current-visibility))
+    (.setEnabled mesh (not current-enabled))))
+    
+;; Note: "visibility" is better controlled by setting the 'enabled'
+;; property, as some meshes, such as models, are a tree structure
+;; and merely setting the .visibility of the root mesh is not suffictient
+;; to make the entire tree visble/invisible.
+(defn set-visibility [mesh-id value]
+  (let [scene main-scene/scene
+        mesh (.getMeshByID scene mesh-id)]
+        ; current-visibility (.-isVisble mesh)]
+    ; (set! (.-isVisible mesh) value)
+    ; (js-debugger)
+    ; (.isEnabled mesh value)
+    (.setEnabled mesh value)))
