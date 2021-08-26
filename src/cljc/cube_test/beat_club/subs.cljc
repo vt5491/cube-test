@@ -36,6 +36,33 @@
    (prn "subs:models: extractor driven")
    (:models db)))
 
+; (reg-sub
+;  :models.is-enabled
+;  (fn [db query-v]
+;    (prn "subs:models.is-enabled: extractor driven, query-v=" query-v)
+;    ; (:models db)
+;    ; (-> db :models :ybot-rumba)
+;    (-> db :models :ybot-head-bang)))
+;    ; (-> db :models)))
+
+(reg-sub
+ :models.ybot-rumba
+ (fn [db query-v]
+   (prn "subs:models.ybot-rumba: extractor driven, query-v=" query-v)
+   (-> db :models :ybot-rumba)))
+
+(reg-sub
+ :models.ybot-head-bang
+ (fn [db query-v]
+   (prn "subs:models.ybot-head-bang: extractor driven, query-v=" query-v)
+   (-> db :models :ybot-head-bang)))
+
+(reg-sub
+ :models.ybot-head-bang.is-enabled
+ (fn [db query-v]
+   (prn "subs:models.ybot-head-bang.is-enabled: extractor driven, query-v=" query-v)
+   (-> db :models :ybot-head-bang :is-enabled)))
+
 ;; computations
 (reg-sub
  :song-loaded
@@ -90,5 +117,25 @@
               ",property-changed=" property-changed
               ",new value=" (-> models model-kw property-changed))
          (when (= property-changed :is-enabled)
-           (utils/set-visibility (name model-kw) new-val)))
+           (utils/set-enabled (name model-kw) new-val)))
        (swap! *last-models* (fn [x] models))))))
+
+(reg-sub
+ :model-changed-rumba
+ :<- [:models.ybot-rumba]
+ (fn [model query-v]
+   (prn "subs: model-changed-rumba: model=" model ",query-v=" query-v)))
+
+(reg-sub
+ :model-changed-head-bang
+ :<- [:models.ybot-head-bang]
+ (fn [model query-v]
+   (prn "subs: model-changed-head-bang: model=" model ",query-v=" query-v)))
+
+(reg-sub
+ :model-changed.head-bang.is-enabled
+ :<- [:models.ybot-head-bang.is-enabled]
+ (fn [new-val query-v]
+   (prn "subs: model-changed.head-bang.is-enabled: new-val=" new-val ",query-v=" query-v)
+   (when new-val
+     (utils/set-enabled (name :ybot-head-bang) new-val))))

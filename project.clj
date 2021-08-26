@@ -85,12 +85,12 @@
                                ;;vt end
                                ;;vt add
                                :dev {:compiler-options {
-                                                        :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}}}
+                                                        :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
                                                         ;;vt add
                                                         ;; don't optimize fn names so we can use cljs as native js cb handlers
                                                         ; :output-feature-set :es6}}
                                                         ; :optimizations :simple
-                                                        ; :optimizations :none}}
+                                                        :optimizations :none}}
                                                         ;vt-x :preloads             [day8.re-frame-10x.preload]}}
                                ;;vt end
                                :devtools {:http-root "resources/public"

@@ -98,24 +98,25 @@
   (when @*twitch-streaming-active*
     (twitch-interval voice (first intervals) (rest intervals))))
 
-(defn twitch-control-interval [obj interval intervals action]
+(defn twitch-control-interval [type obj interval intervals action]
   (cond
     (and (not (nil? interval)) (not (empty? intervals)))
     (js/setTimeout
       #(do
-         (apply action [1])
+         (apply action [])
          (prn "hello from control-interval, action=" action)
-         (twitch-control-stream obj intervals action))
+         (twitch-control-stream type obj intervals action))
        interval)
     (and (not (nil? interval)) (empty? intervals))
-    (js/setTimeout #(do action)
+    (js/setTimeout #(do action [])
                       ; (twitch-control-stream obj intervals action))
                    interval)))
 
-(defn twitch-control-stream [obj intervals action]
-  (prn "scene.twitch-control-stream: obj=" obj ",intervals=" intervals)
+(defn twitch-control-stream [type obj intervals action]
+  (prn "scene.twitch-control-stream: type=" type ",obj=" obj
+       ",intervals=" intervals ",action=" action)
   (when @*twitch-streaming-active*
-    (twitch-control-interval obj (first intervals) (rest intervals) action)))
+    (twitch-control-interval type obj (first intervals) (rest intervals) action)))
 
 (defn play-song-anim [db]
   (swap! *twitch-streaming-active* (fn [x] true))
@@ -127,14 +128,23 @@
   (twitch-stream :TOM-3 (-> db :intervals :tom-3))
   (twitch-stream :CRASH (-> db :intervals :crash))
   ;; control intervals
+  ; (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))))
   (when (-> db :control-intervals :toggle-model)
-    (twitch-control-stream :TOGGLE-MODEL
-                           (-> db :control-intervals :toggle-model :intervals)
-                           ; (fn [] (prn "toggle model cb activated"))
-                           ; #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled :ybot-rumba])
-                           #(utils/toggle-enabled "ybot-rumba"))))
-                           ; #(do (prn "toggle model cb activated"))
-                           ; dummyadd)))
+    (doall (map (fn [hash]
+                  (let [model (-> hash :obj name)
+                        intervals (-> hash :intervals)]
+                    ;;TODO I dont think type is needed at all
+                    (twitch-control-stream :TOGGLE-MODEL
+                                           model
+                                           intervals
+                                           #(utils/toggle-enabled model))))
+                (-> db :control-intervals :toggle-model)))))
+
+    ; (let [model (-> db :control-intervals :toggle-model :obj name)
+    ;       intervals (-> db :control-intervals :toggle-model :intervals)]
+    ;   (twitch-control-stream :TOGGLE-MODEL
+    ;                          intervals
+    ;                          #(utils/toggle-enabled model)))))
 
 (defn stop-song-anim [db]
   (assoc db :twitch-streaming-active false))

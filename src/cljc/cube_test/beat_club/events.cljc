@@ -279,7 +279,8 @@
     (assoc-in db [:models (keyword model-id)]
               {:is-loaded true
                :is-enabled is-enabled
-               :is-playing is-playing})))
+               :is-playing is-playing
+               :model-id model-id})))
 
 (reg-event-db
   ::toggle-model-enabled
@@ -306,4 +307,5 @@
       "rock-candy"
         (do
           (assoc-in db [:control-intervals :toggle-model]
-                    {:obj  :ybot-head-bang :intervals [2000 2000 2000 2000 2000 2000 2000 2000]})))))
+                    [{:obj  :ybot-rumba :intervals [2000 2000 2000 2000 2000 2000 2000 2000]}
+                     {:obj  :ybot-head-bang :intervals [4000 3000 3000 3000 3000 3000 3000 3000]}])))))

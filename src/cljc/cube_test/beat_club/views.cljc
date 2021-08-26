@@ -9,9 +9,12 @@
 (defn init-panel []
   (prn "beat-club-views.init-panel")
   (let [
-        song-loaded         @(subscribe [:song-loaded])
-        twitch-load-status  @(subscribe [:twitch-load-status])
-        models              @(subscribe [:model-changed])])
+        song-loaded           @(subscribe [:song-loaded])
+        twitch-load-status    @(subscribe [:twitch-load-status])
+        models                @(subscribe [:model-changed])
+        model-rumba           @(subscribe [:model-changed-rumba])
+        model-head-bang       @(subscribe [:model-changed-head-bang])
+        model-head-bang-is-enabled  @(subscribe [:model-changed.head-bang.is-enabled])])
         ; [items  @(subscribe [:items])]])
   [:div
      ; [:br] hi from beat-club.views])

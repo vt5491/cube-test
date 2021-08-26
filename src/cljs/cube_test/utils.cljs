@@ -72,12 +72,12 @@
     ; (js-debugger)
     ; (set! (.-isVisible mesh) (not current-visibility))
     (.setEnabled mesh (not current-enabled))))
-    
+
 ;; Note: "visibility" is better controlled by setting the 'enabled'
 ;; property, as some meshes, such as models, are a tree structure
 ;; and merely setting the .visibility of the root mesh is not suffictient
 ;; to make the entire tree visble/invisible.
-(defn set-visibility [mesh-id value]
+(defn set-enabled [mesh-id value]
   (let [scene main-scene/scene
         mesh (.getMeshByID scene mesh-id)]
         ; current-visibility (.-isVisble mesh)]
