@@ -276,7 +276,7 @@
 
 ; (defn post-process-model [is-visible is-playing])
 
-(defn model-loaded [new-meshes particle-systems skeletons name is-enabled is-playing]
+(defn model-loaded [new-meshes particle-systems skeletons name is-enabled is-playing props]
   (prn "model-loaded: count new-meshes=" (count new-meshes))
   ; (js-debugger)
   (doall (map #(set! (.-scaling %1) (-> (js/BABYLON.Vector3.One) (.scale 2))) new-meshes))
@@ -290,16 +290,17 @@
                      (set! (.-name %1) name)
                      (set! (.-id %1) name)))
               new-meshes))
-  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-enabled is-playing])
+  (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-enabled is-playing props])
+  (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
   (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name]))
 
-(defn load-model [path file name is-enabled is-playing]
+(defn load-model [path file name is-enabled is-playing props]
   (prn "scene.load-model: name= " name)
   (.ImportMesh js/BABYLON.SceneLoader ""
              path
              file
              main-scene/scene
-             #(model-loaded %1 %2 %3 name is-enabled is-playing)))
+             #(model-loaded %1 %2 %3 name is-enabled is-playing props)))
 
 (defn load-model-2 [path file name]
   ; (load-model path file name))
@@ -319,7 +320,17 @@
                                            ; #(prn "load-model-2: async handler running")))
                                                        ; #(model-loaded %1 %2 %3 name))))
 
-(defn start-animation [anim-name]
+(defn init-animation-speed [model-kw speed-factor]
+ (let [scene main-scene/scene
+       anim-name-fq (str (name model-kw) "-anim")
+       ag (.getAnimationGroupByName scene anim-name-fq)]
+   ; (.start ag)
+   ; (set! (.-loopAnimation ag) true)
+   (set! (.-speedRatio ag) speed-factor)))
+   ; (js-debugger)))
+
+(defn start-animation [anim-name speed-factor]
+ (prn "scene.start-animation: anim-name=" anim-name ", speed-factor=" speed-factor)
  (let [scene main-scene/scene
        anim-name-fq (str (name anim-name) "-anim")
        ag (.getAnimationGroupByName scene anim-name-fq)]
@@ -327,7 +338,9 @@
        ; beat-sy]
    (.start ag)
    (set! (.-loopAnimation ag) true)
-   (set! (.-speedRatio ag) 1.6)))
+   ; (js-debugger)))
+   ; (set! (.-speedRatio ag) 1.6)))
+   (set! (.-speedRatio ag) speed-factor)))
    ; (set! (.-speedRatio ag) 1.0)))
 
 (defn stop-animation [anim-name]

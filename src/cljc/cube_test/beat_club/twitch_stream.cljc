@@ -1,4 +1,7 @@
-(ns cube-test.beat-club.twitch-stream)
+(ns cube-test.beat-club.twitch-stream
+   (:require
+    ; [clojure.math.numeric-tower :as math]
+    [cube-test.utils.common :as common]))
   ; (:require))
    ; [cube-test.base :as base]))
 
@@ -17,5 +20,6 @@
         quarter-note-factor (/ anim-interval beat-interval)]
     (prn "anim-interval=" anim-interval ", beat-interval=" beat-interval)
     (case beat-type
-      :quarter-note quarter-note-factor
-      :double-note (/ quarter-note-factor 2.0))))
+      ; :quarter-note (format "%.4f" quarter-note-factor)
+      :quarter-note (common/round-places quarter-note-factor 4)
+      :double-note (common/round-places (/ quarter-note-factor 2.0) 4))))

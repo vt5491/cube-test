@@ -27,6 +27,13 @@
 (let [{{{is-loaded :is-loaded} :ybot-rumba} :models} h]
   (println "Joe is a" is-loaded "wielding a"))
 
+;; variable key
+(def k1 :ybot-head-bang)
+(def k2 :ybot-rumba)
+
+(let [{{{:keys [is-enabled]} k2} :models} h]
+  (prn "val=" is-enabled))
+
 (def multiplayer-game-state
   {:joe {:class "Ranger"
          :weapon "Longbow"
@@ -40,3 +47,53 @@
 
 (let [{{:keys [class weapon]} :joe} multiplayer-game-state]
   (println "Joe is a" class "wielding a" weapon))
+
+
+(cube-test.beat-club.twitch-stream/beat-sync-factor 72 30 80 :double-note)
+(cube-test.beat-club.twitch-stream/beat-sync-factor 244 24 80 :double-note)
+(cube-test.beat-club.twitch-stream/beat-sync-factor 44 24 80 :double-note)
+
+(Math/round 3.1)
+(Math/round 1.5999)
+(clojure.core/with-precision 2 3.1415)
+
+(clojure.core/with-precision 2 :rounding FLOOR (/ 1 3M))
+(clojure.core/with-precision 2 :rounding FLOOR 3.1415M)
+(format "%.2f" 3.1415)
+
+(Math/pow 2 5)
+
+(def h {:y 0 :z 1})
+(def h2 {:a 7 :b 8})
+
+(doall (map #(prn "k=" %1 ",v=" %2)))
+
+(keys h2)
+
+(doseq [k (keys h2)
+        v (vals h2)]
+  (assoc h k v)
+  (println (str k " " v)))
+(seq h2)
+(doall (map #(prn "k=" (first %1) ",v=" (second %1)) (seq h2)))
+
+(doall (map #(assoc h (first %1) (second %1)) (seq h2)))
+
+(reduce #(do
+                             (let [level (first %2)]
+                               (assoc %1 level (reduce (fn [a b] (assoc a (first b) (.-name (second b)))) {} (second %2))))
+                          {}
+                          rubiks-grid))
+(reduce #(do
+           (let [k (first %2)
+                 v (second %2)]
+             (prn "k=" k ",v=" v)
+             (assoc %1 k v)))
+        h
+        h2)
+
+(prn h)
+(:z h)
+(def kw :z)
+(prn kw)
+(kw h)

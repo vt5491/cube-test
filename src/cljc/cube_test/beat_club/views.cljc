@@ -17,7 +17,6 @@
         model-head-bang-is-enabled  @(subscribe [:model-changed.head-bang.is-enabled])])
         ; [items  @(subscribe [:items])]])
   [:div
-     ; [:br] hi from beat-club.views])
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])} "play song anim"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-rock-candy])} "load rock-candy"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/pause-song])} "pause song"]
@@ -37,12 +36,4 @@
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled :ybot-rumba])} "toggle enabled"]
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/dummy])} "dummy"]
-    ; (let [song-load-status @(subscribe [:beat-club.subs/sl])])
-    ; (let [song-load-status @(subscribe [:cube-test.beat-club.subs/sl])])
-    ; (let [song-load-status @(subscribe [::sl])])
     [:br]])
-    ; [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-time])} "update time rule"]
-    ; [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-dmy-atom])} "update dummy atom"]
-    ; (let [tc-1 @(subscribe [:twiz-cnt])])
-    ; (let [gen-twiz-cube @(subscribe [:gen-twiz-cube])])
-    ; [:br]])

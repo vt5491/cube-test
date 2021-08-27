@@ -60,7 +60,10 @@
       ; (t/is (= r 1.6))
       (prn "beat-sync-factor-test: r=" r ",r2=" r2)
       (t/is (ish? r 1.6))
-      (t/is (ish? r2 3.2)))))
+      (t/is (ish? r2 3.2))
+      ;; here we make sure it rounds to 4 decimial places
+      (t/is (=  r (float 1.6000)))
+      (t/is (= r2 (float 3.2000))))))
 
   ; (comment
 (t/run-tests 'cube-test.beat-club.twitch-stream-test)

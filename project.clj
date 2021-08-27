@@ -22,6 +22,7 @@
                  [net.sekao/odoyle-rules "0.8.0"]
                  [cljs-ajax "0.8.3"]
                  [day8.re-frame/http-fx "0.2.3"]]
+                 ; [org.clojure/math.numeric-tower "0.0.4"]]
                  ; [org.clojure/data.json "2.4.0"]]
                  ;;vt end
                  ; [proto-repl "1.4.24"]

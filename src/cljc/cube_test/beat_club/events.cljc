@@ -44,12 +44,9 @@
  ::play-song-anim
  ; (fn [cofx [_ ])
  (fn [{:keys [db]} _]
-   ; (println "events.play-song-anim: db=" db)
-   ; {:fx [(beat-club.scene/play-song-anim (:db cofx))]}
    {:fx [(do
            (beat-club.scene/play-song-anim db)
            (re-frame/dispatch [::twitch-streaming-active true]))]}))
-   ; (assoc db :twitch-streaming-active true)))
 
 (reg-event-fx
  ::load-rock-candy
@@ -58,8 +55,6 @@
    {:fx [(beat-club.scene/load-mp3
           "rock-candy"
           "sounds/music_tracks/montrose-rock-candy.mp3"
-          ; js/cube_test.beat_club.scene.mutha2
-          ; js/cube_test.beat_club.scene.mp3-loaded
           beat-club.scene/mp3-loaded)]}))
 
 (reg-event-fx
@@ -116,22 +111,6 @@
     (prn "failure-http-result: result=" result)
     db))
 
-; (reg-event-fx                             ;; note the trailing -fx
-;   ::handler-with-http                      ;; usage:  (dispatch [:handler-with-http])
-;   (fn [{:keys [db]} _]                    ;; the first param will be "world"
-;     (prn "events.handler-with-http entered: db=" db)
-;     {
-;      :db   (assoc db :show-twirly true)   ;; causes the twirly-waiting-dialog to show??
-;      :http-xhrio {:method          :get
-;                   :uri             "https://api.github.com/orgs/day8"
-;                   ; :uri             "https://localhost:8281/sounds/rock_candy_intervals.txt"
-;                   :timeout         8000                                           ;; optional see API docs
-;                   :response-format (ajax/json-response-format {:keywords? true})  ;; IMPORTANT!: You must provide this.
-;                   ; :on-success      [::success-http-result]
-;                   :on-success      [:cube-test.beat-club.events/success-http-result]
-;                   ; :on-failure      [::failure-http-result]
-;                   :on-failure      [:cube-test.beat-club.events/failure-http-result]}}))
-
 (reg-event-db
   ::process-intervals-json
   (fn
@@ -173,30 +152,12 @@
        {:fx [ [:dispatch [::play-track]]
               [:dispatch [::play-song-anim]]
               [:dispatch [::start-animation :ybot-rumba]]]})
-     ; (do
-     ;   (re-frame/dispatch [:cube-test.beat-club.events/play-track])
-     ;   (re-frame/dispatch [:cube-test.beat-club.events/play-song-anim])
-     ;   (re-frame/dispatch [:cube-test.beat-club.events/start-animation])
-     ;   {})
-               ; (re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb"]))
      ;; else
      (do
-       ; (re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"])
        {:fx [
-             ; [(do
-             ;    (beat-club.scene/load-mp3
-             ;     "rock-candy"
-             ;     ; "sounds/music_tracks/montrose-rock-candy.mp3"
-             ;     "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3")
-             ;    beat-club.scene/mp3-loaded
-             ;    (beat-club.scene/create-drum-twitches))]
-             ;;vt-x2
              [(beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)]
              [(beat-club.scene/create-drum-twitches)]
              [:dispatch [::init-song "rock-candy"]]
-             ; [(beat-club.scene/load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang")]
-             ; [:dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
-             ; [:dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]]
              ;; unknown as to why we have to do a dispatch-later to get the second model loaded
              [:dispatch-later {:ms 200
                                :dispatch [::load-model
@@ -204,7 +165,8 @@
                                           "ybot_head_bang.glb"
                                           "ybot-head-bang"
                                           false
-                                          false]}]
+                                          false
+                                          {:anim-fps 24 :anim-cycle 44}]}]
              [:dispatch [::load-intervals]]
              [:dispatch [::twitch-post-process "rock-candy"]]
              ; [:dispatch [::dummy]]
@@ -214,15 +176,8 @@
                "ybot_rumba.glb"
                "ybot-rumba"
                true
-               false]]]}))))
-             ; [(re-frame/dispatch [::load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"])]]}))))
-             ; [(re-frame/dispatch [::load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])]
-              ; (beat-club.scene/load-model "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"))]}))))
-              ; (beat-club.scene/load-model "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"))]}))))
-              ; (re-frame/dispatch [::load-intervals]))]}))))
-              ; (re-frame/dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"]))]}))))
-       ; {:fx [(re-frame/dispatch [::load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])]}))))
-
+               false
+               {:anim-fps 30 :anim-cycle 72}]]]}))))
 
 (reg-event-db
   ::twitch-streaming-active
@@ -253,18 +208,43 @@
 
 (reg-event-fx
  ::load-model
- (fn [cofx [_ path file name is-enabled is-playing]]
-   {:fx [[(beat-club.scene/load-model path file name is-enabled is-playing)]]}))
+ (fn [cofx [_ path file name is-enabled is-playing props]]
+   {:fx [[(beat-club.scene/load-model path file name is-enabled is-playing props)]]}))
 
 (reg-event-fx
  ::load-model-2
  (fn [cofx [_ path file name]]
    {:fx [(beat-club.scene/load-model-2 path file name)]}))
 
+;;ToDo kick off a sub when intervals *and* model is loaded
+(reg-event-fx
+ ::init-animation-speed
+ (fn [{:keys [db]} [_ model-id]]
+ ; (fn [cofx [_ model-id]]
+   (prn "events.init-animation-speed db=" db ", model-id=" model-id)
+   ; (cube-test.beat-club.twitch-stream/beat-sync-factor 72 30 80 :double-note)))
+   (let [model-kw (keyword model-id)
+         models (:models db)
+         model (-> db :models model-kw)
+         ; model (-> db :models :ybot-head-bang)
+         anim-cycle (:anim-cycle model)
+         anim-fps (:anim-fps model)
+         bpm (-> db :intervals :bpm)
+         tmp (prn "events: models=" models",model-kw=" model-kw ",model=" model ",anim-cycle=" anim-cycle ",anim-fps=" anim-fps ",bpm=" bpm)
+         anim-factor (cube-test.beat-club.twitch-stream/beat-sync-factor anim-cycle anim-fps bpm :double-note)]
+     (prn "events.init-animation-speed factor=" anim-factor)
+     {:fx [(beat-club.scene/init-animation-speed model-kw anim-factor)]
+      :db (assoc-in db [:models model-kw :anim-factor] anim-factor)})))
+
+
+   ; {:fx [(beat-club.scene/init-animation-speed model-id)]}))
+
 (reg-event-fx
  ::start-animation
- (fn [cofx [_ name]]
-   {:fx [(beat-club.scene/start-animation name)]}))
+ ; (fn [cofx [_ name]])
+ (fn [{:keys [db]} [_ model-id]]
+   (let [model-kw (keyword model-id)]
+     {:fx [(beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))]})))
 
 (reg-event-fx
  ::stop-animation
@@ -274,13 +254,25 @@
 
 (reg-event-db
   ::model-loaded
-  (fn [db [_ model-id is-enabled is-playing]]
-    (prn "events.update-models: model-id=" model-id)
-    (assoc-in db [:models (keyword model-id)]
-              {:is-loaded true
-               :is-enabled is-enabled
-               :is-playing is-playing
-               :model-id model-id})))
+  (fn [db [_ model-id is-enabled is-playing props]]
+    ; (prn "events.model-loaded: props=" props)
+    (let [ tmp-db
+          (assoc-in db [:models (keyword model-id)]
+                    {:is-loaded true
+                     :is-enabled is-enabled
+                     :is-playing is-playing
+                     :model-id model-id})]
+      ;; mix in all the additinal properties as well
+      ; (prn "events.model-loaded: tmp-db=" tmp-db)
+      (reduce #(do
+                 (let [k (first %2)
+                       v (second %2)]
+                   ; (prn "k=" k ",v=" v)
+                   (assoc-in %1 [:models (keyword model-id) k] v)))
+               tmp-db
+               props))))
+
+
 
 (reg-event-db
   ::toggle-model-enabled
@@ -307,5 +299,5 @@
       "rock-candy"
         (do
           (assoc-in db [:control-intervals :toggle-model]
-                    [{:obj  :ybot-rumba :intervals [2000 2000 2000 2000 2000 2000 2000 2000]}
-                     {:obj  :ybot-head-bang :intervals [4000 3000 3000 3000 3000 3000 3000 3000]}])))))
+                    [{:obj  :ybot-rumba :intervals [20000 2000 2000 2000 2000 2000 2000 2000]}
+                     {:obj  :ybot-head-bang :intervals [40000 3000 3000 3000 3000 3000 3000 3000]}])))))
