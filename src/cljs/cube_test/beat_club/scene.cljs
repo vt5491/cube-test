@@ -130,7 +130,10 @@
   ;; control intervals
   ; (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))))
   (when (-> db :control-intervals :toggle-model)
+    ; (let [model (-> db)])
     (doall (map (fn [hash]
+                  (prn "scene.play-song-anim: hash=" hash)
+                  (prn "scene.play-song-anim: map? hash=" (map? hash) ",vector? hash=" (vector? hash))
                   (let [model (-> hash :obj name)
                         intervals (-> hash :intervals)]
                     ;;TODO I dont think type is needed at all
@@ -276,6 +279,9 @@
 
 ; (defn post-process-model [is-visible is-playing])
 
+;; TODO: alt way to not automatically start an anim upon loading
+; BABYLON.SceneLoader.OnPluginActivatedObservable.addOnce(loader => {})
+;   loader.animationStartMode = BABYLON.GLTFLoaderAnimationStartMode.NONE;
 (defn model-loaded [new-meshes particle-systems skeletons name is-enabled is-playing props]
   (prn "model-loaded: count new-meshes=" (count new-meshes))
   ; (js-debugger)
@@ -291,8 +297,10 @@
                      (set! (.-id %1) name)))
               new-meshes))
   (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-enabled is-playing props])
-  (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
-  (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name]))
+  ; (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
+  ; (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
+  ; (re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled name]))
+  (utils/toggle-enabled name))
 
 (defn load-model [path file name is-enabled is-playing props]
   (prn "scene.load-model: name= " name)
@@ -336,6 +344,7 @@
        ag (.getAnimationGroupByName scene anim-name-fq)]
        ; ag (nth (.-animationGroups scene) 0)]
        ; beat-sy]
+   ; (js-debugger)
    (.start ag)
    (set! (.-loopAnimation ag) true)
    ; (js-debugger)))

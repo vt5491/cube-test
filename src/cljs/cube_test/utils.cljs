@@ -69,6 +69,7 @@
   (let [scene main-scene/scene
         mesh (.getMeshByID scene mesh-id)
         current-enabled (.isEnabled mesh)]
+    (prn "utils.toggle-enabled: mesh-id=" mesh-id ", current-enabled=" current-enabled)
     ; (js-debugger)
     ; (set! (.-isVisible mesh) (not current-visibility))
     (.setEnabled mesh (not current-enabled))))
