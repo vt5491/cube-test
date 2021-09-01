@@ -97,3 +97,47 @@
 (def kw :z)
 (prn kw)
 (kw h)
+
+(def db {:control-intervals {:toggle-model [{:obj :abc :intervals [1 2 3]}]}})
+
+(:control-intervals db)
+(-> db :control-intervals :toggle-model)
+
+(map (fn [x] (prn "x=" x))
+     (-> db :control-intervals :toggle-model))
+
+(str 7)
+
+(def a [0 1 2 3 4 5 6 7 8])
+(def b ["abc" "def" "ghi" "jkl"])
+(range a 1 3)
+(subvec a 1 3)
+
+(for [x (range 1 5)]
+  (do
+    (prn "x=" x)))
+
+(for [x a]
+  (do
+    (prn "x=" x)))
+
+(count a)
+
+(reduce #(prn "%1=" %1 ",%2=" %2) [] a)
+
+(reduce #(prn "%1=" %1 ",%2=" %2) [] b)
+
+(doseq [[i x] (map-indexed vector items)]
+  (println i ":" x))
+
+(map-indexed #(prn "%1=" %1 ",%2=" %2) b)
+
+(map-indexed #((do (when (= %1 2)) ",%2=" %2) b))
+
+(map-indexed #(when (= %1 2) true) b)
+(map-indexed #(= %1 2)  b)
+(map-indexed #(prn %1)  b)
+(map-indexed #(prn %1) b)
+(filter #(not (nil? %1)) (map-indexed #(when (= %1 2) %2) b))
+
+(when true 7)

@@ -76,7 +76,8 @@
      ; ; (utils/toggle-enabled "ybot-head-bang")
      ; (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-head-bang 1.222])
      (utils/toggle-enabled "ybot-combo")
-     (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-combo 1.6]))))
+     ; (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-combo 1.6]))))
+     (re-frame/dispatch [:cube-test.beat-club.events/start-animation :dynamic 1.6]))))
 
 (reg-sub
  :model-changed

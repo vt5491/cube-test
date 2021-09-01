@@ -300,7 +300,12 @@
   ; (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
   ; (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
   ; (re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled name]))
-  (utils/toggle-enabled name))
+  (utils/toggle-enabled name)
+  (let [scene main-scene/scene
+        anim-name-fq (str name "-anim")
+        ag (.getAnimationGroupByName scene anim-name-fq)
+        dyn-ag (twitch-stream/create-sub-anim-group ag name 1 72)]))
+    ; (js-debugger)))
 
 (defn load-model [path file name is-enabled is-playing props]
   (prn "scene.load-model: name= " name)
@@ -342,15 +347,10 @@
  (let [scene main-scene/scene
        anim-name-fq (str (name anim-name) "-anim")
        ag (.getAnimationGroupByName scene anim-name-fq)]
-       ; ag (nth (.-animationGroups scene) 0)]
-       ; beat-sy]
-   ; (js-debugger)
-   (.start ag)
    (set! (.-loopAnimation ag) true)
-   ; (js-debugger)))
-   ; (set! (.-speedRatio ag) 1.6)))
-   (set! (.-speedRatio ag) speed-factor)))
-   ; (set! (.-speedRatio ag) 1.0)))
+   (js-debugger)
+   (set! (.-speedRatio ag) speed-factor)
+   (.start ag)))
 
 (defn stop-animation [anim-name]
   (prn "scene.stop-animation: anim-name=" anim-name)

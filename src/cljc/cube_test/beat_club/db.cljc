@@ -12,7 +12,7 @@
    :song-loaded false
    :twitch-streaming-active false
    :twitch-load-status 0
-   :models {}})
+   :models {:dynamic {:anim-factor 1.6}}})
 
   ;;  :name "re-frame"
    ; ::twizzlers []})

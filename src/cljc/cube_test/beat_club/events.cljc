@@ -44,42 +44,42 @@
  ::play-song-anim
  ; (fn [cofx [_ ])
  (fn [{:keys [db]} _]
-   {:fx [(do
-           (beat-club.scene/play-song-anim db)
-           (re-frame/dispatch [::twitch-streaming-active true]))]}))
+   {:fx [[(do
+            (beat-club.scene/play-song-anim db)
+            (re-frame/dispatch [::twitch-streaming-active true]))]]}))
 
 (reg-event-fx
  ::load-rock-candy
  (fn [cofx [_]]
    (println "events.load-rock-candy:")
-   {:fx [(beat-club.scene/load-mp3
-          "rock-candy"
-          "sounds/music_tracks/montrose-rock-candy.mp3"
-          beat-club.scene/mp3-loaded)]}))
+   {:fx [[(beat-club.scene/load-mp3
+           "rock-candy"
+           "sounds/music_tracks/montrose-rock-candy.mp3"
+           beat-club.scene/mp3-loaded)]]}))
 
 (reg-event-fx
  ::pause-song
  (fn [cofx [_]]
    (println "events.pause-song:")
-   {:fx [(beat-club.scene/pause-song)]}))
+   {:fx [[(beat-club.scene/pause-song)]]}))
 
 (reg-event-fx
  ::stop-song
  (fn [cofx [_]]
    (println "events.stop-song:")
-   {:fx [(beat-club.scene/stop-song)]}))
+   {:fx [[(beat-club.scene/stop-song)]]}))
 
 (reg-event-fx
  ::play-track
  (fn [cofx [_]]
    (println "events.play-track:")
-   {:fx [(beat-club.scene/play-track)]}))
+   {:fx [[(beat-club.scene/play-track)]]}))
 
 (reg-event-fx
  ::create-drum-twitches
  (fn [cofx [_]]
    (println "events.create-drum-twitches:")
-   {:fx [(beat-club.scene/create-drum-twitches)]}))
+   {:fx [[(beat-club.scene/create-drum-twitches)]]}))
 
 
 (reg-event-fx
@@ -144,6 +144,13 @@
       (prn "event: inc-twitch-load-status: current-twitch-load-status=" current-twitch-load-status)
       (assoc db :twitch-load-status (+ current-twitch-load-status 1)))))
 
+(reg-event-db
+  ::init-song
+  (fn [db [_ active-song]]
+    (prn "events.set-active-song: active-song= " active-song)
+    (-> (assoc-in db [:song-status :name] active-song)
+        (assoc-in [:song-status :loaded] false))))
+
 (reg-event-fx
  ::full-twitch-seq
  (fn [cofx [_]]
@@ -153,10 +160,12 @@
               [:dispatch [::play-song-anim]]
               ; [:dispatch [::start-animation :ybot-rumba 1.6]]
               ; [:dispatch [::start-animation :ybot-head-bang 1.2222]]
-              [:dispatch [::start-animation :ybot-combo 1.6]]]})
+              ; [:dispatch [::start-animation :ybot-combo 1.6]]
+              [:dispatch [::start-animation :dynamic 1.6]]]})
      ;; else
      (do
-       {:fx [
+       {:db (:db cofx)
+        :fx [
              [(beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)]
              [(beat-club.scene/create-drum-twitches)]
              [:dispatch [::init-song "rock-candy"]]
@@ -187,7 +196,7 @@
                "ybot-combo"
                true
                false
-               {:anim-fps 30 :anim-cycle 72 :anim-factor 1.5}]]]}))))
+               {:anim-fps 30 :anim-cycle 72 :anim-factor 1.6}]]]}))))
 
 (reg-event-db
   ::twitch-streaming-active
@@ -205,17 +214,17 @@
    ; (set! beat-club.scene/twitch-streaming-active false)
    (swap! beat-club.scene/*twitch-streaming-active* (fn [x] false))
    ; {:fx []}))
-   {:fx [(do
-           (re-frame/dispatch [::twitch-streaming-active false])
-           (re-frame/dispatch [::stop-song])
-           ; (re-frame/dispatch [::stop-animation "ybot-rumba"])
-           ; (re-frame/dispatch [::stop-animation "ybot-head-bang"])
-           (re-frame/dispatch [::stop-animation "ybot-combo"]))]}))
+   {:fx [[(do
+            (re-frame/dispatch [::twitch-streaming-active false])
+            (re-frame/dispatch [::stop-song])
+            ; (re-frame/dispatch [::stop-animation "ybot-rumba"])
+            ; (re-frame/dispatch [::stop-animation "ybot-head-bang"])
+            (re-frame/dispatch [::stop-animation "ybot-combo"]))]]}))
 
 (reg-event-fx
  ::firework
  (fn [cofx [_]]
-   {:fx [(beat-club.scene/firework)]}))
+   {:fx [[(beat-club.scene/firework)]]}))
 
 (reg-event-fx
  ::load-model
@@ -244,18 +253,19 @@
          tmp (prn "events: models=" models",model-kw=" model-kw ",model=" model ",anim-cycle=" anim-cycle ",anim-fps=" anim-fps ",bpm=" bpm)
          anim-factor (cube-test.beat-club.twitch-stream/beat-sync-factor anim-cycle anim-fps bpm :double-note)]
      (prn "events.init-animation-speed factor=" anim-factor)
-     {:fx [[(beat-club.scene/init-animation-speed model-kw anim-factor)]]
+     ; (beat-club.scene/init-animation-speed model-kw anim-factor)
+     {
+      :fx [[(beat-club.scene/init-animation-speed model-kw anim-factor)]]
       :db (assoc-in db [:models model-kw :anim-factor] anim-factor)})))
-
-
-   ; {:fx [(beat-club.scene/init-animation-speed model-id)]}))
 
 (reg-event-fx
  ::start-animation
  ; (fn [cofx [_ name]])
  (fn [{:keys [db]} [_ model-id]]
    (let [model-kw (keyword model-id)]
-     {:fx [(beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))]})))
+     ; (beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))
+     {:db db
+      :fx [[(beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))]]})))
 
 (reg-event-fx
  ::stop-animation
@@ -279,7 +289,7 @@
                      :model-id model-id})]
       ;; mix in all the additinal properties as well
       ; (prn "events.model-loaded: tmp-db=" tmp-db)
-      {:fx [[:dispatch ::init-animation-speed model-id anim-factor]]
+      {:fx [[:dispatch [::init-animation-speed model-id anim-factor]]]
        :db (reduce #(do
                       (let [k (first %2)
                             v (second %2)]
@@ -287,12 +297,6 @@
                         (assoc-in %1 [:models (keyword model-id) k] v)))
                    tmp-db
                    props)})))
-       ; :db (reduce #) (let [k (first %2
-                 ; v (second %2)
-                 ;                                                                                                                                                                   ; (prn "k=" k ",v=" v)
-                 ;   (assoc-in %1 [:models (keyword model-id) k] v
-                 ;            tmp-db
-                 ;     props)})))
 
 
 
@@ -315,12 +319,12 @@
       {:fx [[(utils/toggle-enabled model-id)]]
        :db (assoc-in db [:models model-kw :is-enabled] (not current-visibility))})))
 
-(reg-event-db
-  ::init-song
-  (fn [db [_ active-song]]
-    (prn "events.set-active-song: active-song= " active-song)
-    (-> (assoc-in db [:song-status :name] active-song)
-        (assoc-in [:song-status :loaded] false))))
+; (reg-event-db
+;   ::init-song
+;   (fn [db [_ active-song]]
+;     (prn "events.set-active-song: active-song= " active-song)
+;     (-> (assoc-in db [:song-status :name] active-song)
+;         (assoc-in [:song-status :loaded] false))))
 
 (reg-event-db
   ::twitch-post-process

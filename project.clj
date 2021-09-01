@@ -78,7 +78,8 @@
                                :output-dir "resources/public/js/compiled"
                                :asset-path "/js/compiled"
                                :modules {:app {:init-fn cube-test.core/init
-                                               :preloads [devtools.preload
+                                               :preloads [
+                                                          devtools.preload
                                                           ;;vt add
                                                           day8.re-frame-10x.preload]}}
                                ;;vt add
@@ -123,7 +124,8 @@
 
   :profiles
   {:dev
-    {:dependencies [[binaryage/devtools "1.0.0"]
+    {:dependencies [
+                    [binaryage/devtools "1.0.3"]
                     ;;vt add
                     [day8.re-frame/tracing      "0.6.2"]
                     [day8.re-frame/re-frame-10x "1.0.2"]]
