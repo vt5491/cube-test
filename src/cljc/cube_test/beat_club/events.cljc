@@ -160,8 +160,8 @@
               [:dispatch [::play-song-anim]]
               ; [:dispatch [::start-animation :ybot-rumba 1.6]]
               ; [:dispatch [::start-animation :ybot-head-bang 1.2222]]
-              ; [:dispatch [::start-animation :ybot-combo 1.6]]
-              [:dispatch [::start-animation :dynamic 1.6]]]})
+              [:dispatch [::start-animation :ybot-combo 1.6 0 2.4]]]})
+              ; [:dispatch [::start-animation :dynamic 1.6]]]})
      ;; else
      (do
        {:db (:db cofx)
@@ -234,7 +234,9 @@
 (reg-event-fx
  ::load-model-2
  (fn [cofx [_ path file name]]
-   {:fx [(beat-club.scene/load-model-2 path file name)]}))
+   (beat-club.scene/load-model-3 path file name)
+   ; {:fx [[(beat-club.scene/load-model-3 path file name)]]}
+   {:fx [[]]}))
 
 ;;ToDo kick off a sub when intervals *and* model is loaded
 (reg-event-fx
@@ -261,11 +263,14 @@
 (reg-event-fx
  ::start-animation
  ; (fn [cofx [_ name]])
- (fn [{:keys [db]} [_ model-id]]
+ (fn [{:keys [db]} [_ model-id speed-ratio from to]]
    (let [model-kw (keyword model-id)]
      ; (beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))
      {:db db
-      :fx [[(beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))]]})))
+      :fx [[(beat-club.scene/start-animation
+             model-id speed-ratio from to)]]})))
+             ; (-> db :models model-kw :anim-factor)
+             ; speed-ratio)]]})))
 
 (reg-event-fx
  ::stop-animation

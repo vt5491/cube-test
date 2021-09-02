@@ -18,6 +18,7 @@
 
 (declare twitch-stream)
 (declare twitch-control-stream)
+(declare start-animation)
 (def rock-candy-track)
 (def snare-twitch)
 (def kick-twitch)
@@ -28,6 +29,7 @@
 (def crash-twitch)
 (def ^:dynamic *twitch-streaming-active* (atom false))
 (def particle-helper)
+(def ^:dynamic *anim-loop-count* (atom 0))
 
 (defn ^:export dummyadd [x]
   (prn "now in dummyadd, x=" x)
@@ -300,12 +302,12 @@
   ; (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
   ; (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
   ; (re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled name]))
-  (utils/toggle-enabled name)
-  (let [scene main-scene/scene
-        anim-name-fq (str name "-anim")
-        ag (.getAnimationGroupByName scene anim-name-fq)
-        dyn-ag (twitch-stream/create-sub-anim-group ag name 1 72)]))
-    ; (js-debugger)))
+  (utils/toggle-enabled name))
+  ; (let [scene main-scene/scene
+  ;       anim-name-fq (str name "-anim")
+  ;       ag (.getAnimationGroupByName scene anim-name-fq)
+  ;       dyn-ag (twitch-stream/create-sub-anim-group ag name 1 72)]))
+  ;   ; (js-debugger)))
 
 (defn load-model [path file name is-enabled is-playing props]
   (prn "scene.load-model: name= " name)
@@ -325,13 +327,17 @@
                                               main-scene/scene
                                               (fn [](prn "on-progress")))
                          (fn [obj] (prn "model-2 loaded")))))
-                         ; (fn [obj] (model-loaded (.-meshes obj)
-                         ;                         (.-particleSystems obj)
-                         ;                         (.-skeletons obj)
-                         ;                         name))) 2000))
-                         ;                   ; #(model-loaded %1 %2 %3 name)))
-                                           ; #(prn "load-model-2: async handler running")))
-                                                       ; #(model-loaded %1 %2 %3 name))))
+
+(defn load-model-3 [path file name]
+  (prn "scene.load-model-3: name= " name)
+  (.ImportMesh js/BABYLON.SceneLoader ""
+             path
+             file
+             main-scene/scene
+             ; #(model-loaded %1 %2 %3 name is-enabled is-playing props)
+             #(do
+                (prn "model" file " is loaded")
+                (start-animation "ybot-combo" 1.0))))
 
 (defn init-animation-speed [model-kw speed-factor]
  (let [scene main-scene/scene
@@ -342,15 +348,21 @@
    (set! (.-speedRatio ag) speed-factor)))
    ; (js-debugger)))
 
-(defn start-animation [anim-name speed-factor]
- (prn "scene.start-animation: anim-name=" anim-name ", speed-factor=" speed-factor)
+(defn start-animation [anim-name speed-ratio from to]
+ (prn "scene.start-animation: anim-name=" anim-name ", speed-ratio=" speed-ratio
+      ",from=" from ", to=" to)
  (let [scene main-scene/scene
        anim-name-fq (str (name anim-name) "-anim")
        ag (.getAnimationGroupByName scene anim-name-fq)]
-   (set! (.-loopAnimation ag) true)
-   (js-debugger)
-   (set! (.-speedRatio ag) speed-factor)
-   (.start ag)))
+   ; (set! (.-loopAnimation ag) true)
+   ; (js-debugger)
+   ; (set! (.-speedRatio ag) speed-factor)
+   (.start ag true speed-ratio from to)
+   ; (set! (.-onAnimationGroupEndObservable ag) #(prn "scene: groupEndObservable ag=" %1))
+   ; (-> (.-onAnimationGroupEndObservable ag) (.add #(prn "scene: groupEndObservable ag=" %1)))
+   ; (-> (.-onAnimationGroupLoopObservable ag) (.add #(prn "scene: groupLoopObservable ag=" %1)))
+   (-> (.-onAnimationGroupLoopObservable ag) (.add twitch-stream/animGroupLoopHandler))))
+   ; (set! (.-onAnimationGroupLoopObservable ag) #(prn "scene: groupLoopObservable ag=" %1))))
 
 (defn stop-animation [anim-name]
   (prn "scene.stop-animation: anim-name=" anim-name)

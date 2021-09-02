@@ -139,5 +139,10 @@
 (map-indexed #(prn %1)  b)
 (map-indexed #(prn %1) b)
 (filter #(not (nil? %1)) (map-indexed #(when (= %1 2) %2) b))
+(filter #(not (nil? %1)) (map-indexed #((= %1 2) %2) b))
 
 (when true 7)
+(<= 3 5 4)
+(<= 4 8.6 8.5)
+
+(inc 1)

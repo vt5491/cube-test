@@ -2,7 +2,14 @@
    (:require
     ; [clojure.math.numeric-tower :as math]
     [babylonjs :as bjs]
-    [cube-test.utils.common :as common]))
+    [cube-test.utils.common :as common]
+    [cube-test.utils :as utils]))
+
+(def ^:dynamic *anim-loop-count* (atom 0))
+(def ^:dynamic *anim-index* (atom 0))
+(def anim-lookup [{:name "ybot-combo" :loop 2 :speed-ratio 0.6 :from 0 :to 2.4}
+                  {:name "ybot-combo" :loop 3 :speed-ratio 0.6 :from 2.4 :to 2.73}
+                  {:name "ybot-combo" :loop 1 :speed-ratio 0.6 :from 2.8 :to 10.9}])
 
 (defn dummy []
   8)
@@ -71,3 +78,27 @@
     (set! (.-to ag-new) 4.8)
     (js-debugger)
     ag-new))
+
+; (swap! *twitch-streaming-active* (fn [x] true))
+(defn animGroupLoopHandler [ag]
+  (swap! *anim-loop-count* (fn [loop-count] (inc loop-count)))
+  (prn "twitch-stream: anim-loop-count=" @*anim-loop-count*)
+  (let [anim-loop-cnt @*anim-loop-count*
+        anim-idx @*anim-index*
+        anim (nth anim-lookup anim-idx)
+        ag-name (:name anim)
+        max-loops (:loop anim)]
+    (prn "twitch-stream: anim=" anim)
+    (prn "twitch-stream: anim-loop-cnt=" anim-loop-cnt ", anim-idx=" anim-idx ", max-loops-" max-loops)
+    (when (and (= anim-loop-cnt max-loops) (< anim-idx (count anim-lookup)))
+      (prn "twitch-stream: going to next anim")
+      (utils/stop-animation (str ag-name "-anim"))
+      (swap! *anim-loop-count* (fn [loop-count] 0))
+      (swap! *anim-index* (fn [idx-count] (inc idx-count)))
+      (let [next-anim-idx @*anim-index*
+            next-anim (nth anim-lookup next-anim-idx)
+            next-ag-name (:name next-anim)
+            next-speed-ratio (:speed-ratio next-anim)
+            next-from (:from next-anim)
+            next-to (:to next-anim)]
+        (utils/start-animation (str next-ag-name "-anim") next-speed-ratio next-from next-to)))))

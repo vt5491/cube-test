@@ -86,3 +86,21 @@
     ; (js-debugger)
     ; (.isEnabled mesh value)
     (.setEnabled mesh value)))
+
+(defn start-animation [anim-name speed-ratio from to]
+ (prn "utils.start-animation: anim-name=" anim-name ", speed-ratio=" speed-ratio
+      ",from=" from ", to=" to)
+ (let [scene main-scene/scene
+       ; anim-name-fq (str (name anim-name) "-anim")
+       ag (.getAnimationGroupByName scene anim-name)]
+   (.start ag true speed-ratio from to)))
+   ; (-> (.-onAnimationGroupLoopObservable ag) (.add twitch-stream/animGroupLoopHandler))))
+
+(defn stop-animation [anim-name]
+  (prn "utils.stop-animation: anim-name=" anim-name)
+  ; (js-debugger)
+  (let [scene main-scene/scene
+        ; anim-name-fq (str (name anim-name) "-anim")
+        ag (.getAnimationGroupByName scene anim-name)]
+      (prn "utils.stop-animation: ag=" ag)
+      (.stop ag)))
