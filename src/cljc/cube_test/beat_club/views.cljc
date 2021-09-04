@@ -33,7 +33,7 @@
     [:br]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/firework])} "firework"]
     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-model-2 "models/beat_club/" "ybot_head_bang.glb" "ybot-head-bang"])} "load-model-2"]
-    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-model-2 "models/beat_club/" "ybot_rumba_to_head_bang_trans.glb" "ybot-rumba-to-head-bang-trans"])} "load-model-2"]
+    [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-model-2 "models/beat_club/" "ybot_combo.glb" "ybot-combo"])} "load-model-2"]
     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/load-model-2 "models/beat_club/" "ybot_rumba.glb" "ybot-rumba"])} "load-model-2"]
     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled :ybot-rumba])} "toggle enabled"]
     [:br]

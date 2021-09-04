@@ -7,12 +7,27 @@
 
 (def ^:dynamic *anim-loop-count* (atom 0))
 (def ^:dynamic *anim-index* (atom 0))
-(def anim-lookup [{:name "ybot-combo" :loop 2 :speed-ratio 0.6 :from 0 :to 2.4}
-                  {:name "ybot-combo" :loop 3 :speed-ratio 0.6 :from 2.4 :to 2.73}
-                  {:name "ybot-combo" :loop 1 :speed-ratio 0.6 :from 2.8 :to 10.9}])
+(def anim-lookup [
+                  {:name "ybot-combo" :loop 8 :speed-ratio 1.6 :from 0 :to 2.4 :desc "rumba"}
+                  ; {:name "ybot-combo" :loop 1 :speed-ratio 0.8888 :from 2.4 :to 2.73}
+                  {:name "ybot-combo" :loop 1 :speed-ratio 1.0 :from 2.4 :to 2.73}
+                  {:name "ybot-combo" :loop 1 :speed-ratio 1.2222 :from 2.8 :to 10.9 :desc "head-bang"}
+                  {:name "ybot-combo" :loop 1 :speed-ratio 1.0 :from 10.93328 :to 11.2666}
+                  {:name "ybot-combo" :loop 4 :speed-ratio 1.6 :from 11.3 :to 15.133 :desc "silly"}
+                  {:name "ybot-combo" :loop 1 :speed-ratio 1.0 :from 15.06 :to 15.4}
+                  {:name "ybot-combo" :loop 2 :speed-ratio 1.0 :from 15.4 :to 30.8333 :desc "robot"}])
+                  ; {:name "ybot-combo" :loop 8 :speed-ratio 1.6 :from 0 :to 2.4 :desc "rumba"}
+                  ; {:name "ybot-combo" :loop 1 :speed-ratio 1.0 :from 2.4 :to 2.73}
+                  ; {:name "ybot-combo" :loop 2 :speed-ratio 1.2222 :from 2.8 :to 10.9 :desc "head-bang"}])
 
 (defn dummy []
   8)
+
+(defn reset-anim-loop-count[]
+  (swap! *anim-loop-count* (fn [loop-count] 0)))
+
+(defn reset-anim-index[]
+  (swap! *anim-index* (fn [x] 0)))
 
 ;; Given a bpm (beats-per-minute) for a song, and the number of
 ;; steps and the frame rate of an animation, calculate the factor
@@ -88,17 +103,24 @@
         anim (nth anim-lookup anim-idx)
         ag-name (:name anim)
         max-loops (:loop anim)]
-    (prn "twitch-stream: anim=" anim)
+    ; (prn "twitch-stream: anim=" anim)
     (prn "twitch-stream: anim-loop-cnt=" anim-loop-cnt ", anim-idx=" anim-idx ", max-loops-" max-loops)
-    (when (and (= anim-loop-cnt max-loops) (< anim-idx (count anim-lookup)))
-      (prn "twitch-stream: going to next anim")
+    ; (js-debugger)
+    (when (= anim-loop-cnt max-loops)
       (utils/stop-animation (str ag-name "-anim"))
       (swap! *anim-loop-count* (fn [loop-count] 0))
       (swap! *anim-index* (fn [idx-count] (inc idx-count)))
-      (let [next-anim-idx @*anim-index*
-            next-anim (nth anim-lookup next-anim-idx)
-            next-ag-name (:name next-anim)
-            next-speed-ratio (:speed-ratio next-anim)
-            next-from (:from next-anim)
-            next-to (:to next-anim)]
-        (utils/start-animation (str next-ag-name "-anim") next-speed-ratio next-from next-to)))))
+      (prn "twitch-stream: going to next anim, anim-index=" @*anim-index*)
+      ; (when (< anim-idx (count anim-lookup)))
+      (if (< @*anim-index* (count anim-lookup))
+        (do
+          (let [next-anim-idx @*anim-index*
+                next-anim (nth anim-lookup next-anim-idx)
+                next-ag-name (:name next-anim)
+                next-speed-ratio (:speed-ratio next-anim)
+                next-from (:from next-anim)
+                next-to (:to next-anim)]
+            (utils/start-animation (str next-ag-name "-anim") next-speed-ratio next-from next-to)
+            (prn "twitch-stream.animGroupLoopHandler: isPlaying=" (-> (.getAnimationGroupByName cube-test.main-scene.scene "ybot-combo-anim") .-isPlaying))))
+        (do
+          (swap! *anim-index* (fn [idx-count] 0)))))))

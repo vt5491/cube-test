@@ -6,6 +6,7 @@
    [cube-test.beat-club.game :as beat-club.game]
    [cube-test.beat-club.scene :as beat-club.scene]
    [cube-test.beat-club.db :as beat-club.db]
+   [cube-test.beat-club.twitch-stream :as twitch-stream]
    ; [cube-test.twizzlers.twizzler :as twizzlers.twizzler]
    ; [cube-test.twizzlers.rules :as twizzlers.rules]
    [cube-test.utils :as utils]
@@ -18,7 +19,10 @@
  (fn [cofx _]
    ; (prn "::init-scene: cofx=" cofx)
    (beat-club.scene/init (:db cofx))
-   cofx))
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
 
 (re-frame/reg-event-fx
  ::init-game
@@ -30,8 +34,12 @@
 (re-frame/reg-event-fx
  ::run-game
  ; [twizzlers-check-spec-interceptor]
- (fn [_]
-   (beat-club.game/run-game)))
+ (fn [cofx _]
+   (beat-club.game/run-game)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
 
 (reg-event-db
  ::init-db
@@ -39,47 +47,77 @@
    (println ":beat-club.init-db: now running")
    (beat-club.db/init-db db)))
 
-   ; {:keys [db]}))
 (reg-event-fx
  ::play-song-anim
  ; (fn [cofx [_ ])
- (fn [{:keys [db]} _]
-   {:fx [[(do
-            (beat-club.scene/play-song-anim db)
-            (re-frame/dispatch [::twitch-streaming-active true]))]]}))
+ (fn [{:keys [db] :as cofx} _]
+   (beat-club.scene/play-song-anim db)
+   (re-frame/dispatch [::twitch-streaming-active true])
+   ; cofx
+   {:fx (:fx cofx)
+    :db (:db cofx)}))
+
+   ; {:fx [[(do
+   ;          (beat-club.scene/play-song-anim db)
+   ;          (re-frame/dispatch [::twitch-streaming-active true]))]]})))
 
 (reg-event-fx
  ::load-rock-candy
  (fn [cofx [_]]
    (println "events.load-rock-candy:")
-   {:fx [[(beat-club.scene/load-mp3
-           "rock-candy"
-           "sounds/music_tracks/montrose-rock-candy.mp3"
-           beat-club.scene/mp3-loaded)]]}))
+   (beat-club.scene/load-mp3
+                       "rock-candy"
+                       "sounds/music_tracks/montrose-rock-candy.mp3"
+                       beat-club.scene/mp3-loaded)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+                       ; {:fx [[]]})))
 
 (reg-event-fx
  ::pause-song
  (fn [cofx [_]]
    (println "events.pause-song:")
-   {:fx [[(beat-club.scene/pause-song)]]}))
+   (beat-club.scene/pause-song)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/pause-song)]]}))
 
 (reg-event-fx
  ::stop-song
  (fn [cofx [_]]
    (println "events.stop-song:")
-   {:fx [[(beat-club.scene/stop-song)]]}))
+   (beat-club.scene/stop-song)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/stop-song)]]}))
 
 (reg-event-fx
  ::play-track
  (fn [cofx [_]]
    (println "events.play-track:")
-   {:fx [[(beat-club.scene/play-track)]]}))
+   (beat-club.scene/play-track)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/play-track)]]}))
 
 (reg-event-fx
  ::create-drum-twitches
  (fn [cofx [_]]
    (println "events.create-drum-twitches:")
-   {:fx [[(beat-club.scene/create-drum-twitches)]]}))
+   (beat-club.scene/create-drum-twitches)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/create-drum-twitches)]]}))
 
 
 (reg-event-fx
@@ -87,7 +125,10 @@
  (fn [cofx [_]]
    (prn "dummy: cofx=" cofx)
    (prn "db@intevals=" (:intervals (:db cofx)))
-   {}))
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
 
 (re-frame/reg-event-db
  ::song-loaded
@@ -164,10 +205,12 @@
               ; [:dispatch [::start-animation :dynamic 1.6]]]})
      ;; else
      (do
+       (beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)
+       (beat-club.scene/create-drum-twitches)
        {:db (:db cofx)
         :fx [
-             [(beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)]
-             [(beat-club.scene/create-drum-twitches)]
+             ; [(beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)]
+             ; [(beat-club.scene/create-drum-twitches)]
              [:dispatch [::init-song "rock-candy"]]
              ;; unknown as to why we have to do a dispatch-later to get the second model loaded
              ; [:dispatch-later {:ms 200
@@ -214,29 +257,47 @@
    ; (set! beat-club.scene/twitch-streaming-active false)
    (swap! beat-club.scene/*twitch-streaming-active* (fn [x] false))
    ; {:fx []}))
-   {:fx [[(do
-            (re-frame/dispatch [::twitch-streaming-active false])
-            (re-frame/dispatch [::stop-song])
-            ; (re-frame/dispatch [::stop-animation "ybot-rumba"])
-            ; (re-frame/dispatch [::stop-animation "ybot-head-bang"])
-            (re-frame/dispatch [::stop-animation "ybot-combo"]))]]}))
+   ; {:fx [[(do
+   ;          (re-frame/dispatch [::twitch-streaming-active false])
+   ;          (re-frame/dispatch [::stop-song])
+   ;          ; (re-frame/dispatch [::stop-animation "ybot-rumba"])
+   ;          ; (re-frame/dispatch [::stop-animation "ybot-head-bang"])
+   ;          (re-frame/dispatch [::stop-animation "ybot-combo"]))]]
+   {:fx [[:dispatch [::twitch-streaming-active false]]
+         [:dispatch [::stop-song]]
+         [:dispatch [::reset-anim]]
+         [:dispatch [::stop-animation "ybot-combo"]]]}))
 
 (reg-event-fx
  ::firework
  (fn [cofx [_]]
-   {:fx [[(beat-club.scene/firework)]]}))
+   (beat-club.scene/firework)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/firework)]]}))
 
 (reg-event-fx
  ::load-model
  (fn [cofx [_ path file name is-enabled is-playing props]]
-   {:fx [[(beat-club.scene/load-model path file name is-enabled is-playing props)]]}))
+   (beat-club.scene/load-model path file name is-enabled is-playing props)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/load-model path file name is-enabled is-playing props)]]}))
 
 (reg-event-fx
  ::load-model-2
  (fn [cofx [_ path file name]]
    (beat-club.scene/load-model-3 path file name)
    ; {:fx [[(beat-club.scene/load-model-3 path file name)]]}
-   {:fx [[]]}))
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[]]}))
 
 ;;ToDo kick off a sub when intervals *and* model is loaded
 (reg-event-fx
@@ -256,27 +317,36 @@
          anim-factor (cube-test.beat-club.twitch-stream/beat-sync-factor anim-cycle anim-fps bpm :double-note)]
      (prn "events.init-animation-speed factor=" anim-factor)
      ; (beat-club.scene/init-animation-speed model-kw anim-factor)
+     (beat-club.scene/init-animation-speed model-kw anim-factor)
      {
-      :fx [[(beat-club.scene/init-animation-speed model-kw anim-factor)]]
+      ; :fx [[(beat-club.scene/init-animation-speed model-kw anim-factor)]]
       :db (assoc-in db [:models model-kw :anim-factor] anim-factor)})))
 
 (reg-event-fx
  ::start-animation
  ; (fn [cofx [_ name]])
- (fn [{:keys [db]} [_ model-id speed-ratio from to]]
+ (fn [{:keys [db] :as cofx} [_ model-id speed-ratio from to]]
    (let [model-kw (keyword model-id)]
      ; (beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))
-     {:db db
-      :fx [[(beat-club.scene/start-animation
-             model-id speed-ratio from to)]]})))
-             ; (-> db :models model-kw :anim-factor)
-             ; speed-ratio)]]})))
+     (beat-club.scene/start-animation model-id speed-ratio from to)
+     ; cofx)
+     {
+        ; :fx (:fx cofx)
+        :db (:db cofx)})))
+     ; {:db db
+     ;  :fx [[(beat-club.scene/start-animation
+     ;         model-id speed-ratio from to)]]})))
 
 (reg-event-fx
  ::stop-animation
  (fn [cofx [_ name]]
    (prn "events: stop-animation: name=" name)
-   {:fx [[(beat-club.scene/stop-animation name)]]}))
+   (beat-club.scene/stop-animation name)
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[(beat-club.scene/stop-animation name)]]}))
 
 ; (reg-event-db)
 (reg-event-fx
@@ -321,7 +391,9 @@
     (prn "events.toggle-model-enabled: entered")
     (let [model-kw (keyword model-id)
           current-visibility (-> db :models model-kw :is-enabled)]
-      {:fx [[(utils/toggle-enabled model-id)]]
+      (utils/toggle-enabled model-id)
+      {
+       ; :fx [[(utils/toggle-enabled model-id)]]
        :db (assoc-in db [:models model-kw :is-enabled] (not current-visibility))})))
 
 ; (reg-event-db
@@ -344,3 +416,19 @@
                     [])))))
                      ; {:obj  :ybot-rumba :intervals [2000 2000 2000 2000 2000 2000 2000 2000]}
                      ; {:obj  :ybot-head-bang :intervals [2000 2000 2000 2000 2000 2000 2000 2000]}])))))
+
+; (reg-event-fx
+;  ::reset-anim-loop-count
+;  (fn [cofx [_]]))
+
+(reg-event-fx
+ ::reset-anim
+ (fn [cofx [_]]
+   (println "events.reset-anim:")
+   (twitch-stream/reset-anim-loop-count)
+   (twitch-stream/reset-anim-index)
+   ; {:fx [[]]}))
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))

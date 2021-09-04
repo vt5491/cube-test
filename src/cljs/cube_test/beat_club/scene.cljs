@@ -189,6 +189,8 @@
   (.pause rock-candy-track))
 
 (defn stop-song []
+  ; (js-debugger)
+  (prn "scene: stop-song: stopping " rock-candy-track)
   (.stop rock-candy-track))
 
 (defn play-track []
@@ -300,7 +302,7 @@
               new-meshes))
   (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-enabled is-playing props])
   ; (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
-  ; (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
+  (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
   ; (re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled name]))
   (utils/toggle-enabled name))
   ; (let [scene main-scene/scene
@@ -355,13 +357,17 @@
        anim-name-fq (str (name anim-name) "-anim")
        ag (.getAnimationGroupByName scene anim-name-fq)]
    ; (set! (.-loopAnimation ag) true)
-   ; (js-debugger)
    ; (set! (.-speedRatio ag) speed-factor)
+   ; (.stop ag)
+   (.reset ag)
    (.start ag true speed-ratio from to)
    ; (set! (.-onAnimationGroupEndObservable ag) #(prn "scene: groupEndObservable ag=" %1))
    ; (-> (.-onAnimationGroupEndObservable ag) (.add #(prn "scene: groupEndObservable ag=" %1)))
    ; (-> (.-onAnimationGroupLoopObservable ag) (.add #(prn "scene: groupLoopObservable ag=" %1)))
+   (-> (.-onAnimationGroupLoopObservable ag) (.clear))
    (-> (.-onAnimationGroupLoopObservable ag) (.add twitch-stream/animGroupLoopHandler))))
+   ; (js-debugger)))
+   ; (-> (.-onAnimationGroupLoopObservable ag) (.addOnce twitch-stream/animGroupLoopHandler))))
    ; (set! (.-onAnimationGroupLoopObservable ag) #(prn "scene: groupLoopObservable ag=" %1))))
 
 (defn stop-animation [anim-name]

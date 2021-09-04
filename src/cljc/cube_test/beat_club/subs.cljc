@@ -17,13 +17,13 @@
 (reg-sub
  :get-twitch-load-status
  (fn [db _]
-   (prn "subs:get-twitch-load-status: extractor driven")
+   ; (prn "subs:get-twitch-load-status: extractor driven")
    (:twitch-load-status db)))
 
 (reg-sub
  :models
  (fn [db _]
-   (prn "subs:models: extractor driven")
+   ; (prn "subs:models: extractor driven")
    (:models db)))
 
 ; (reg-sub
@@ -38,27 +38,27 @@
 (reg-sub
  :models.ybot-rumba
  (fn [db query-v]
-   (prn "subs:models.ybot-rumba: extractor driven, query-v=" query-v)
+   ; (prn "subs:models.ybot-rumba: extractor driven, query-v=" query-v)
    (-> db :models :ybot-rumba)))
 
 (reg-sub
  :models.ybot-head-bang
  (fn [db query-v]
-   (prn "subs:models.ybot-head-bang: extractor driven, query-v=" query-v)
+   ; (prn "subs:models.ybot-head-bang: extractor driven, query-v=" query-v)
    (-> db :models :ybot-head-bang)))
 
 (reg-sub
  :models.ybot-head-bang.is-enabled
  (fn [db query-v]
-   (prn "subs:models.ybot-head-bang.is-enabled: extractor driven, query-v=" query-v)
+   ; (prn "subs:models.ybot-head-bang.is-enabled: extractor driven, query-v=" query-v)
    (-> db :models :ybot-head-bang :is-enabled)))
 
 ;; computations
 (reg-sub
  :song-loaded
  :<- [:get-song-loaded]
- (fn [db query-v]
-  (prn "subs: song-loaded entered")))
+ (fn [db query-v]))
+  ; (prn "subs: song-loaded entered")))
 
 (reg-sub
  :twitch-load-status
@@ -66,7 +66,7 @@
  ; (fn [db query-v])
  (fn [load-status query-v]
    ; (prn "subs: twitch-load-status entered, db=" db)
-   (prn "subs: twitch-load-status entered, load-status=" load-status)
+   ; (prn "subs: twitch-load-status entered, load-status=" load-status)
    ; (when (= (:twitch-load-status db) 2))
    (when (= load-status 2)
      (re-frame/dispatch [:cube-test.beat-club.events/play-track])
@@ -76,7 +76,7 @@
      ; ; (utils/toggle-enabled "ybot-head-bang")
      ; (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-head-bang 1.222])
      (utils/toggle-enabled "ybot-combo")
-     (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-combo 0.6 0 2.4]))))
+     (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-combo 1.6 0 2.4]))))
      ; (re-frame/dispatch [:cube-test.beat-club.events/start-animation :ybot-combo 1.6 2.4 2.73]))))
      ; (re-frame/dispatch [:cube-test.beat-club.events/start-animation :dynamic 1.6]))))
 
@@ -86,8 +86,6 @@
  :<- [:models]
  ; (fn [db query-v])
  (fn [models query-v]
-   ; (prn "subs:  diff=" (clj-data/diff {:a 7 :b 8} {:a 7}))
-   ; (prn "subs: *last-models* (non-ref)=" *last-models*)
    (prn "subs: *last-models*=" @*last-models*)
    (prn "subs: diff=" (first (clj-data/diff models @*last-models*)))
    (prn "subs: model-changed: models=" models ",query-v=" query-v)
@@ -119,6 +117,6 @@
  :model-changed.head-bang.is-enabled
  :<- [:models.ybot-head-bang.is-enabled]
  (fn [new-val query-v]
-   (prn "subs: model-changed.head-bang.is-enabled: new-val=" new-val ",query-v=" query-v)
+   ; (prn "subs: model-changed.head-bang.is-enabled: new-val=" new-val ",query-v=" query-v)
    (when new-val
      (utils/set-enabled (name :ybot-head-bang) new-val))))
