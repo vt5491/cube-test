@@ -223,15 +223,6 @@
              ;                              {:anim-fps 24 :anim-cycle 44}]}]
              [:dispatch [::load-intervals]]
              [:dispatch [::twitch-post-process "rock-candy"]]
-             ; [:dispatch [::dummy]]
-             ; [:dispatch
-             ;  [::load-model
-             ;   "models/beat_club/"
-             ;   "ybot_rumba.glb"
-             ;   "ybot-rumba"
-             ;   true
-             ;   false
-             ;   {:anim-fps 30 :anim-cycle 72}]]
              [:dispatch
               [::load-model
                "models/beat_club/"
@@ -269,6 +260,13 @@
          [:dispatch [::stop-animation "ybot-combo"]]]}))
 
 (reg-event-fx
+ ::toggle-dancer
+ (fn [cofx [_]]
+   (beat-club.scene/toggle-dancer)
+   {
+    :db (:db cofx)}))
+
+(reg-event-fx
  ::firework
  (fn [cofx [_]]
    (beat-club.scene/firework)
@@ -292,6 +290,26 @@
  ::load-model-2
  (fn [cofx [_ path file name]]
    (beat-club.scene/load-model-3 path file name)
+   ; {:fx [[(beat-club.scene/load-model-3 path file name)]]}
+   ; cofx
+   {
+    ; :fx (:fx cofx)
+    :db (:db cofx)}))
+   ; {:fx [[]]}))
+
+(reg-event-fx
+ ::load-model-4
+ (fn [cofx [_ path file name]]
+   (beat-club.scene/load-model-4 path file name)
+   cofx))
+   ; {
+   ;  ; :fx (:fx cofx)
+   ;  :db (:db cofx)}))
+
+(reg-event-fx
+ ::load-model-fbx
+ (fn [cofx [_ path file name]]
+   (beat-club.scene/load-model-fbx path file name)
    ; {:fx [[(beat-club.scene/load-model-3 path file name)]]}
    ; cofx
    {
@@ -324,18 +342,12 @@
 
 (reg-event-fx
  ::start-animation
- ; (fn [cofx [_ name]])
  (fn [{:keys [db] :as cofx} [_ model-id speed-ratio from to]]
    (let [model-kw (keyword model-id)]
      ; (beat-club.scene/start-animation model-id (-> db :models model-kw :anim-factor))
      (beat-club.scene/start-animation model-id speed-ratio from to)
-     ; cofx)
      {
-        ; :fx (:fx cofx)
         :db (:db cofx)})))
-     ; {:db db
-     ;  :fx [[(beat-club.scene/start-animation
-     ;         model-id speed-ratio from to)]]})))
 
 (reg-event-fx
  ::stop-animation

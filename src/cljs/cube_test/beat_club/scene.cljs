@@ -12,7 +12,9 @@
    [cube-test.beat-club.note-twitch :as note-twitch]
    [cube-test.base :as base]
    [cube-test.utils :as utils]
-   [cube-test.beat-club.twitch-stream :as twitch-stream]))
+   [cube-test.beat-club.twitch-stream :as twitch-stream]
+   [babylonjs-loaders :as bjs-l]))
+
    ; [goog.object :as g]
    ; [clojure.data.json :as json]))
 
@@ -227,6 +229,7 @@
         top-hdr (bjs-gui/TextBlock.)
         play-twitch-btn (bjs-gui/Button.CreateSimpleButton. "play-twitch-btn" "play twitch")
         stop-twitch-btn (bjs-gui/Button.CreateSimpleButton. "stop-twitch-btn" "stop twitch")
+        toggle-dancer-btn (bjs-gui/Button.CreateSimpleButton. "toggle-dancer-btn" "toggle dancer")
         firework-btn (bjs-gui/Button.CreateSimpleButton. "firework-btn" "firework")]
     (set! (.-position top-plane) (bjs/Vector3. 0 3 8))
     (.enableEdgesRendering top-plane)
@@ -266,6 +269,16 @@
                 (re-frame/dispatch [:cube-test.beat-club.events/stop-song-anim]))))
     (.addControl top-pnl stop-twitch-btn 1 1)
 
+    ;; toggle-dancer-btn
+    (set! (.-autoScale toggle-dancer-btn) true)
+    (set! (.-fontSize toggle-dancer-btn) "100")
+    (set! (.-color toggle-dancer-btn) "white")
+    (-> toggle-dancer-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "toggle-dancer-btn pressed")
+                (re-frame/dispatch [:cube-test.beat-club.events/toggle-dancer]))))
+    (.addControl top-pnl toggle-dancer-btn 2 0)
+
     ;; firework-btn
     (set! (.-autoScale firework-btn) true)
     (set! (.-fontSize firework-btn) "100")
@@ -278,10 +291,25 @@
 
 (defn firework []
   (prn "beat-club.scene: firework entered")
-  (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
-    (.start ph)))
+  (if particle-helper
+    (do
+      (if (.isStarted particle-helper)
+        (.stop particle-helper)
+        (.start particle-helper)))
+    (do
+      (set! particle-helper (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4)))
+      (.start particle-helper))))
+  ; (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
+  ;   (.start ph)))
 
-; (defn post-process-model [is-visible is-playing])
+;;TODO: put into some scene helper class as this isn't really direclty view-orientd
+;; (a little but more state-oriented)
+(defn toggle-dancer []
+  (prn "beat-club.scene: toggle-dancer entered")
+  (let [scene main-scene/scene
+        mesh (.getMeshByID scene "ybot-combo")
+        mesh-enabled (.isEnabled mesh)]
+    (.setEnabled mesh (not mesh-enabled))))
 
 ;; TODO: alt way to not automatically start an anim upon loading
 ; BABYLON.SceneLoader.OnPluginActivatedObservable.addOnce(loader => {})
@@ -339,7 +367,66 @@
              ; #(model-loaded %1 %2 %3 name is-enabled is-playing props)
              #(do
                 (prn "model" file " is loaded")
-                (start-animation "ybot-combo" 1.0))))
+                ; (start-animation  1.0)
+                (let [ag-1 (.getAnimationGroupByName main-scene/scene "mv_right_simp")
+                      ag-2 (.getAnimationGroupByName main-scene/scene "mv_up_simp")
+                      ag-3 (.getAnimationGroupByName main-scene/scene "mv_combo_baked")
+                      ag-4 (.getAnimationGroupByName main-scene/scene "mv_rot_simp")
+                      vt-baked-anim (.getAnimationGroupByName main-scene/scene "vt_baked")
+                      ag-new (bjs/AnimationGroup. "ag-new")]
+                      ; ag-new (twitch-stream/create-sub-anim-group ag-1 "ag-new" 0 60)
+                      ; ag-new-2 (twitch-stream/create-sub-anim-group ag-new "ag-new" 0 60)]
+                  ; (set! (.-isAdditive ag-1) true)
+                  ; (set! (.-isAdditive ag-2) true)
+                  ; (.start ag-1 true)
+                  ; (.start ag-2 true)
+                  ; (let [children (.-children ag-1)]
+                  ;   (doall (for [ta children]
+                  ;            (.addTargetedAnimation ag-new
+                  ;                   ; (.clone (.-animation ta))
+                  ;                   (.-animation ta)
+                  ;                   (.-target ta)))))
+                  ; (let [children (.-children ag-4)]
+                  ;   ; (doseq [ta (map (fn [x] x) children)])
+                  ;   (doseq [ta children]
+                  ;    (prn "ta=" ta ", animation ta=" (.-animation ta))
+                  ;    (let [anim (force (.-animation ta))
+                  ;          ; tmp (js-debugger)
+                  ;          anim-sub (twitch-stream/set-anim-key-range anim 1 30)]
+                  ;      (.addTargetedAnimation ag-new
+                  ;                             ; (.clone (.-animation ta))
+                  ;                             ; (.-animation ta)
+                  ;                             anim
+                  ;                             (.-target ta)))))
+                  (.start vt-baked-anim true)))))
+
+(defn load-model-4 [path file name]
+  (prn "scene.load-model-4: name= " name)
+  (.ImportMesh js/BABYLON.SceneLoader ""
+             path
+             file
+             main-scene/scene
+             #(do
+                (prn "model" file " is loaded")
+                (let [ag (.getAnimationGroupByName main-scene/scene "idle_grasp_baked")]
+                  (.start ag true)))))
+
+; const assetsManager = new BABYLON.AssetsManager(scene);
+; const meshTask = assetsManager.addMeshTask('piano task', '', './assets/', 'piano.obj');
+; meshTask.onSuccess = (task) => {}
+;     const pianoMesh = task.loadedMeshes[0];
+;     // Do something with the mesh here
+                  ; assetsManager.load())))
+;; Note: bjs does not support fbx, so this doesn't work
+(defn load-model-fbx [path file name]
+  (let [am (bjs/AssetsManager. main-scene/scene)
+        meshTask (.addMeshTask am "fbx-task" name path file)]
+      (set! (.-onTaskSuccess meshTask)
+        (fn []
+          (prn "load-model-fbx: model loaded")
+          (let [ag (.getAnimationGroupByName name)]
+            (.start ag true))))
+      (.load am)))
 
 (defn init-animation-speed [model-kw speed-factor]
  (let [scene main-scene/scene
@@ -383,8 +470,12 @@
 (defn init [db]
   (let [scene main-scene/scene
         ; snare-drum (bjs/MeshBuilder.CreateBox "snare-drum" (js-obj "width" 2 "height" 2) scene)
-        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
+        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)
+        camera main-scene/camera
+        camera-pos (.-position camera)]
     (init-gui)))
+    ; (set! (.-position camera) (.subtract camera-pos (bjs/Vector3. 0 0 2)))))
+
     ; (prn "scene.blue-mat=" main-scene/blue-mat)
     ; (set! (.-material snare-drum) main-scene/blue-mat)
     ; (set! (.-position snare-drum) (bjs/Vector3. 0 1 0))))

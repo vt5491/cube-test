@@ -48,14 +48,15 @@
 ; (filter #(not (nil? %1)) (map-indexed #(when (= %1 2) %2) b))
 (defn set-anim-key-range [anim from-key to-key]
   ; (js-debugger)
+  (prn "set-anim-key-range: anim=" anim ", getKey anim=" (.getKeys anim))
   (let [
         ; range (.createRange (str "range-" from-key "-" to-key) from-key to-key)
         ; sub-keys (subvec (.getKeys anim) from-key to-key)
         ; sub-keys (reduce #() (.getKeys anim) from-key to-key)
         sub-keys
-                   (filter #(not (nil? %1))
-                          (doall
-                            (map-indexed #(when (<= from-key (+ %1 1) to-key) %2) (.getKeys anim))))
+              (filter #(not (nil? %1))
+               (doall
+                 (map-indexed #(when (<= from-key (+ %1 1) to-key) %2) (.getKeys anim))))
         sk-2 (concat sub-keys sub-keys)
         ; sk-3 (doall (map #((prn "sk2.to=" (.-to %1))) sk-2))
         ;; note sub-keys, even with doall is still a lazy seq internally.  We need to fully convert
@@ -69,9 +70,11 @@
     (prn "count(sub-keys)=" (count sub-keys))
     (prn "count(sk-array-2)=" (count sk-array-2))
     ; (js-debugger)
-    (.setKeys anim sk-array-2)))
+    ; (.setKeys anim sk-array-2)
+    (.setKeys anim sk-array)))
 
 
+;; Note: to-key from-key are ints like in blender, not times like in bjs.
 (defn create-sub-anim-group [ag-orig name from-key to-key]
   (prn "twitch-stream.create-sub-anim-group: entered, ag-orig=" ag-orig)
   (let [ag-new (bjs/AnimationGroup. (str name "-" from-key "-" to-key))
@@ -90,8 +93,9 @@
                  (.addTargetedAnimation ag-new sub-anim target)))))
                  ; (js-debugger)))))
     (set! (.-name ag-new) "dynamic-anim")
-    (set! (.-to ag-new) 4.8)
-    (js-debugger)
+    ; (set! (.-to ag-new) 4.8)
+    (set! (.-to ag-new) 2.0)
+    ; (js-debugger)
     ag-new))
 
 ; (swap! *twitch-streaming-active* (fn [x] true))

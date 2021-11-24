@@ -146,3 +146,35 @@
 (<= 4 8.6 8.5)
 
 (inc 1)
+
+(nth [0 1 2] 2)
+(count [1 2])
+
+(map list [1 2 3])
+(def a [1 2 3])
+(def a [{:a 1 } {:b 1} {:c 1}])
+(list? (first (map list a)))
+(map (fn [x] x) a)
+(first (map (fn [x] x) a))
+(map list a)
+
+(defn is-small? [number]
+  (if (< number 100) "yes" "no"))
+
+(def ph "abc")
+(def ph nil)
+
+(defn exist-test []
+  (prn "now in exist-test")
+  (if ph
+    (prn "ph exists")
+    (prn "ph not exists")))
+
+(exist-test)
+(when (not ph) "hi")
+
+(if ph "hi" "bye")
+(if ph (prn "hi") "bye")
+(prn "abc")
+
+(exist-test)
