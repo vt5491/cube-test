@@ -9,7 +9,8 @@
    [cube-test.dummy-base :as dummy-base]
    ; [cube-test.dummy-base :as dummy-base]))
    [cube-test.twizzlers.events :as twizzler-events]
-   [cube-test.beat-club.events :as beat-club-events]))
+   [cube-test.beat-club.events :as beat-club-events]
+   [cube-test.frig-frog.events :as frig-frog-events]))
 
 (declare render-loop)
 
@@ -90,7 +91,17 @@
                                                          (re-frame/dispatch [::beat-club-events/init-db])
                                                          (re-frame/dispatch [::beat-club-events/init-game])
                                                          (re-frame/dispatch [::beat-club-events/run-game])))])
-                            (re-frame/dispatch [:init-fps-panel main-scene/scene]))))
+                            (re-frame/dispatch [:init-fps-panel main-scene/scene]))
+    :frig-frog (do
+                (println "top-level-scene=frig-frog")
+                (re-frame/dispatch [:init-main-scene
+                                    (fn [] (do
+                                             ;;TODO: call init-db from init-game in events
+                                             ; (re-frame/dispatch [::beat-club-events/init-db])
+                                             (re-frame/dispatch [::frig-frog-events/init-game])
+                                             ; (re-frame/dispatch [::beat-club-events/run-game])
+                                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                                             (re-frame/dispatch [::frig-frog-events/run-game])))]))))
 
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)

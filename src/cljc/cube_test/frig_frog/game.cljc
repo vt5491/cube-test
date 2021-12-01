@@ -1,12 +1,11 @@
-;; Note: game is used to init and control game level things, that is to say things
-;; that are common to all scenes and is, thus, scene-independent.
-(ns cube-test.beat-club.game
+(ns cube-test.frig-frog.game
   (:require
    [re-frame.core :as re-frame]
    ; [cube-test.msg-cube.spec.db :as msg-cube.spec]
    [cube-test.utils :as utils]
    [cube-test.main-scene :as main-scene]
-   [cube-test.beat-club.scene :as beat-club-scene]
+   [cube-test.frig-frog.scene :as frig-frog-scene]
+   ; [cube-test.frig-frog.db :as frig-frog-db]
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]))
@@ -24,6 +23,7 @@
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
 
 (defn init []
-  (println "beat-club.game.init: entered")
-  (re-frame/console :warn "console msg from beat-club.game.init"))
-  ; (re-frame/dispatch [:cube-test.frig-frog.events/init-game-level-db]))
+  (println "frig-frog.game.init: entered")
+  (re-frame/console :warn "console msg from frig-frog.game.init")
+  ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-game-level-db]))
