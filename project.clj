@@ -85,6 +85,9 @@
                                ;;vt add
                                ; :js-options {:ignore-asset-requires true}
                                ;;vt end
+                               :karma-test {:compiler-options {
+                                                               :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                               :optimizations :none}}
                                ;;vt add
                                :dev {:compiler-options {
                                                         :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
@@ -96,7 +99,25 @@
                                                         ;vt-x :preloads             [day8.re-frame-10x.preload]}}
                                ;;vt end
                                :devtools {:http-root "resources/public"
-                                          :http-port 8281}}}}
+                                          :http-port 8281}}
+                         ;;vt add
+                         :karma-test {
+                                      :target :browser
+                                      :output-dir "resources/public/js/compiled"
+                                      :asset-path "/js/compiled"
+                                      :modules {:app {:init-fn cube-test.core/init
+                                                      :preloads [
+                                                                 devtools.preload
+                                                                 day8.re-frame-10x.preload]}}
+                                      :karma-test {:compiler-options {
+                                                                      :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                                      :optimizations :none}}
+                                      :dev {:compiler-options {
+                                                               :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                               :optimizations :none}}
+                                      :devtools {:http-root "resources/public"
+                                                      :http-port 8281}}}}
+                         ;;vt end
 
 
   :aliases {"dev"          ["with-profile" "dev" "do"
@@ -112,6 +133,11 @@
             "karma"        ["with-profile" "prod" "do"
                             ["shadow" "compile" "karma-test"]
                             ["shell" "karma" "start" "--single-run" "--reporters" "junit,dots"]]
+            ;;vt add
+            "karma-test"  ["with-profile" "dev" "do"
+                           ["shadow" "compile" "karma-test"]
+                           ["shell" "karma" "start" "--single-run" "--reporters" "junit,dots"]]
+            ;;vt end
             ;;vt-add
             ; "fig:build" ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]
             ; "devfw" ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]

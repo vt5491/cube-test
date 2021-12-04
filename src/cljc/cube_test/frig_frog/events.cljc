@@ -2,7 +2,7 @@
 (ns cube-test.frig-frog.events
   (:require
    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx after ] :as re-frame]
-   [cube-test.frig-frog.game :as frig-frog.game]
+   [cube-test.frig-frog.game :as ff.game]
    [cube-test.frig-frog.scene :as frig-frog.scene]
    [cube-test.frig-frog.db :as frig-frog.db]
    ; [cube-test.beat-club.db :as beat-club.db]
@@ -12,10 +12,10 @@
    [cube-test.utils :as utils]))
 
 (reg-event-db
- ::init-game-level-db
+ ::init-game-db
  (fn [db [_ id]]
-   (println ":frig-frog.init-game-level-db: now running")
-   (frig-frog.db/init-game-level-db db)))
+   (println ":frig-frog.init-game-db: now running")
+   (frig-frog.db/init-game-db db)))
 
 (re-frame/reg-event-fx
  ::init-scene
@@ -27,7 +27,7 @@
 (re-frame/reg-event-fx
  ::init-game
  (fn [cofx _]
-   (frig-frog.game/init)
+   (ff.game/init)
    {
     ; :fx [[:dispatch [::init-scene]]]
     :fx [[:dispatch [::init-scene]]]}))
@@ -36,6 +36,17 @@
 (re-frame/reg-event-fx
  ::run-game
  (fn [cofx _]
-   (frig-frog.game/run-game)
+   (ff.game/run-game)
    {
     :db (:db cofx)}))
+
+;; change-abc is for testing
+(reg-event-db
+  ::change-abc
+  (fn [db [_ val]]
+    ; (ff.game/change-abc db val)
+    (let [r (ff.game/change-abc db val)]
+      (prn "events.change-abc: r=" r)
+      r)))
+    ; (prn "events: returned db=")
+    ; db))

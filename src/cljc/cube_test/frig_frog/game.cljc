@@ -2,13 +2,24 @@
   (:require
    [re-frame.core :as re-frame]
    ; [cube-test.msg-cube.spec.db :as msg-cube.spec]
-   [cube-test.utils :as utils]
+   ; [cube-test.utils :as utils]
    [cube-test.main-scene :as main-scene]
-   [cube-test.frig-frog.scene :as frig-frog-scene]
+   ; [cube-test.frig-frog.scene :as frig-frog-scene]
    ; [cube-test.frig-frog.db :as frig-frog-db]
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
-   [cube-test.utils.fps-panel :as fps-panel]))
+   [cube-test.utils.fps-panel :as fps-panel]
+   [cube-test.utils.common :as utils-common]))
+
+(defn dmy []
+  8)
+
+; (defn change-abc [new-val db]
+(defn change-abc [db new-val]
+  (prn "game.change-abc: new-val=" new-val)
+  (prn "game.change-abc: db=" db)
+  (prn "game.change-abc: db.abc=" (db :abc))
+  (assoc db :abc new-val))
 
 (defn render-loop []
   (if (= main-scene/xr-mode "vr")
@@ -26,4 +37,4 @@
   (println "frig-frog.game.init: entered")
   (re-frame/console :warn "console msg from frig-frog.game.init")
   ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
-  (re-frame/dispatch [:cube-test.frig-frog.events/init-game-level-db]))
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db]))
