@@ -8,7 +8,7 @@
 
 (def default-game-db
   {
-    :abc 7})
+    :game-abc 7})
 
 (def default-db
   {
@@ -30,5 +30,5 @@
   (utils/merge-dbs db default-db))
 
 (defn init-game-db [db]
-  (prn "frig-frog.db: init-game-db: entered")
-  (utils/merge-dbs db default-game-db))
+  (prn "frig-frog.db: init-game-db: entered"))
+  ; (utils/merge-dbs db default-game-db))

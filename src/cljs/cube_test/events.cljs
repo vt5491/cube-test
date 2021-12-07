@@ -27,12 +27,21 @@
    [cube-test.msg-cube.msg-cube-scene :as msg-cube.scene]
    [cube-test.msg-cube.data.msg :as msg-cube.msg]
    [cube-test.msg-cube.spec.db :as msg-cube.spec]
-   [cube-test.twizzlers.game :as twizzlers.game]))
+   [cube-test.twizzlers.game :as twizzlers.game]
+   [cube-test.utils.common :as common]))
 
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ _]
    db/default-db))
+
+(reg-event-db
+ ::init-game-db
+ (fn [db [_ default-game-db]]
+   (println ":events-main: now running init-game-db")
+   (prn "db=" db)
+   (prn "default-game-db=" default-game-db)
+   (common/merge-dbs db default-game-db)))
 
 ;; method from the 'todomvc' example, to allow checking of the db spec as an interceptor
 (defn check-and-throw

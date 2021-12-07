@@ -178,7 +178,6 @@
 (prn "abc")
 
 (exist-test)
-;; 2021-12-04
 (common-utils/close? 0.01 6.0 6.06)
 (common-utils/relative-difference 6.0 6.06)
 

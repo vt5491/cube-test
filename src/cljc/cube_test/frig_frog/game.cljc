@@ -9,7 +9,10 @@
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]
-   [cube-test.utils.common :as utils-common]))
+   [cube-test.utils.common :as common]))
+
+(def default-game-db
+  {:game-abc 7})
 
 (defn dmy []
   8)
@@ -33,8 +36,14 @@
 (defn run-game []
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
 
+(defn init-game-db [game-db]
+  ; (re-frame/dispatch [:common/init-game-db d])
+  (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
+
 (defn init []
   (println "frig-frog.game.init: entered")
   (re-frame/console :warn "console msg from frig-frog.game.init")
   ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
-  (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db]))
+  ; (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db])
+  (init-game-db default-game-db))
+  ; (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))

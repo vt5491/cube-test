@@ -28,6 +28,11 @@
     ; (float (/ (int (* factor number)) factor))
     (float (/ (Math/round (* factor number)) factor))))
 
+(defn merge-dbs [db1 db2]
+  "Merge two maps into one"
+  (reduce #(do
+             (assoc %1 (first %2) (second %2)))
+          db1 db2))
 ; (defn vr-render-loop [xr-mode fps-pnl controller]
 ;   (if (= xr-mode "vr")
 ;     (controller/tick)
