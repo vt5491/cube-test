@@ -1,10 +1,14 @@
 ;;
 (ns cube-test.base
   (:require
-   [re-frame.core :as re-frame]))
+   [re-frame.core :as re-frame]
+   [babylonjs :as bjs]))
 
 (def ONE-DEG (/ Math/PI 180.0))
 (def scale-factor 1)
+(def X-QUAT-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* ONE-DEG 90))))
+(def X-QUAT-NEG-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* ONE-DEG -90))))
+(def Y-QUAT-NEG-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* ONE-DEG -90))))
 
 ;; use-xr is actually defunct as main_scene.cljs simply sets based on browser.
 (def use-xr false)

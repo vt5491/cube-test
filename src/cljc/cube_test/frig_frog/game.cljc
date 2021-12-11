@@ -12,7 +12,9 @@
    [cube-test.utils.common :as common]))
 
 (def default-game-db
-  {:game-abc 7})
+  {:game-abc 7
+   :n-cols 2 :n-rows 3 
+   :board {}})
 
 (defn dmy []
   8)
@@ -46,4 +48,5 @@
   ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
   ; (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db])
   (init-game-db default-game-db))
+  ; (re-frame/dispatch [:cube-test.frig-frog.events/draw-board]))
   ; (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))

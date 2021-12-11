@@ -1,4 +1,6 @@
-(ns cube-test.tmp-test)
+(ns cube-test.tmp-test
+ (:require
+   [clojure.test :refer-macros [is testing deftest run-tests] :as t]))
 
 (def h {:models
         {:ybot-rumba {:is-loaded true, :is-enabled true, :is-playing false},
@@ -215,3 +217,81 @@
 
 (vector? [1 2])
 (type [1 2])
+
+;; 2021-12-10 fun with reduce (accumulator)
+(+ 1 1)
+
+(def a 7)
+
+(reduce (fn [val accum] (prn "val=" val ",accum=" accum)) [0 1 2] [])
+
+(assoc {:a 7} :a 8)
+(conj [1 2] 3)
+
+(doall
+  (reduce
+          (fn [accum val]
+            (do
+              (prn "val=" val ",accum=" accum)
+              (conj accum (inc val))))
+          ; (fn [a b] (inc a))
+          ; #(do (prn "1=" %1 ",2=" %2))
+          []
+          [0 1 2]))
+
+(print "hi")
+(prn "hi")
+
+(doall (map (fn [x] (do
+                      (prn "hi")
+                      (+ x 1)))
+            [1 2 3]))
+
+(reduce #(do (prn "1=" %1 ",2=" %2)) {} [1 2 3])
+(-> (reduce #(conj %1 [(keyword (str "tile-" %2)) %2]) {} [1 2 3])
+    (prn "r=" %1))
+
+(conj [])
+
+(keyword "a")
+(range 2 5)
+
+(keyword (str "tile-" 7))
+(str 7)
+
+(map-indexed (fn [i v] (prn "i=" i ",v=" v)) [1 2 3])
+
+(conj [1 2 ] 3)
+(conj { } [:a 7] [:b 8])
+
+(conj [] {:tile-2 2, :tile-3 3, :tile-1 1})
+(seq (into (sorted-map) {:tile-2 2, :tile-3 3, :tile-1 1}))
+
+(seq (into (sorted-map) {:key1 "value1" :key2 "value2"}))
+
+(as-> (reduce #(conj %1 [(keyword (str "tile-" %2)) %2]) {} [1 2 3]) r
+    (conj [] r))
+    ; (seq (into (sorted-map) r)))
+    ; (conj [] ))
+
+(type '([{:tile-0-0 {}, :tile-0-1 {}}] [{:tile-1-0 {}, :tile-1-1 {}}]))
+(type (list [{:tile-0-0 {}, :tile-0-1 {}}] [{:tile-1-0 {}, :tile-1-1 {}}]))
+
+(hash-map :a 7 :b 8)
+(hash-map :a [{:a 7} {:b 8}])
+;; here
+(reduce-kv (fn [a i v] (conj a (hash-map (keyword (str "row-" i)) v)))
+           {}
+           (vector [{:tile-0-0 {}, :tile-0-1 {}}] [{:tile-1-0 {}, :tile-1-1 {}}]))
+
+(conj {} {:a 7})
+(conj {} [:a 7] [:b 8])
+(type [])
+(type (vector))
+(type ([1], [2]))
+(type (list 1 2))
+(type '(1 2))
+(reduce-kv (fn [a i v] (prn "a=" a ",i=" i ",v=" v)) [] [{:a 7} {:b 8}])
+
+(use 'clojure.walk)
+(postwalk identity [1 2 3])

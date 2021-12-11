@@ -9,6 +9,8 @@
  (shadow.cljs.devtools.api/nrepl-select :app)
  ,)
 
+(def a 7)
+(def b 8)
 ;; set up
 (def db {:msgs [
                   {:id 1 :text "abc" :level :INFO}
@@ -16,7 +18,7 @@
                   {:id 3 :text "ghi" :level :INFO}]})
 
 ;; tests
-(deftest get-by-id 
+(deftest get-by-id
  (testing "get-by-id 2 returns the second vector in :msgs"
 ;;  (println "hi from get-by-id test"))
    (let [r (msg/get-by-id 2 (db :msgs))]

@@ -5,10 +5,8 @@
    [cube-test.frig-frog.game :as ff.game]
    [cube-test.frig-frog.scene :as frig-frog.scene]
    [cube-test.frig-frog.db :as frig-frog.db]
-   ; [cube-test.beat-club.db :as beat-club.db]
-   ; [cube-test.beat-club.twitch-stream :as twitch-stream]
-   ; [cube-test.twizzlers.twizzler :as twizzlers.twizzler]
-   ; [cube-test.twizzlers.rules :as twizzlers.rules]
+   [cube-test.frig-frog.tile :as ff.tile]
+   [cube-test.frig-frog.board :as ff.board]
    [cube-test.utils :as utils]))
 
 (reg-event-db
@@ -50,3 +48,34 @@
       r)))
     ; (prn "events: returned db=")
     ; db))
+
+;; tile
+;; defunct as board calls 'draw-tile' natively for performance and various other reasons.
+(re-frame/reg-event-fx
+ ::draw-tile
+ (fn [cofx [_ pos-x pos-y]]
+   (ff.tile/draw pos-x pos-y)
+   {
+    :db (:db cofx)}))
+
+;; board
+; (re-frame/reg-event-fx
+;  ::draw-board
+;  ; (fn [cofx _])
+;  (fn [{:keys [db] :as cofx}]
+;    ; (ff.board/draw-board (:db cofx))
+;    ; (let [db (:db cofx)]
+;      {
+;       ; :db (ff.board/draw-board (:db cofx))
+;       :db (assoc db :board (ff.board/draw-board db))}))
+;         ; :db (:db cofx)}))
+
+(reg-event-db
+  ::draw-board
+  (fn [db [_ val]]
+    (assoc db :board (ff.board/draw-board db))))
+
+(reg-event-db
+  ::init-board
+  (fn [db [_ val]]
+    (assoc db :board (ff.board/init-board db))))

@@ -7,7 +7,8 @@
    [cube-test.ut-simp.msg :as msg]
    [cube-test.msg-cube.views :as msg-cube.views]
    [cube-test.twizzlers.views :as twizzlers.views]
-   [cube-test.beat-club.views :as beat-club.views]))
+   [cube-test.beat-club.views :as beat-club.views]
+   [cube-test.frig-frog.views :as frig-frog.views]))
 
 (defn main-panel []
   (let [name (re-frame/subscribe [::subs/name])
@@ -26,4 +27,5 @@
         :msg-cube (do (msg-cube.views/init-panel))
         :twizzlers (do (twizzlers.views/init-panel))
         :beat-club (do (beat-club.views/init-panel))
+        :frig-frog (do (frig-frog.views/init-panel))
         [:br])]))

@@ -63,7 +63,8 @@
           r-db @db/app-db]
         (prn "r-db=" r-db)
         (t/is (contains? r-db :game-abc))
-        (t/is (:game-abc r-db) 7))))
+        (t/is (:game-abc r-db) 7)
+        (t/is (contains? r-db :board)))))
 
 
 (t/run-tests 'cube-test.frig-frog.game-test)
