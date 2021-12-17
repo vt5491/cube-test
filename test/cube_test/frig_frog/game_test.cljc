@@ -20,9 +20,9 @@
  ;; but do need to do if running a cljs repl?
  (use 'cube-test.frig-fron.game :reload)
  ,)
-(+ 1 3)
-(count (keys (ns-interns 'cljs.test)))
-(count (keys (ns-publics 'cljs.test)))
+; (+ 1 3)
+; (count (keys (ns-interns 'cljs.test)))
+; (count (keys (ns-publics 'cljs.test)))
 
 (t/deftest dmy-1
   (t/testing "close?"

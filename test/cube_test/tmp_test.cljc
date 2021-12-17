@@ -1,6 +1,7 @@
 (ns cube-test.tmp-test
  (:require
-   [clojure.test :refer-macros [is testing deftest run-tests] :as t]))
+   [clojure.test :refer-macros [is testing deftest run-tests] :as t]
+   [re-frame.db       :as db]))
 
 (def h {:models
         {:ybot-rumba {:is-loaded true, :is-enabled true, :is-playing false},
@@ -291,7 +292,65 @@
 (type ([1], [2]))
 (type (list 1 2))
 (type '(1 2))
-(reduce-kv (fn [a i v] (prn "a=" a ",i=" i ",v=" v)) [] [{:a 7} {:b 8}])
+(type (reduce-kv (fn [a i v] (prn "a=" a ",i=" i ",v=" v)) [] [{:a 7} {:b 8}]))
 
 (use 'clojure.walk)
 (postwalk identity [1 2 3])
+
+(type (reduce-kv (fn [a i v] (conj a (hash-map (keyword (str "row-" i)) v)))
+                 {}
+            (vector [{:tile-0-0 {}, :tile-0-1 {}}] [{:tile-1-0 {}, :tile-1-1 {}}])))
+
+
+(into [] (list 1 2))
+(def h {:a {:a1 7 :a2 8}})
+(let [h {:a {:a1 7 :a2 8}}]
+  (prn (get-in h [:a :a1]))
+  (contains? h :a)
+  (contains? (:a h) :a3))
+
+
+(let [db @db/app-db
+      b (:board db)
+      r0 (:row-0 b)
+      r1 (:row-1 b)]
+  (prn "r0=" r0)
+  (prn "r0.0" (nth r0 0))
+  (prn "r1=" r1))
+
+(let [db @db/app-db
+      b (:board-2 db)
+      r0 (nth b 0)
+      r1 (nth b 1)]
+  (prn "board-2" b)
+  (prn "r0=" r0)
+  (prn "tile-0-0" (nth (:row-0 r0) 0))
+  (prn "tile-0-1" (nth (:row-0 r0) 1))
+  (prn "r1=" r1))
+
+(type [])
+(vector? [])
+(conj [] 7)
+
+(hash-map :a 7 :b 8)
+(hash-map :a)
+
+(let [h (hash-map :a)
+      h2 (assoc h :a 7)]
+  (prn "h2=" h2))
+
+(let [h {}
+      h2 (assoc h :a 7)
+      h3 (assoc h2 :b 8)
+      kw (keyword "a")]
+  (prn "h3=" h3)
+  (prn "h3.a=" (kw h3)))
+  ; (prn "h3.a=" (get-in h3 kw)))
+
+; @re-frame.db/app-db
+(let [db @re-frame.db/app-db
+      b (:board db)]
+    (prn "b=" b)
+    (prn "b[0]=" (nth b 0))
+    (prn "b[1]=" (nth b 1))
+    (prn "t[0]=" (-> (:row-0 (nth b 0)) (nth 1))))

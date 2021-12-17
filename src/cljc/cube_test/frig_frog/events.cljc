@@ -11,9 +11,10 @@
 
 (reg-event-db
  ::init-game-db
- (fn [db [_ id]]
+ (fn [db [_ game-db]]
    (println ":frig-frog.init-game-db: now running")
-   (frig-frog.db/init-game-db db)))
+   ; (frig-frog.db/init-game-db db)
+   game-db))
 
 (re-frame/reg-event-fx
  ::init-scene
@@ -51,6 +52,7 @@
 
 ;; tile
 ;; defunct as board calls 'draw-tile' natively for performance and various other reasons.
+;; Nope: active once again
 (re-frame/reg-event-fx
  ::draw-tile
  (fn [cofx [_ pos-x pos-y]]
@@ -70,12 +72,39 @@
 ;       :db (assoc db :board (ff.board/draw-board db))}))
 ;         ; :db (:db cofx)}))
 
-(reg-event-db
-  ::draw-board
-  (fn [db [_ val]]
-    (assoc db :board (ff.board/draw-board db))))
+; (reg-event-db
+;   ::draw-board
+;   (fn [db [_ val]]
+;     (assoc db :board (ff.board/draw-board db))))
 
 (reg-event-db
   ::init-board
   (fn [db [_ val]]
     (assoc db :board (ff.board/init-board db))))
+
+;; this is mostly useful for testing and debugging
+(reg-event-db
+  ::init-row
+  (fn [db [_ row-num n-col]]
+    ; (ff.board/init-row row-num n-col (:board db))
+    (assoc db :board (ff.board/init-row row-num n-col (:board db)))))
+    ; db))
+
+(reg-event-db
+  ::init-board-2
+  (fn [db [_]]
+    ; (assoc db :board-2 [{:row-0 [{:tile-0-0 {}}, {:tile-0-1 {}}]},
+    ;                     {:row-1 [{:tile-1-0 {}}, {:tile-1-1 {}}]}])
+    ; (assoc db :board-2 {:row-0 [{:tile-0-0 {}}, {:tile-0-1 {}}],
+    ;                     :row-1 [{:tile-1-0 {}}, {:tile-1-1 {}}]})
+    ; (assoc db :board-2 [{:row-0 [{:tile-0-0 {}}, {:tile-0-1 {}}]}
+    ;                     {:row-1 [{:tile-1-0 {}}, {:tile-1-1 {}}]}])
+    (assoc db :board-2 [{:row-0 [{:tile :0-0 :state 7}, {:tile :0-1 :state 7}]}
+                        {:row-1 [{:tile :1-0 :state 8}, {:tile :1-1 :state 8}]}])))
+
+(reg-event-db
+  ::add-dummy-tile
+  (fn [db [_]]
+    ; (assoc db :board (conj (:board db) {:tile-dmy {}}))
+    (assoc db :board (conj (:board db) {:row-4 {:tile-4-0 {}, :tile-4-1 {}}}))))
+    ; (assoc db :board (conj (:board db) {:row-4 [{:tile-4-0 {}}, {:tile-4-1 {}}]}))))

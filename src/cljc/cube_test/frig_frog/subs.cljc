@@ -6,6 +6,9 @@
    [cube-test.utils :as utils]
    [clojure.data :as clj-data]))
 
+(def ^:dynamic *last-board* (atom nil))
+; (def ^:dynamic *last-board* (atom {}))
+
 ;; extractors
 (reg-sub
  :get-board
@@ -18,3 +21,15 @@
  :<- [:get-board]
  (fn [db query-v]
    (prn "board has changed")))
+
+(reg-sub
+ :board-changed
+ :<- [:get-board]
+ (fn [board query-v]
+   ; (re-frame/dispatch [:cube-test.frig-frog.events/draw-tile 0 0])
+   (prn "subs: *last-board*=" @*last-board*)
+   (prn "subs: diff=" (first (clj-data/diff board @*last-board*)))
+   (prn "subs: board-changed: board=" board ",query-v=" query-v)
+   (let [diff (first (clj-data/diff board @*last-board*))]
+      (prn "diff=" diff))
+   (swap! *last-board* (fn [x] board))))

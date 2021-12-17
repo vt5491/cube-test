@@ -13,7 +13,8 @@
 
 (def default-game-db
   {:game-abc 7
-   :n-cols 2 :n-rows 3 
+   :n-cols 2 :n-rows 3
+   ; :n-cols 10 :n-rows 10
    :board {}})
 
 (defn dmy []
@@ -41,12 +42,13 @@
 (defn init-game-db [game-db]
   ; (re-frame/dispatch [:common/init-game-db d])
   (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
+  ; default-game-db)
 
 (defn init []
   (println "frig-frog.game.init: entered")
   (re-frame/console :warn "console msg from frig-frog.game.init")
   ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
   ; (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db])
-  (init-game-db default-game-db))
-  ; (re-frame/dispatch [:cube-test.frig-frog.events/draw-board]))
+  (init-game-db default-game-db)
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-board]))
   ; (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
