@@ -60,6 +60,19 @@
    {
     :db (:db cofx)}))
 
+(reg-event-db
+  ::update-tile
+  (fn [db [_ row-num col-num update-fn]]
+    (ff.tile/update-tile row-num col-num update-fn db)))
+    ; (let [b (:board db)
+    ;       row (nth b row-num)
+    ;       row-kw (keyword (str "row-" row-num))
+    ;       tmp (prn "b=" b ", row=" row ", row-kw=" row-kw)
+    ;       tile (-> (row-kw row) (nth col-num))]
+    ;   (prn "update-tile: tile=" tile))))
+
+    ; (-> (:row-0 (nth b 0)) (nth 1) -> (:tile))))
+    ; (assoc db :board (ff.board/init-board db))))
 ;; board
 ; (re-frame/reg-event-fx
 ;  ::draw-board

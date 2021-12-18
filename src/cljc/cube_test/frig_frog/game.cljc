@@ -13,7 +13,7 @@
 
 (def default-game-db
   {:game-abc 7
-   :n-cols 2 :n-rows 3
+   :n-cols 4 :n-rows 3
    ; :n-cols 10 :n-rows 10
    :board {}})
 
