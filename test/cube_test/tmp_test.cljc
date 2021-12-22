@@ -353,4 +353,64 @@
     (prn "b=" b)
     (prn "b[0]=" (nth b 0))
     (prn "b[1]=" (nth b 1))
-    (prn "t[0]=" (-> (:row-0 (nth b 0)) (nth 1))))
+    (prn "t[0]=" (-> (:row-0 (nth b 0)) (nth 1)))
+    (prn "get-in=" (get-in b [0 :row-0 1])))
+
+(let [a [nil nil {:a 3} nil {:a 5}]
+      b [nil 2 nil 3]
+      ; tmp2 (filter (-> nil? not) b)
+      tmp (filter some? a)
+      tmp2 (filter (fn [x] (not (nil? x))) a)]
+    (prn "tmp=" tmp)
+    (prn "tmp2=" tmp2))
+      ; non-n (doall (filter (not nil?) a))])
+
+  ; (prn "non-nil="))
+  ; (prn "type non-nil" (type non-nil)))
+  ; (prn "count non-nil" (count non-nil)))
+
+(not (nil? nil))
+(type "a")
+
+(defn parse-int [s]
+  (Integer/parseInt (re-find #"\A-?\d+" s)))
+
+(parse-int "5")
+
+(name :abc)
+(read-string "5")
+; :row-1
+(re-matches #"^([a-z]*)_(cube)_(\d)_(\d)" "abc_cube_1_2")
+(-> (re-matches #"row-(\d+)" (name :row-12)) (nth 1) (js/parseInt))
+
+(js/parseInt "5")
+
+(map #(some? %1) [nil 1 nil 3])
+(filter #(some? %1) [nil 1 nil 3])
+
+(some? 7)
+
+(conj {:a 7} {:b 8})
+
+(first (vals {:row-0 [{:state 1}]}))
+(first (keys {:row-0 [{:state 1}]}))
+(into {} [ 7])
+(into {} [[:a "a"] [:b "b"]])
+(into (hash-map) [[:a "a"] [:b "b"]])
+
+(map (fn [val] (prn "val=" val) val) {:a 7 :b 8})
+
+(conj [[:a 7 :b 8]] [[:d 7 :e 8]])
+
+(let [a [:d 7 :e 9]]
+  ; (into (hash-map [[:a 7 :b 8] a]))
+  (prn "x=" [a])
+  (into (hash-map) [a]))
+
+(map (fn [x] x)  (into [] (map (fn [x] x) [[:a 7] [:b 8] [:c 9]])))
+
+(vector [1 2])
+
+(conj [[:col 2]] (into [](map (fn [x] x)(into [] (map (fn [x] x) [[:state 1] [:abc 0]])))))
+(into [] (flatten (conj [[:col 2]] [[:state 1] [:abc 0]])))
+(hash-map (into [] (flatten (conj [[:col 2]] [[:state 1] [:abc 0]]))))

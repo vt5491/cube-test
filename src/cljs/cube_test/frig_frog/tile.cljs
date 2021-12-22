@@ -6,10 +6,17 @@
    [cube-test.base :as base]))
 
 (defn state-update-fn [tile]
-  (if (:state tile)
-    (let [old-state (:state tile)]
-      (assoc tile :state (+ old-state 1)))
-    (assoc tile :state 1)))
+  (let [state (if (:state tile)
+                (let [old-state (:state tile)]
+                  (assoc {} :state (+ old-state 1)))
+               (assoc {} :state 0))
+        abc (if (:abc tile)
+                (let [old-abc (:abc tile)]
+                  (assoc {} :abc (- old-abc 1)))
+               (assoc {} :abc 0))]
+      ; (prn "state-update-fn: state=" state)
+      ; (prn "state-update-fn: abc=" abc)
+      (conj state abc)))
 
 (defn draw [grid-pos-x grid-pos-y]
   (prn "tile.draw: entered")

@@ -7,14 +7,19 @@
    [cube-test.frig-frog.db :as frig-frog.db]
    [cube-test.frig-frog.tile :as ff.tile]
    [cube-test.frig-frog.board :as ff.board]
-   [cube-test.utils :as utils]))
+   [cube-test.utils :as utils]
+   [cube-test.utils.common :as common-utils]))
 
 (reg-event-db
  ::init-game-db
  (fn [db [_ game-db]]
    (println ":frig-frog.init-game-db: now running")
    ; (frig-frog.db/init-game-db db)
-   game-db))
+   (let [default-db ff.game/default-game-db
+         board (ff.board/init-board default-db)]
+     ; (prn "tmp-db=" tmp-db)
+     (assoc default-db :board board))))
+   ; game-db))
 
 (re-frame/reg-event-fx
  ::init-scene
@@ -73,6 +78,7 @@
 
     ; (-> (:row-0 (nth b 0)) (nth 1) -> (:tile))))
     ; (assoc db :board (ff.board/init-board db))))
+
 ;; board
 ; (re-frame/reg-event-fx
 ;  ::draw-board
@@ -96,12 +102,12 @@
     (assoc db :board (ff.board/init-board db))))
 
 ;; this is mostly useful for testing and debugging
-(reg-event-db
-  ::init-row
-  (fn [db [_ row-num n-col]]
-    ; (ff.board/init-row row-num n-col (:board db))
-    (assoc db :board (ff.board/init-row row-num n-col (:board db)))))
-    ; db))
+; (reg-event-db
+;   ::init-row
+;   (fn [db [_ row-num n-col]]
+;     ; (ff.board/init-row row-num n-col (:board db))
+;     (assoc db :board (ff.board/init-row row-num n-col (:board db)))))
+;     ; db))
 
 (reg-event-db
   ::init-board-2

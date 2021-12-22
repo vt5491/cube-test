@@ -37,13 +37,23 @@
    (prn "subs: *last-board*=" @*last-board*)
    (prn "subs: diff=" (first (clj-data/diff board @*last-board*)))
    (prn "subs: board-changed: board=" board ",query-v=" query-v)
-   (let [diff (first (clj-data/diff board @*last-board*))]
+   (let [diff-full (clj-data/diff board @*last-board*)
+         diff-a (first diff-full)
+         diff-b (second diff-full)
+         diff-c (nth diff-full 2)]
    ; (let [diff (clj-data/diff  board @*last-board*)]
-    (prn "diff=" diff)
-    (prn "count diff=" (count diff))
+    (prn "diff-a=" diff-a)
+    (prn "count diff-a=" (count diff-a))
+    ; (prn "diff-b=" diff-b)
+    ; (prn "count diff-b=" (count diff-b))
+    ; (prn "diff-c=" diff-c)
     ; (let [[item1 _ item3 _ item5 _] names])
-    (let [[row0 row1 row2 ] diff]
-      (prn "row0=" row0 ", row1=" row1 ", row2=" row2)))
+    (let [[row0 row1 row2 ] diff-a]
+      (prn "row0=" row0 ", row1=" row1 ", row2=" row2))
+    (let [changed-tiles (filter some? diff-a)]
+      (prn "changed-tiles=" changed-tiles)
+      (prn "count changed-tiles=" (count changed-tiles))))
+      ; (-> (re-matches #"row-(\d+)" (name :row-12)) (nth 1) (js/parseInt))))
     ; (let [[{_ [col0 col1 col2]} ] diff]
     ;   (prn "col0=" col0 ", col1=" col1 ", col2=" col2)))
    (let [diff-row-1 (first

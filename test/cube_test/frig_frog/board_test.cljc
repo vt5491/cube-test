@@ -5,7 +5,7 @@
   [cube-test.frig-frog.db       :as ff-db]
   [re-frame.core :refer [dispatch-sync] :as re-frame]
   [cube-test.frig-frog.events :as ff-ev]
-  [cube-test.frig-frog.board :as ff-bd]
+  [cube-test.frig-frog.board :as ff-board]
   [cube-test.utils.common :as common-utils]
   ; [clojure.test :as t]))
   [cljs.test :as t]))
@@ -24,7 +24,7 @@
   (t/testing "create-row"
     (dispatch-sync [:ff-db/init-db])
     ; (dispatch-sync [:cube-test.frig-frog.events/init-row 0 0])
-    (let [r (ff-bd/create-row 0 2)]
+    (let [r (ff-board/create-row 0 2)]
       (prn "r=" r)
       (t/is (map? r))
       (t/is (vector? (:row-0 r)))
@@ -51,14 +51,35 @@
     ;     (prn "r-db=" r-db)
     ;     (t/is (contains? r-db :game-abc)))))
 
+(t/deftest parse-delta
+  (t/testing "parse-delta"
+    (t/is (= 1 1))
+    (let [diff-1 [{:row-0 [{:state 1 :abc 0}]}
+                  nil
+                  {:row-2 [nil nil {:state 1 :abc 0}]}]
+          r (ff-board/parse-delta diff-1)]
+      ; (t/is (map? r))
+      (prn "r=" r)
+      (prn "type r=" (type r))
+      (t/is (vector? r))
+      (t/is (= 2 (count r)))
+      (let [r-1 (first r)
+            r-2 (second r)]
+        (t/is (map? r-1))
+        (t/is (= (:row r-1) 0))
+        (t/is (= (:col r-1) 0))))))
+        ; (t/is (map? r-2))))))
+
 (t/run-tests 'cube-test.frig-frog.board-test)
 
 (comment
  ;; run a single test
  (t/test-vars [#'create-row])
  ; (t/test-vars [#'init-row])
- (t/test-vars [#'init-board]))
+ (t/test-vars [#'init-board])
+ (t/test-vars [#'parse-delta]))
 
+; (assoc {} :a 7 :b 8)
     ; (prn "r0.1" (nth r0 1)))
 ; (let [db @db/app-db
 ;       b (:board db)
