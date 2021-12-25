@@ -65,6 +65,12 @@
       (t/is (= 2 (count r)))
       (let [r-1 (first r)
             r-2 (second r)]
+        (prn "r-1=" r-1)
+        (prn "r-1.info=" (:info r-1))
+        (prn "type r-1.info=" (type (:info r-1)))
+        (prn "take r-1.info=" (take 1 (:info r-1)))
+        (prn "rest r-1.info=" (rest (:info r-1)))
+        (prn "doall r-1.info=" (doall (:info r-1)))
         (t/is (map? r-1))
         (t/is (= (:row r-1) 0))
         (t/is (= (:col r-1) 0))))))

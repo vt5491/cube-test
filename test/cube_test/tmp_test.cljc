@@ -414,3 +414,14 @@
 (conj [[:col 2]] (into [](map (fn [x] x)(into [] (map (fn [x] x) [[:state 1] [:abc 0]])))))
 (into [] (flatten (conj [[:col 2]] [[:state 1] [:abc 0]])))
 (hash-map (into [] (flatten (conj [[:col 2]] [[:state 1] [:abc 0]]))))
+
+(let [hash {:row 0}
+      kv-pairs [:col 0 :state 1 :abc 0]
+      ; h2 (into {} kv-pairs)]
+      h2 (apply hash-map kv-pairs)]
+    (prn "seq kv-pairs=" (seq kv-pairs))
+    ; (prn "hash-map=" (hash-map :a 7 :b 8))
+    ; (prn "hash-map=" (apply hash-map kv-pairs)))
+    (conj hash h2))
+
+    ; (prn "h2=" h2))

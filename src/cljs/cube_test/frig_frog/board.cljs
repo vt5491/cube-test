@@ -69,6 +69,7 @@
           tmp-21 (vector (conj [] (nth tmp-2 0) (nth tmp-2 1)))
           tmp-22 (into [] (nth tmp-2 2))
           tmp-23 (into [] (flatten (conj tmp-21 tmp-22)))
+          ; tmp-23 (flatten (conj tmp-21 tmp-22))
           tmp-3 (first (into [] tmp-2))]
       (prn "tmp=" tmp)
       (prn "kv-pairs=" kv-pairs)
@@ -77,6 +78,7 @@
       (prn "tmp-22=" tmp-22)
       (prn "type tmp-22=" (type tmp-22))
       (prn "tmp-23=" tmp-23)
+      (prn "type tmp-23=" (type tmp-23))
       (prn "tmp-3=" tmp-3)
       ; (into (hash-map) [[:col idx]])
       ; (into (hash-map) tmp-23))
@@ -90,7 +92,10 @@
     (if (some? diff-col)
       ; (assoc result (map-indexed parse-diff-col diff-col))
       (let [r (first (into [] (filter some? (map-indexed parse-diff-col diff-col))))]
+      ; (let [tmp (map-indexed parse-diff-col diff-col)
+      ;       r (filter some? (map-indexed parse-diff-col diff-col))]
       ; (let [r (map-indexed parse-diff-col diff-col)]
+        ; (prn "parse-diff-cols: tmp=" tmp)
         (prn "parse-diff-cols: r=" r)
         ; (prn "parse-diff-cols: type r=" (type r))
         ; (prn "parse-diff-cols: realized r=" (realized? r))
@@ -106,6 +111,7 @@
         ; (assoc result :row idx :col (map parse-diff-cols (vals diff-row)))
         (let [row-info (assoc result :row idx)
               col-info (first (into [] (map parse-diff-cols (vals diff-row))))]
+              ; col-info (map parse-diff-cols (vals diff-row))]
               ; col-info (clj-walk/postwalk identity (map parse-diff-cols (vals diff-row)))]
           (prn "parse-diff-rows: row-info=" row-info ", col-info=" col-info)
           ; (prn "parse-diff-rows: type col-info=" (type col-info))
@@ -118,7 +124,18 @@
 
 ;; go through a diff and extract which tiles have changed e.g. the row and col.
 (defn parse-delta [diff]
-  (let [parse-info (map-indexed parse-diff-rows diff)]
-    (prn "parse-delta: parse-info=" parse-info)
-    (into [] (filter some? parse-info))))
+  ; (let [parse-info (map-indexed parse-diff-rows diff)])
+  (let [parse-info (map-indexed parse-diff-rows diff)
+        parse-info-2 (into [] (filter some? parse-info))
+        flat-info (into [] (map (fn [val] (conj {:row (:row val) } (apply hash-map (:info val)))) parse-info-2))
+        tmp (prn "parse-delta: flat-info=" flat-info)]
+        ; flat-info-2 (conj {:row (:row val)} flat-info)]
+        ; flat-info-2 (conj {:a 7} flat-info)]
+    (prn "parse-delta: parse-info-2=" parse-info-2)
+    ; (prn "parse-delta: flat-info-2=" flat-info-2)
+    ; (first)
+    ; parse-info-2
+    flat-info))
+    ; flat-info-2))
+    ; (into [] (filter some? parse-info))))
     ; (filter some? (into [] parse-info))))
