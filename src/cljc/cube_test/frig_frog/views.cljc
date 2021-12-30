@@ -17,7 +17,7 @@
      [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-game-db ff-game/default-game-db])} "reset-db"]
      [:br]
      [:br]
-     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/draw-tile 0 0])} "draw-tile"]
+     [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/draw-tile 1 0])} "draw-tile"]
      [:br]
      [:button.user-action
       {:on-click #(re-frame/dispatch

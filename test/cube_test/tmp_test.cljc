@@ -425,3 +425,169 @@
     (conj hash h2))
 
     ; (prn "h2=" h2))
+(conj {:a 1 :b 2} {:c 3 :d 4})
+(conj {:c 3 :d 4} {:a 1 :b 2})
+(conj {:c 3 :d 4} {:a 1 :b 2} {:e 7})
+(get-in {:a 1 :b {:g 1 :h 2} :c 3} [:b :h])
+
+(let [ds [{:row 0, :col 0, :abc -15, :state 15} {:row 2, :col 2, :abc -1, :state 1}]]
+      ; {:keys [name location description]} ds]
+  (map (fn [{:keys [row col]}]
+         (prn "row=" row)
+         row) ds))
+
+(defn ds1 [{:keys [row col]}]
+  (prn "row=" row))
+
+(defn ds2 [val]
+  (prn "ds2: val=" val))
+
+(ds1 {:row 0, :col 0, :abc -15, :state 15})
+(ds2 {:row 0, :col 0, :abc -15, :state 15})
+
+; (let [dseq (seq [{:row 0, :col 0, :abc -15, :state 15} {:row 2, :col 2, :abc -1, :state 1}])])
+(let [dseq [{:row 0, :col 0, :abc -15, :state 15} {:row 2, :col 2, :abc -1, :state 1}]]
+  (prn "dseq=" dseq)
+  ; (doseq [x dseq])
+  (doseq [{:keys [row col]} dseq]
+    (prn "row=" row)))
+
+  ; (doseq dseq (fn [x] (prn "x=" x))))
+  ; (doseq dseq (prn "hi")))
+
+(doseq [ x (seq [1 2 3])] (prn "x=" x))
+(doseq [ x (seq [1 2 3])] (conj [] x))
+(map (fn [x] (inc x))
+     (seq [1 2 3]))
+
+(doseq [x [1 2 3]
+        y (seq [4 5 6])]
+  (prn "x=" x)
+  (prn "y=" y))
+
+(seq [1 2 3])
+
+(doseq [x [-1 0 1]
+        y [1  2 3]]
+  (prn (* x y)))
+
+(flatten [[:col 0 :tile :0-0] [:col 1 :tile :0-1]])
+
+(doseq [ x [[:col 0 :tile :0-0] [:col 1 :tile :0-1]]]
+  (prn "x=" x))
+
+(let [r (doseq [x [-1 0 1]
+                y [1  2 3]
+                a []]
+          (prn "x=" x)
+          (prn "a=" (conj a (* x y))))]
+  (prn "r=" r)
+  r)
+
+(let [a []]
+  (doseq [x [-1 0 1]
+          y [1  2 3]]
+    (prn (* x y))
+    (prn "a=" (conj a (* x y)))))
+
+(reduce (fn [a v]
+          (prn "v=" v ",a=" a)
+          (conj a v))
+        []
+        [0 1 2])
+
+(reduce (fn [a v]
+          (prn "val=" v ",accum=" a)
+          (prn "col=" (:col v))
+          (conj a (:col v)))
+        []
+        [{:col 0 :tile :0-0} {:col 1 :tile :0-1}])
+
+(conj [] 0)
+(conj {} [:a 7] [:b 8])
+(conj {} [:a 7] {:b 8 :c 9})
+(conj [] :a 7 :b 8)
+(nth [0 1 2] 2)
+(conj {} [:col 0 :tile :0-0])
+(conj {} [:col 0] [:tile :0-0])
+(conj {} [[:col 0 :tile :0-0]])
+(array-map [:col 0 :tile :0-0])
+(array-map [:col 0])
+(let [r (array-map :a 10)]
+  (prn "r=" r))
+(array-map :a 10 :b 11)
+(conj {:x 1} (apply array-map [:a 10 :b 11]))
+(let [a [:a 7 :b 8]
+      h {:a 7 :b 8}
+      hf (flatten h)
+      af (flatten a)
+      am (apply array-map a)]
+  (prn "am=" am))
+  ; (prn "hf=" hf)
+  ; (prn "af=" af))
+
+(reduce-kv (fn [a i v]
+             (prn "a=" a ",i=" i ",v=" v)
+             ; (conj a (conj [] (first v) (second v) (nth v 2) (nth v 3)))
+             ; (conj a (doall (conj []  (nth v 2) (nth v 3) (first v)))))
+             ; (conj a (conj [] (flatten v))))
+             (let [flat-v (into [] (flatten v))
+                   tmp (count flat-v)]
+               (prn "count flat-v=" tmp)
+               (prn "flat-v=" flat-v)
+               (conj a flat-v)))
+             ;   (doseq [x flat-v]))
+             ; (conj a (flatten v)))
+          []
+          [[:col 0 :tile :0-0] [:col 1 :tile :0-1] [:col 2 :tile :0-2]])
+
+(let [am [:a 7 :b 8]
+      am2 (apply array-map (conj  am :c))]
+  (prn "am2=" am2))
+
+(into (hash-map) (array-map :a 7))
+(array-map :a 7 :b 8)
+(vector 1 2)
+(into (hash-map) (flatten (vector :a 7)))
+
+(into (array-map) (vector :a 7))
+(reduce conj {} [[:a 1] [:b 2 :c 3]])
+(apply hash-map (flatten [:a 7 :b 8 :c 9]))
+
+(let [a [[:row 0 :col 0 :tile :0-0] [:row 0 :col 1 :tile :0-1]]]
+  ; (into [] (map (fn [x] (apply hash-map (flatten x))) a)))
+  (->> (map (fn [x] (apply hash-map (flatten x))) a)
+      (into []) second))
+  ; (apply hash-map (flatten a)))
+
+(type 76)
+(take 1 (map
+               (fn [x] x)
+               [1 2 3]))
+
+(count [[:row 0 :col 0 :state 1 :abc 0]] [[:row 2 :col 2 :state 1 :abc 0]])
+(count (seq [[[:a 7]] [[:b 8]]]))
+((seq [[:a 7]]))
+
+(let [r
+      (->> (reduce (fn [a v]
+                     (prn "v=" v)
+                     (prn "first v=" (first v))
+                     (prn "a=" a)
+                     (conj a (first v)))
+                   []
+                   (seq [[[:a 7]] [[:b 8]]]))
+       (into []))]
+  (prn "r=" r)
+  (prn "first r=" (first r)))
+                 ; (first))
+(range 3)
+(let [a [[:a 1] [:b 2] [:c 3]]]
+  (map-indexed (fn [i x](nth a i)) (range 3)))
+
+(loop [a [] x 3]
+  (if (>= x 0)
+    (do
+      (prn "x=" x)
+      (recur (conj a x) (dec x)))
+    a))

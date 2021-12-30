@@ -18,8 +18,8 @@
       ; (prn "state-update-fn: abc=" abc)
       (conj state abc)))
 
-(defn draw [grid-pos-x grid-pos-y]
-  (prn "tile.draw: entered")
+(defn draw [row col]
+  (prn "tile.draw: row=" row ", col=" col)
   (when main-scene/scene
     (let [scene main-scene/scene
           tmp-2 (prn "scene=" scene)
@@ -27,11 +27,12 @@
           ; tmp (js-debugger)
           tile (bjs/MeshBuilder.CreatePlane
                 "tile"
-                (js-obj "width" 1 "height" 1 "sideOrientation" bjs/Mesh.DOUBLESIDE)
+                (js-obj "width" 1.0 "height" 1.0 "sideOrientation" bjs/Mesh.DOUBLESIDE)
                 scene)]
           ; tmp-db db
           ; board (:board db)]
-      (set! (.-position tile) (bjs/Vector3. 0 0.5 7))
+      ; (set! (.-position tile) (bjs/Vector3. 0 0.5 7))
+      (set! (.-position tile) (bjs/Vector3. (* row 1.2) 1 (* col 1.2)))
       (set! (.-rotationQuaternion tile) base/X-QUAT-NEG-90))))
         ; (assoc board :tile-1 {})))
   ; {:abc 2})

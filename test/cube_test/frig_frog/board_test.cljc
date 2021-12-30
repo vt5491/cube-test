@@ -50,14 +50,14 @@
     ;       r-db @db/app-db]
     ;     (prn "r-db=" r-db)
     ;     (t/is (contains? r-db :game-abc)))))
-
+; [{:row-0 [{:state 0, :abc 0}]} nil {:row-2 [nil nil {:state 0, :abc 0}]}]
 (t/deftest parse-delta
   (t/testing "parse-delta"
     (t/is (= 1 1))
     (let [diff-1 [{:row-0 [{:state 1 :abc 0}]}
                   nil
                   {:row-2 [nil nil {:state 1 :abc 0}]}]
-          r (ff-board/parse-delta diff-1)]
+          r (ff-board/parse-delta-2 diff-1)]
       ; (t/is (map? r))
       (prn "r=" r)
       (prn "type r=" (type r))
@@ -73,9 +73,33 @@
         (prn "doall r-1.info=" (doall (:info r-1)))
         (t/is (map? r-1))
         (t/is (= (:row r-1) 0))
-        (t/is (= (:col r-1) 0))))))
+        (t/is (= (:col r-1) 0))
+        (prn "r-2=" r-2)
+        (t/is (map? r-2))
+        (t/is (= (:row r-2) 2))
+        (t/is (= (:col r-2) 2))))))
         ; (t/is (map? r-2))))))
 
+;; test with values from the inital board
+(t/deftest parse-delta-init
+  (t/testing "parse-delta")
+  (let [diff [{:row-0 [{:tile :0-0} {:tile :0-1} {:tile :0-2} {:tile :0-3}]}]
+        r (ff-board/parse-delta-2 diff)]
+    (prn "r=" r)
+    (t/is (vector? r))))
+    ; (doseq [x r]
+    ;   (prn "x=" x))))
+
+(t/deftest parse-delta-init-2
+  (t/testing "parse-delta")
+  (let [diff [{:row-0 [{:tile :0-0} {:tile :0-1} {:tile :0-2} {:tile :0-3}]}
+              {:row-1 [{:tile :1-0} {:tile :1-1} {:tile :1-2} {:tile :1-3}]}
+              {:row-2 [{:tile :2-0} {:tile :2-1} {:tile :2-2} {:tile :2-3}]}]
+        r (ff-board/parse-delta-2 diff)]
+    (prn "r=" r)
+    (t/is (vector? r))))
+
+; [{:row-0 [{:tile :0-0} {:tile :0-1} {:tile :0-2} {:tile :0-3}]} {:row-1 [{:tile :1-0} {:tile :1-1} {:tile :1-2} {:tile :1-3}]} {:row-2 [{:tile :2-0} {:tile :2-1} {:tile :2-2} {:tile :2-3}]}]
 (t/run-tests 'cube-test.frig-frog.board-test)
 
 (comment
@@ -83,7 +107,9 @@
  (t/test-vars [#'create-row])
  ; (t/test-vars [#'init-row])
  (t/test-vars [#'init-board])
- (t/test-vars [#'parse-delta]))
+ (t/test-vars [#'parse-delta])
+ (t/test-vars [#'parse-delta-init])
+ (t/test-vars [#'parse-delta-init-2]))
 
 ; (assoc {} :a 7 :b 8)
     ; (prn "r0.1" (nth r0 1)))
@@ -94,3 +120,6 @@
 ;   (prn "r0=" r0)
 ;   (prn "r0.0" (nth r0 0))
 ;   (prn "r1=" r1))
+(info {} [:col 0 :tile :0-0])
+(doseq [x [:col 0 :tile :0-0]]
+  (prn "x=" x))
