@@ -7,6 +7,7 @@
    [cube-test.frig-frog.db :as frig-frog.db]
    [cube-test.frig-frog.tile :as ff.tile]
    [cube-test.frig-frog.board :as ff.board]
+   [cube-test.frig-frog.frog :as ff.frog]
    [cube-test.utils :as utils]
    [cube-test.utils.common :as common-utils]))
 
@@ -127,3 +128,40 @@
     ; (assoc db :board (conj (:board db) {:tile-dmy {}}))
     (assoc db :board (conj (:board db) {:row-4 {:tile-4-0 {}, :tile-4-1 {}}}))))
     ; (assoc db :board (conj (:board db) {:row-4 [{:tile-4-0 {}}, {:tile-4-1 {}}]}))))
+
+;;
+;; frog
+;;
+(reg-event-db
+  ::init-frog
+  (fn [db [_ row col]]
+    ; (assoc db :frog (ff.frog/init-frog db))
+    (ff.frog/init-frog row col db)))
+
+(reg-event-db
+  ::jump-frog
+  (fn [db [_ row-delta col-delta]]
+    (let [frog-row (get-in db [:frog :row])
+          frog-col (get-in db [:frog :col])]
+      (-> (assoc-in db [:frog :row] (+ frog-row row-delta))
+          (assoc-in [:frog :col] (+ frog-col col-delta))))))
+
+;; kind of a dummy event for now
+(reg-event-db
+  ::set-frog-mode
+  (fn [db [_ new-mode]]
+    (assoc-in db [:frog :mode] new-mode)))
+
+(reg-event-db
+  ::inc-frog-mode
+  (fn [db [_]]
+    (let [last-frog-mode (get-in db [:frog :mode])]
+      (assoc-in db [:frog :mode] (+ last-frog-mode 1)))))
+
+(re-frame/reg-event-fx
+ ::draw-frog
+ (fn [cofx [_ row col]]
+   (prn "events.draw-frog: row=" row ", col=" col)
+   (ff.frog/draw-frog row col)
+   {
+    :db (:db cofx)}))

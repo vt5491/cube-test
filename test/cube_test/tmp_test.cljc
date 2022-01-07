@@ -591,3 +591,47 @@
       (prn "x=" x)
       (recur (conj a x) (dec x)))
     a))
+
+(+ 1 1)
+(doseq (= :a) (keys {:a 1 :b 2}))
+(doseq [{:keys [:a :b]} {:z 1 :b 2}]
+  (prn "a=" :a))
+(doseq [ x (keys {:a 1 :b 2})]
+  (prn "x=" x)
+  (some? (= x :b)))
+(filter #(= %1 :c) (keys {:a 1 :b 2}))
+
+(nil? nil)
+(nil? 7)
+(nil? ())
+
+(assoc {} :a 7 :b 8)
+(let [h {}
+      tmp (assoc h :frog {})
+      tmp-2 (assoc-in h [:frog :a] 7)
+      tmp-3 (assoc-in tmp-2 [:frog :b] 8)]
+  (prn "tmp=" tmp)
+  (prn "tmp-2=" tmp-2)
+  (prn "tmp-3=" tmp-3))
+
+(-> (assoc-in {} [:a] 7) (assoc-in [:b] 8))
+
+(let [h {:a 7 :b 8 :c 9}]
+  ; (prn (get-in h [:a])))
+  (conj (hash-map :x (get-in h [:a])) (hash-map :y (get-in h [:b]))))
+
+(:a {:a 7 :b 8})
+(let [a 7]
+  (when a (prn "hi")))
+
+(map (fn [x] (inc x)) [1 2])
+(map #(inc %1) [1 2])
+(map #(identity 7) [1 2])
+
+(identity 7)
+
+(let [h {:a 7 :b 8 :c 9}
+      row (or (:a h))
+      col (or (:d h) -1)]
+  (prn "row=" row)
+  (prn "col=" col))

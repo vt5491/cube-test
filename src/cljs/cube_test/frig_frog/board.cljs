@@ -32,7 +32,7 @@
             (range n-rows))))
 
 (defn parse-diff-col [idx val]
-  (prn "parse-diff-col: idx=" idx ",val=" val)
+  ; (prn "parse-diff-col: idx=" idx ",val=" val)
   (if (some? val)
     (let [
           tmp (into (vector) (map (fn [kv] kv) val))
@@ -51,7 +51,7 @@
       ; (prn "tmp-21=" tmp-21)
       ; (prn "tmp-22=" tmp-22)
       ; (prn "type tmp-22=" (type tmp-22))
-      (prn "tmp-23=" tmp-23)
+      ; (prn "tmp-23=" tmp-23)
       ; (prn "tmp-24=" tmp-24)
       ; (prn "type tmp-23=" (type tmp-23))
       ; (prn "tmp-3=" tmp-3)
@@ -62,14 +62,14 @@
     nil))
 
 (defn parse-diff-cols [diff-col]
-  (prn "parse-diff-cols: diff-col=" diff-col)
+  ; (prn "parse-diff-cols: diff-col=" diff-col)
   (let [result {}]
     (if (some? diff-col)
       (let [pdc-r (into [] (filter some? (map-indexed parse-diff-col diff-col)))
             ; r (first pdc-r)
             r pdc-r]
-        (prn "parse-diff-cols: pdc-r=" pdc-r)
-        (prn "parse-diff-cols: r=" r)
+        ; (prn "parse-diff-cols: pdc-r=" pdc-r)
+        ; (prn "parse-diff-cols: r=" r)
         r)
       nil)))
 
@@ -80,8 +80,8 @@
         (let [row-info (assoc result :row idx)
               col-info (first (into [] (map parse-diff-cols (vals diff-row))))
               col-info-2 (-> (map parse-diff-cols (vals diff-row)) (into []) first)]
-          (prn "parse-diff-rows: row-info=" row-info ", col-info=" col-info)
-          (prn "parse-diff-rows: col-info-2=" col-info-2)
+          ; (prn "parse-diff-rows: row-info=" row-info ", col-info=" col-info)
+          ; (prn "parse-diff-rows: col-info-2=" col-info-2)
           (conj row-info {:info col-info})
           (conj row-info {:info col-info-2})))
       nil)))
@@ -91,7 +91,7 @@
 (defn parse-delta [diff]
   (let [parse-info (map-indexed parse-diff-rows diff)
         parse-info-2 (into [] (filter some? parse-info))
-        tmp0 (prn "parse-delta: parse-info-2=" parse-info-2)
+        ; tmp0 (prn "parse-delta: parse-info-2=" parse-info-2)
         ; flat-info (into [] (map (fn [val] (conj {:row (:row val) } (apply hash-map (:info val)))) parse-info-2))
         ; row (-> parse-info-2 -> first -> :row)
         ; tmp1 (prn "parse-delta: row=" row)
@@ -106,6 +106,8 @@
     ; (prn "parse-delta: parse-info-2=" parse-info-2)
     flat-info))
 
+;; This is basically a 300-line regex.  Impossible to read and in dire need of
+;; of re-factoring.  But for now at least it works.
 (defn parse-delta-2 [diff]
   (let [parse-info (map-indexed parse-diff-rows diff)
         parse-info-2 (into [] (filter some? parse-info))
@@ -116,7 +118,7 @@
         flat-info (->
                     (map
                         (fn [val]
-                         (prn "parse-delta-2: val=" val)
+                         ; (prn "parse-delta-2: val=" val)
                          (into [] (expand-col-info (:row val) (:info val))))
                          ; (let [expand-val (expand-col-info (:row val) (:info val))]
                          ;   (prn "parse-delta-2: expand-val=" expand-val))
@@ -126,16 +128,16 @@
                        parse-info-2)
                     ; (into []) first
                     (into []))
-        tmp1 (prn "parse-delta-2: flat-info=" flat-info)
-        tmp11 (prn "parse-delta-2: take 1 flat-info=" (take 1 flat-info))
-        tmp12 (prn "parse-delta-2: count flat-info=" (count flat-info))
-        tmp13 (prn "parse-delta-2: first flat-info=" (first (into [] flat-info)))
+        ; tmp1 (prn "parse-delta-2: flat-info=" flat-info)
+        ; tmp11 (prn "parse-delta-2: take 1 flat-info=" (take 1 flat-info))
+        ; tmp12 (prn "parse-delta-2: count flat-info=" (count flat-info))
+        ; tmp13 (prn "parse-delta-2: first flat-info=" (first (into [] flat-info)))
         ;; turn mult. array of arrays into one array of arrays
         flat-info-11 (if (> (count flat-info) 1)
                        (->> (reduce (fn [a v]
-                                      (prn "v=" v)
-                                      (prn "first v=" (first v))
-                                      (prn "a=" a)
+                                      ; (prn "v=" v)
+                                      ; (prn "first v=" (first v))
+                                      ; (prn "a=" a)
                                       ; (conj a (first v))
                                       ; (conj a v))
                                       ; (-> (conj a (first v))
@@ -150,7 +152,7 @@
                                       (loop [a2 a x (- (count v) 1)]
                                         (if (>= x 0)
                                           (do
-                                            (prn "recur x=" x ",v=" v)
+                                            ; (prn "recur x=" x ",v=" v)
                                             (recur (conj a2 (nth v x)) (dec x)))
                                           a2)))
                                     []
@@ -158,15 +160,15 @@
                             (into []))
                       (first flat-info))
                       ; flat-info)
-        tmp14 (prn "parse-delta-2: flat-info-11=" flat-info-11)
+        ; tmp14 (prn "parse-delta-2: flat-info-11=" flat-info-11)
         flat-info-2 (->>
                      (map
                        (fn [x]
-                          (prn "flat-info-2: x=" x)
+                          ; (prn "flat-info-2: x=" x)
                           (apply hash-map (flatten x)))
                       flat-info-11)
-                     (into []))
-        tmp2 (prn "parse-delta-2: flat-info-2=" flat-info-2)]
+                     (into []))]
+        ; tmp2 (prn "parse-delta-2: flat-info-2=" flat-info-2)]
     flat-info-2))
 
         ; (doseq [x [1 2 3]
@@ -193,7 +195,7 @@
    (fn [accum val]
       (let [tmp
              (reduce-kv (fn [a i v]
-                          (prn "expand-col-info: accum=" a ",v=" v ",i=" i)
+                          ; (prn "expand-col-info: accum=" a ",v=" v ",i=" i)
                           ; (conj a (apply array-map (conj v :row row)))
                           (conj a v))
                         [:row row]
@@ -201,26 +203,3 @@
         (conj accum tmp)))
    []
    col-info))
-
-      ; [])))
-  ; (let [r
-  ;       (doseq [info col-info]
-  ;         (prn "expand-col-info: row=" row ", info=" info)
-  ;         (let [s (reduce-kv (fn [a i v]
-  ;                             (prn "expand-col-info: accum=" a ",v=" v ",i=" i)
-  ;                             (conj a (apply array-map v)))
-  ;                            []
-  ;                            info)]
-  ;           (prn "expand-col-info s=" s)
-  ;           (set! tmp-s s)))]
-  ;   (prn "expand-col-info tmp-s=" tmp-s)
-  ;   tmp-s))
-
-      ; (reduce (fn [a v]
-      ;           (prn "process-col-info: accum=" a ",v=" v)
-      ;           ; (conj a [:row row] v)
-      ;           (conj a (array-map v)))
-      ;         {}
-      ;         info)))
-;     (doseq [x info]
-;       (prn "process-col-info: x=" x))))

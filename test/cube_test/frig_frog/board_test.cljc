@@ -51,6 +51,7 @@
     ;     (prn "r-db=" r-db)
     ;     (t/is (contains? r-db :game-abc)))))
 ; [{:row-0 [{:state 0, :abc 0}]} nil {:row-2 [nil nil {:state 0, :abc 0}]}]
+;; easy parse case
 (t/deftest parse-delta
   (t/testing "parse-delta"
     (t/is (= 1 1))
@@ -81,15 +82,18 @@
         ; (t/is (map? r-2))))))
 
 ;; test with values from the inital board
+;; moderate parse case
 (t/deftest parse-delta-init
   (t/testing "parse-delta")
   (let [diff [{:row-0 [{:tile :0-0} {:tile :0-1} {:tile :0-2} {:tile :0-3}]}]
         r (ff-board/parse-delta-2 diff)]
     (prn "r=" r)
-    (t/is (vector? r))))
-    ; (doseq [x r]
-    ;   (prn "x=" x))))
+    (t/is (vector? r))
+    (t/is (= (count r) 4))
+    (t/is (map? (nth r 0)))
+    (t/is (= 3 (-> (filter #(do #_(prn "%=" %) (or (= % :row)(= % :col)(= % :tile))) (keys (nth r 0))) count)))))
 
+;; full test case
 (t/deftest parse-delta-init-2
   (t/testing "parse-delta")
   (let [diff [{:row-0 [{:tile :0-0} {:tile :0-1} {:tile :0-2} {:tile :0-3}]}
@@ -97,7 +101,11 @@
               {:row-2 [{:tile :2-0} {:tile :2-1} {:tile :2-2} {:tile :2-3}]}]
         r (ff-board/parse-delta-2 diff)]
     (prn "r=" r)
-    (t/is (vector? r))))
+    (t/is (vector? r))
+    (t/is (= (count r) 12))
+    (t/is (map? (nth r 0)))
+    (t/is (= 3 (-> (filter #(do #_(prn "%=" %) (or (= % :row)(= % :col)(= % :tile))) (keys (nth r 0))) count)))))
+    ; (t/is (filter #(do (prn "%1=" %1)(= %1 :sow)) (keys (nth r 0))))))
 
 ; [{:row-0 [{:tile :0-0} {:tile :0-1} {:tile :0-2} {:tile :0-3}]} {:row-1 [{:tile :1-0} {:tile :1-1} {:tile :1-2} {:tile :1-3}]} {:row-2 [{:tile :2-0} {:tile :2-1} {:tile :2-2} {:tile :2-3}]}]
 (t/run-tests 'cube-test.frig-frog.board-test)
@@ -120,6 +128,6 @@
 ;   (prn "r0=" r0)
 ;   (prn "r0.0" (nth r0 0))
 ;   (prn "r1=" r1))
-(info {} [:col 0 :tile :0-0])
-(doseq [x [:col 0 :tile :0-0]]
-  (prn "x=" x))
+; (info {} [:col 0 :tile :0-0])
+; (doseq [x [:col 0 :tile :0-0]]
+;   (prn "x=" x))
