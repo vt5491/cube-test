@@ -93,15 +93,44 @@
       (set! lastGripTime (.now js/Date)))
     (set! isGripping false)))
 
+;;vt-x start
+(defn main-btn-handler [stateObject]
+  (prn "controller.main-btn-handler: stateObject=" stateObject))
+  ; (js-debugger))
+
+(defn secondary-btn-handler [stateObject]
+  (prn "controller.secondary-btn-handler: stateObject=" stateObject))
+  ; (js-debugger))
+;;vt-x end
 (defn controller-mesh-loaded-handler [webVRController]
-  (println "now in controller-mesh-loaded-handler")
+  (println "frig now in controller-mesh-loaded-handler")
   ; (.add (.-onSecondaryTriggerStateChangedObservable webVRController) trigger-handler))
   (-> webVRController (.-onTriggerStateChangedObservable) (.add trigger-handler))
-  (-> webVRController (.-onSecondaryTriggerStateChangedObservable) (.add grip-handler))
-  (js/window (.addEventListener "onclick" click-handler)))
+  (-> webVRController (.-onSecondaryTriggerStateChangedObservable) (.add grip-handler)))
+  ;;
+  ;; x and a btns
+  ; (-> webVRController (.-onMainButtonStateChangedObservable) (.add main-btn-handler))
+  ;; y and b btns
+  ; (-> webVRController (.-onSecondaryButtonStateChangedObservable) (.add secondary-btn-handler))
+  ; (-> webVRController (.-onPadStateChangedObservable) (.add click-handler))
+  ; (-> webVRController (.-onPadValuesChangedObservable) (.add click-handler))
+
+  ; (js/window (.addEventListener "onclick" click-handler)))
 
 (defn setup-controller-handlers [vrHelper]
-  (println "setup-controler-handlers: entered")
+  (println "setup-controller-handlers: entered")
   (-> vrHelper (.-onControllerMeshLoaded) (.add controller-mesh-loaded-handler)))
-
+  ; (-> vrHelper (.-onControllerMeshLoaded) (.add (fn [webVRController]
+  ;                                                 (re-frame/dispatch [:cube-test.frig-frog.events/ff-ctrl-mesh-loaded webVRController])))))
+  ;;vt
+  ; (-> vrHelper (.-onControllerMeshLoaded) (.add cube-test.frig-frog.game/ctrl-mesh-loaded-handler))
+  ; (-> vrHelper (.-onControllerMeshLoaded) (.add
+  ;                                               (fn [webVRController]
+  ;                                                 (prn "frig-frog: in anon func")
+  ;                                                 (controller-mesh-loaded-handler webVRController)
+  ;                                                 (re-frame/dispatch [:cube-test.frig-frog.events/ff-ctrl-mesh-loaded webVRController])
+  ;                                                 (re-frame/dispatch [:cube-test.frig-frog.events/ff-dummy]))))
+  ; (prn "frig-frog: meshLoaded obserbable cnt=" (count (.-observers (.-onControllerMeshLoaded vrHelper))))
+  ; ; (-> vrHelper (.-onControllerMeshLoaded) (.add controller-mesh-loaded-handler))
+  ; (prn "frig-frog: meshLoaded obserbable cnt2=" (count (.-observers (.-onControllerMeshLoaded vrHelper)))))
 ;; xr support

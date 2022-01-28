@@ -27,8 +27,8 @@
 (def camera-rig)
 ; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
 (def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
-; (def ^:dynamic *camera-init-pos* (atom {:x 0, :y 0, :z -5}))
-(def ^:dynamic *camera-init-pos* (atom {:x 58.6, :y 7.9, :z 12.7}))
+(def ^:dynamic *camera-init-pos* (atom {:x 0, :y 4, :z -7}))
+; (def ^:dynamic *camera-init-pos* (atom {:x 58.6, :y 7.9, :z 12.7}))
 ; (def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z -5}))
 (def ^:dynamic *camera-init-rot* (atom {:x 0, :y 0, :z 0}))
 ; (def non-vr-camera)
@@ -91,12 +91,13 @@
   (set! env (bjs/EnvironmentHelper.
              (js-obj
               "createGround" false
-              "skyboxSize" 30)
+              "skyboxSize" 90)
+              ; "skyboxSize" 10)
              scene))
   ;; manually create a ground with a physicsImposter.
-  (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 10 "subdivisions" 10))]
+  (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 30 "subdivisions" 10))]
     ; (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
-    (set! (.-material grnd) (bjs-m/GridMaterial. "green-mat" scene))
+    (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
     (set! (.-physicsImpostor grnd)
       (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
                             (js-obj "mass" 0 "restitution" 0.9) scene))
@@ -123,14 +124,15 @@
     (re-seq #"Chrome" js/navigator.userAgent)
     (do
       (prn "Chrome detected")
-      (set! xr-mode "xr"))
-      ; (set! xr-mode "vr"))
+      ; (set! xr-mode "xr"))
+      (set! xr-mode "vr"))
     (re-seq #"Firefox" js/navigator.userAgent)
     (do
       (prn "Firefox detected")
       ; (set! xr-mode "xr"))
       (set! xr-mode "vr"))
-    true (set! xr-mode "xr"))
+    true
+    (set! xr-mode "xr"))
   (prn "xr-mode=" xr-mode)
   (if (= xr-mode "vr")
     (do
@@ -139,8 +141,11 @@
                           (js-obj "useXR" false)))
                                   ; "floorMeshesCollection" (array))))
       (set! camera (.-webVRCamera vrHelper))
-      (let [do-cam (.-deviceOrientationCamera vrHelper)]
-        (set! (.-position do-cam) (bjs/Vector3. 0 4 -15)))
+      (let [do-cam (.-deviceOrientationCamera vrHelper)
+            ip @*camera-init-pos*]
+        ; (set! (.-position do-cam) (bjs/Vector3. 0 4 -15))
+        ; (set! (.-position do-cam) (bjs/Vector3. 0 4 -7))
+        (set! (.-position do-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip))))
       (set! (.-id camera) "main-camera")
       (controller/init scene vrHelper camera)
       (controller/setup-controller-handlers vrHelper)
@@ -178,35 +183,37 @@
 ;; This gets control when the "enter vr" button is clicked.
 (defn enter-vr-handler []
   (prn "entered vr")
-  (.setTarget camera (bjs/Vector3. 0 0 0))
+  ;; note: this will tilt the view because it forces the camera to look at the origin
+  ;(.setTarget camera (bjs/Vector3. 0 0 0))
   (prn "cam-rot a=" (.-rotation camera))
   ;; need a different rot when in vr
   ; (swap! *camera-init-rot* (fn [x] {:x 0 :y (* base/ONE-DEG -90) :z 0}))
   ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (/ js/Math.PI 1.0) 0 0))
   ;; scruz adjustment
-  (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -180) 0 0))
+  ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG -180) 0 0))
   ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG 0) 0 0))
   (.resetToCurrentRotation camera)
   (prn "cam-rot a=" (.-rotation camera))
   ; (prn "dispatch-sync=" (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera]))
-  (let [cam-pos (.-position camera)
-        ; xr-cam (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera])
-        vr-cam (.-deviceOrientationCamera vrHelper)
-        x (.-x cam-pos)
-        y (.-y cam-pos)
-        z (.-z cam-pos)
-        ip @*camera-init-pos*
-        ir @*camera-init-rot*
-        quat (bjs/Quaternion.FromEulerAngles (:x ir) (+ (:y ir) (* 70 base/ONE-DEG)) (:z ir))]
+  (comment
+   (let [cam-pos (.-position camera)
+         ; xr-cam (re-frame/dispatch-sync [:cube-test.utils.events/get-xr-camera])
+         vr-cam (.-deviceOrientationCamera vrHelper)
+         x (.-x cam-pos)
+         y (.-y cam-pos)
+         z (.-z cam-pos)
+         ip @*camera-init-pos*
+         ir @*camera-init-rot*
+         quat (bjs/Quaternion.FromEulerAngles (:x ir) (+ (:y ir) (* 70 base/ONE-DEG)) (:z ir))]
 
-      (prn "vr-cam=" vr-cam)
-      ; (prn "xr-cam pre.pos=" xr-cam)
-      ; (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
-      ; (set! (.-rotationQuaternion camera) quat)
-      ; (prn "cam-rot c=" (.-rotation camera))
-      (set! (.-position vr-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
-      (set! (.-rotationQuaternion vr-cam) quat)
-      (prn "cam-rot c=" (.-rotation vr-cam))))
+       (prn "vr-cam=" vr-cam)
+       ; (prn "xr-cam pre.pos=" xr-cam)
+       ; (set! (.-position camera) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+       ; (set! (.-rotationQuaternion camera) quat)
+       ; (prn "cam-rot c=" (.-rotation camera))
+       (set! (.-position vr-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))
+       (set! (.-rotationQuaternion vr-cam) quat)
+       (prn "cam-rot c=" (.-rotation vr-cam)))))
 
 ;; this gets control when the "enter xr" button is clicked.
 (defn enter-xr-handler [state]

@@ -3,7 +3,7 @@
    [re-frame.core :as re-frame :refer [reg-sub subscribe]]
    [cube-test.frig-frog.events :as events]
    [cube-test.frig-frog.board :as ff-board]
-   [cube-test.frig-frog.scene :as scene]
+   [cube-test.frig-frog.scene-l1 :as scene-l1]
    [cube-test.utils :as utils]
    [clojure.data :as clj-data]
    [cube-test.macros :as macros]))
@@ -39,6 +39,12 @@
  (fn [db _]
    (get-in db [:frog :mode])))
 
+(reg-sub
+ :get-dev-mode
+ (fn [db _]
+   ; (get-in db [:dev-mode])
+   (:dev-mode db)))
+
 ;; computations
 (reg-sub
  :board-changed-0
@@ -51,7 +57,7 @@
  :<- [:get-board]
  (fn [board query-v]
    ; (re-frame/dispatch [:cube-test.frig-frog.events/draw-tile 0 0])
-   (prn "subs: *last-board*=" @*last-board*)
+   ; (prn "subs: *last-board*=" @*last-board*)
    ; (prn "subs: diff=" (first (clj-data/diff board @*last-board*)))
    ; (prn "subs: board-changed: board=" board ",query-v=" query-v)
    (let [diff-full (clj-data/diff board @*last-board*)
@@ -135,3 +141,14 @@
  (fn [mode query-v]
    (prn "sub: frog-mode-changed: mode=" mode ", qv=" query-v)))
    ; (re-frame/dispatch [:events/jump-frog])))
+
+(reg-sub
+ :dev-mode-changed
+ :<- [:get-dev-mode]
+ (fn [mode query-v]
+   (prn "sub: dev-mode-changed: mode=" mode ", qv=" query-v)
+   ; (re-frame/dispatch [:cube-test.frig-frog.events/echo-db mode])
+   ; (re-frame/dispatch [:cube-test.frig-frog.events/echo-fx mode])
+   ;; handle the logic in the dispatch, since we need access to other parms in the db
+   ;; and sub handler only has access to the db delta.
+   (re-frame/dispatch [:cube-test.frig-frog.events/dev-mode-changed mode])))

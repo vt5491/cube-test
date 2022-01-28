@@ -35,6 +35,13 @@
  (fn [_ _]
    db/default-db))
 
+(re-frame/reg-event-db
+ ::seed-db
+ (fn [db [_ seed]]
+   (prn "events.seed-db: seed=" seed)
+   ; db/default-db
+   seed))
+
 (reg-event-db
  ::init-game-db
  (fn [db [_ default-game-db]]

@@ -3,14 +3,47 @@
   (:require
    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx after ] :as re-frame]
    [cube-test.frig-frog.game :as ff.game]
-   [cube-test.frig-frog.scene :as frig-frog.scene]
-   [cube-test.frig-frog.db :as frig-frog.db]
+   [cube-test.frig-frog.scene-l1 :as ff.scene-l1]
+   [cube-test.frig-frog.db :as ff.db]
    [cube-test.frig-frog.tile :as ff.tile]
    [cube-test.frig-frog.board :as ff.board]
    [cube-test.frig-frog.frog :as ff.frog]
    [cube-test.utils :as utils]
    [cube-test.utils.common :as common-utils]))
 
+(re-frame/reg-event-fx
+ ::ff-dummy
+ (fn [cofx _]
+   (prn "frig-frog: dummy event")
+   {
+    :db (:db cofx)}))
+
+;; used for development
+(reg-event-db
+ ::echo-db
+ (fn [db [_ val]]
+   (prn "events.echo-db: db=" db ",val=" val)
+   db))
+
+(reg-event-fx
+ ::echo-fx
+ (fn [cofx [_ val]]
+   (prn "events.echo-fx: cofx=" cofx ",val=" val)
+   {
+    :db (:db cofx)}))
+
+;;
+;; db events (for testing )
+;;
+(reg-event-db
+ ::seed-test-db
+ (fn [db [_ key val]]
+   (prn "seed-test-db: key=" key ", val=" val)
+   (assoc db key val)))
+
+;;
+;; game level events
+;;
 (reg-event-db
  ::init-game-db
  (fn [db [_ game-db]]
@@ -23,20 +56,17 @@
    ; game-db))
 
 (re-frame/reg-event-fx
- ::init-scene
- (fn [cofx _]
-   (frig-frog.scene/init (:db cofx))
-   {
-    :db (:db cofx)}))
-
-(re-frame/reg-event-fx
  ::init-game
  (fn [cofx _]
    (ff.game/init)
-   {
-    ; :fx [[:dispatch [::init-scene]]]
-    :fx [[:dispatch [::init-scene]]]}))
-    ; :db (:db cofx)}))
+   (condp (:active-scene (:db cofx))
+     :ff-l1
+     (do
+       {
+        :fx [[:dispatch [::init-scene-l1]]]}))))
+
+    ; {
+    ;  :fx [[:dispatch [::init-scene]]]})))
 
 (re-frame/reg-event-fx
  ::run-game
@@ -56,6 +86,94 @@
     ; (prn "events: returned db=")
     ; db))
 
+;; defunct
+(re-frame/reg-event-fx
+ ::ff-ctrl-mesh-loaded
+ (fn [cofx [_ webVRController]]
+   (prn "frig-frog.events: now calling ctrl-mesh-loaded-handler")
+   (ff.game/ctrl-mesh-loaded-handler webVRController)
+   {
+    :db (:db cofx)}))
+
+(reg-event-db
+ ::toggle-dev-mode
+ (fn [db [_]]
+   ; (prn ":frig-frog.toggle-dev-mode: entered, db=" db)
+   (if (not (:dev-mode db))
+     (assoc db :dev-mode true)
+     (assoc db :dev-mode (not (:dev-mode db))))))
+
+(reg-event-fx
+ ::dev-mode-changed
+ (fn [cofx [_ dev-mode]]
+   (let [db (:db cofx)
+         active-scene (:active-scene db)]
+     (prn "events.dev-mode-changed: dev-mode=" dev-mode ",active-scene=" active-scene)
+     (when (and (not (nil? dev-mode)) active-scene)
+       (condp = active-scene
+         :ff-l1 (do
+                  ; (if (= new-dev-mode false))
+                  (if dev-mode
+                    (do
+                      (prn "events: calling create-walls")
+                      (ff.scene-l1/create-walls))
+                    (do
+                      (prn "events: calling remove-walls")
+                      (ff.scene-l1/remove-walls))))))
+    {
+      :db (:db cofx)})))
+
+;;
+;; scene-l1
+;;
+(re-frame/reg-event-fx
+ ::init-scene-l1
+ (fn [cofx _]
+   (ff.scene-l1/init (:db cofx))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::init-non-vr-view
+ (fn [cofx [_ rot-delta]]
+   (prn "events.init-view: rot-delta=" rot-delta)
+   ; (ff.scene/init-view rot-delta)
+   (if rot-delta
+     (ff.scene-l1/init-non-vr-view rot-delta)
+     (ff.scene-l1/init-non-vr-view))
+   {
+     :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::init-vr-view
+ (fn [cofx [_ rot-delta]]
+   (prn "events.init-view: rot-delta=" rot-delta)
+   ; (ff.scene/init-view rot-delta)
+   (if rot-delta
+     (ff.scene-l1/init-vr-view rot-delta)
+     (ff.scene-l1/init-vr-view))
+   {
+     :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::init-view
+ (fn [cofx [_ rot-delta]]
+   (prn "events.init-view: rot-delta=" rot-delta)
+   (if rot-delta
+     (ff.scene-l1/init-view rot-delta)
+     (ff.scene-l1/init-view))
+   {
+     :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::reset-view
+ (fn [cofx [_]]
+   (prn "events.reset-view: entered")
+   (ff.scene-l1/reset-view)
+   {
+     :db (:db cofx)}))
+
+;;
 ;; tile
 ;; defunct as board calls 'draw-tile' natively for performance and various other reasons.
 ;; Nope: active once again
@@ -132,11 +250,17 @@
 ;;
 ;; frog
 ;;
+; (reg-event-db
+;   ::init-frog
+;   (fn [db [_ row col]]
+;     ; (assoc db :frog (ff.frog/init-frog db))
+;     (ff.frog/init-frog row col db)))
+
 (reg-event-db
   ::init-frog
-  (fn [db [_ row col]]
+  (fn [db [_]]
     ; (assoc db :frog (ff.frog/init-frog db))
-    (ff.frog/init-frog row col db)))
+    (ff.frog/init-frog db)))
 
 (reg-event-db
   ::jump-frog

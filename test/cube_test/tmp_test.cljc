@@ -1,7 +1,8 @@
 (ns cube-test.tmp-test
  (:require
    [clojure.test :refer-macros [is testing deftest run-tests] :as t]
-   [re-frame.db       :as db]))
+   [re-frame.db       :as db]
+   [babylonjs :as bjs]))
 
 (def h {:models
         {:ybot-rumba {:is-loaded true, :is-enabled true, :is-playing false},
@@ -635,3 +636,29 @@
       col (or (:d h) -1)]
   (prn "row=" row)
   (prn "col=" col))
+
+(let [a -7
+      b 8]
+  (* b (if (neg? a)
+         -1
+         1)))
+
+(let [v (bjs/Vector3. 0 0 1)
+      v2 (.multiply v)]
+  (prn "v=" v))
+
+(+ 1 1)
+(range 6)
+
+(bjs/Color3.Red)
+(bjs/Color3. 1 2 3)
+(bjs/Color3. 0xff 2 3)
+(-> (bjs/Angle.FromDegrees 180) (.-radians))
+(.-radians (bjs/Angle. 180))
+; BABYLON.Angle.FromDegrees(45).radians();
+(-> (bjs/Angle.FromDegrees 10) (.radians))
+
+(+ 1 1)
+(let [a nil]
+  (when (not (nil? a))
+    (+ 1 2)))
