@@ -8,6 +8,7 @@
    [cube-test.frig-frog.tile :as ff.tile]
    [cube-test.frig-frog.board :as ff.board]
    [cube-test.frig-frog.frog :as ff.frog]
+   [cube-test.frig-frog.train :as ff.train]
    [cube-test.utils :as utils]
    [cube-test.utils.common :as common-utils]))
 
@@ -289,3 +290,86 @@
    (ff.frog/draw-frog row col)
    {
     :db (:db cofx)}))
+
+;;
+;; train
+;;
+(reg-event-db
+  ::init-train
+  (fn [db [_ opts]]
+    (ff.train/init opts db)))
+
+(reg-event-db
+  ::drop-train-idx
+  (fn [db [_ idx]]
+    (let [new-trains (ff.train/drop-train-idx (:trains db) idx)]
+      (assoc db :trains new-trains))))
+
+(reg-event-db
+  ::update-train-idx
+  (fn [db [_ idx]]
+    (let [new-trains (ff.train/drop-train-idx (:trains db) idx)]
+      (assoc db :trains new-trains))))
+
+; (re-frame/reg-event-fx
+;  ::get-train-by-id
+;  (fn [cofx [_ trains id]]
+;    (prn "events.get-train-by-id: trains=" trains ", id=" id)
+;    (ff.train/get-train-by-id trains id)
+;    {
+;     :db (:db cofx)}))
+
+;; this wraps train/update-train-by-id, but updates the entire :trains field as a whole
+(reg-event-db
+  ::update-train-by-id
+  (fn [db [_ id updates]]
+    (let [trains (:trains db)
+          new-train (ff.train/update-train-by-id trains id updates)
+          idx (common-utils/idx-of-id trains id)]
+      ; (assoc (:trains db) idx new-train)
+      (assoc db :trains (assoc trains idx new-train)))))
+
+; (re-frame/reg-event-fx
+;  ::add-train-mesh
+;  (fn [cofx [_ id]]
+;    (prn "events.add-train-mesh: entered")
+;    (let [db (:db cofx)
+;          trains (:trains db)
+;          train (ff.train/get-train-by-id trains id)]
+;      (prn "events.add-train-mesh: train=" train)
+;      (ff.train/add-train-mesh train))
+;    {
+;      :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::add-train-mesh
+ (fn [cofx [_ train]]
+   (prn "events.add-train-mesh: entered")
+   (let [db (:db cofx)]
+         ; trains (:trains db)
+         ; train (ff.train/get-train-by-id trains id)]
+     (prn "events.add-train-mesh: train=" train)
+     (ff.train/add-train-mesh train))
+   {
+     :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::drop-train-mesh
+ (fn [cofx [_ train]]
+   (prn "events.drop-train-mesh: entered")
+   (let [db (:db cofx)]
+     (ff.train/drop-train-mesh train))
+   {
+     :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::update-train-mesh-by-idx
+ ; (fn [cofx [_ train]])
+ (fn [cofx [_ idx]]
+   (prn "events.update-train-mesh: idx=" idx)
+   (let [db (:db cofx)
+         train (nth (:trains db) idx)]
+     (ff.train/drop-train-mesh train)
+     (ff.train/add-train-mesh train))
+   {
+     :db (:db cofx)}))

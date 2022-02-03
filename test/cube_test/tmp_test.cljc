@@ -2,6 +2,7 @@
  (:require
    [clojure.test :refer-macros [is testing deftest run-tests] :as t]
    [re-frame.db       :as db]
+   [cube-test.main-scene :as main-scene]
    [babylonjs :as bjs]))
 
 (def h {:models
@@ -662,3 +663,73 @@
 (let [a nil]
   (when (not (nil? a))
     (+ 1 2)))
+
+(quot 8 2)
+
+(let [h {:a [0 1 2]}]
+  (get-in h [:a 1]))
+
+(let [db {:a [:x :y :z]}
+      v (:a db)
+      ; v2 (map-indexed #(do (prn "1=" %1)(prn "2=" %2)) v)
+      ; v2 (doall (map-indexed #(prn "1=" %1) v))
+      ; v2 (doall (map-indexed #(do (prn "1=" %1)(prn "%2=" %2)) v))
+      v3 (doall (map-indexed #(when-not (= %1 1) %2) v))
+      v4 (keep-indexed #(when-not (= %1 1) %2) v)]
+      ; v2 (map-indexed #(prn "1=" %1) v)]
+  (prn "v3=" v3)
+  (prn "v4=" v4)
+  (assoc db :a v))
+
+(let [db {:a [:x :y :z]}
+      v (filter #(not (= %1 :y)) (:a db))]
+    (prn "v=" v))
+
+(get [0 1 2] 1)
+
+(let [a [{:a 1 :id :a1} {:b 2 :id :b1}{:c 3 :id :c1}]
+      r (into [] (filter (fn [x] (= (:id x) :b1)) a))]
+  (prn "r=" r))
+
+(defn f-x [[a b]]
+  (prn "a=" a ",b=" b))
+
+(f-x [ 1 2])
+(apply f-x '([3 4]))
+(apply #(count %1) '([3 4]))
+(apply (fn [[a b]](+ a b)) '([3 4]))
+(map (fn [[a b]] (+ a b)) [[3 4] [7 9]])
+
+(apply + '(1 2))
+
+(let [h {:a 1 :b 2 :c 3}
+      updates {:b 12}
+      new-h (doall (map #(prn "x=" %1) updates))
+      ; new-h2 (doall (map (fn [[k v]] (prn "k=" k ",v=" v)) updates))
+      new-h2 (doall (map (fn [[k v]] (if (get-in updates [k])
+                                       [k (get-in updates [k])]
+                                       [k v]))
+                         h))
+      new-h3 (into {} new-h2)]
+  (prn "new-h2=" new-h2)
+  (prn "new-h3=" new-h3))
+
+(let [k :a
+      h {:a 1 :b 2}
+      r (get-in h [k])]
+  r)
+
+(conj [{:a 1 :id :1}] {:b 1 :id :2})
+(seq? [1 2])
+(seq? 1)
+
+(assoc [0 1 2 3] 2 7)
+
+(name :abc)
+(dotimes [i 3] (prn "abc")(prn "i=" i))
+(str "abc" "def")
+(some? nil)
+(some? 7)
+
+(-> cube-test/main-scene)
+(let [scene (main-scene/scene)])

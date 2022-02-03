@@ -41,3 +41,24 @@
 ;     (fps-panel/tick main-scene/engine))
 ;   ; (beat-club-scene/tick)
 ;   (.render main-scene/scene))
+;; return
+; (doseq [[i x] (map-indexed vector items)]
+;   (println i ":" x))
+; (map-indexed #(when (= %1 2) true) b)
+
+(defn idx-of-id
+  "Given a vector of hashes (each with an :id key), return the (first occurence)
+   index that matches the supplied id.
+   Example:
+   (idx-of-id [{:a 1 :id :1},{:b 2 :id :3},{:c 3 :id :2},{:d 4 :id :3}] :3) -> 1"
+  [vec id]
+  ; (let [r (into [] (filter #(= (:id %1) id) vec))])
+  (let [tmp (map-indexed #(if (= (:id %2) id)
+                            %1
+                            nil)
+                          vec)
+        tmp-2 (filter #(not (nil? %1)) tmp)]
+    ; (prn "idx-of-id: tmp=" tmp)
+    ; (prn "idx-of-id: tmp-2=" tmp-2)
+    ; (first (into []) tmp-2)
+    (first  tmp-2)))

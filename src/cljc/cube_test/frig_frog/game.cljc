@@ -5,7 +5,7 @@
    ; [cube-test.msg-cube.spec.db :as msg-cube.spec]
    ; [cube-test.utils :as utils]
    [cube-test.main-scene :as main-scene]
-   ; [cube-test.frig-frog.scene :as frig-frog-scene]
+   [cube-test.frig-frog.scene-l1 :as ff.scene-l1]
    [cube-test.frig-frog.frog :as frog]
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
@@ -16,7 +16,7 @@
 (def default-game-db
   {:game-abc 7
    ; :n-rows 3 :n-cols 4
-   :n-cols 8 :n-rows 8 
+   :n-cols 8 :n-rows 8
    ; :n-cols 10 :n-rows 10
    :board {}
    :active-scene :ff-l1
@@ -24,6 +24,7 @@
 
 (defn dmy []
   8)
+(def active-scene)
 
 ; (defn change-abc [new-val db]
 (defn change-abc [db new-val]
@@ -40,7 +41,9 @@
   (if fps-panel/fps-pnl
     (fps-panel/tick main-scene/engine))
   (frog/tick)
-  (.render main-scene/scene))
+  (.render main-scene/scene)
+  (condp = active-scene
+    :scene-l1  (ff.scene-l1/tick)))
 
 (defn run-game []
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
@@ -134,6 +137,7 @@
   ;   ;; at the moment.
   ;   (prn "frig-frog.game: adding observable to vrHelper")
   ;   (-> vrHelper .-onAfterEnteringVRObservable (.add init-ctrl)))
+  (set! active-scene :scene-l1)
   (when-let [vrHelper main-scene/vrHelper]
     (prn "frig-frog.game: adding observable to vrHelper")
     (-> vrHelper .-onAfterEnteringVRObservable (.add init-ctrl))
