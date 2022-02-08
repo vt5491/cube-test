@@ -24,6 +24,9 @@
                   {:init-row 6, :vx 1, :vy 0, :init-col 7, :length 1, :id :tr-3}])
 
 
+;;
+;; tests
+;;
 (t/deftest init-train
   (t/testing "init-train"
     ; (dispatch-sync [:ff-db/init-db])
@@ -58,15 +61,27 @@
         (t/is (= (:init-row train-2) 0))
         (t/is (= (:init-col train-2) 0))))))
 
-(t/deftest drop-train
-  (t/testing "drop-train"
+(t/deftest drop-train-idx
+  (t/testing "drop-train-idx"
     ; (dispatch-sync [:ff-db/init-db])
     (dispatch-sync [:cube-test.events/seed-db
                      ; {:trains [{:init-row 4, :vx -1, :vy 0, :init-col 7, :id :tr-1}
                      ;           {:init-row 5, :vx 1, :vy 0, :init-col 7, :id :tr-2}
                      ;           {:init-row 6, :vx 1, :vy 0, :init-col 7, :id :tr-3}]}
                      {:trains train-vec-3}])
-    (dispatch-sync [::ff-events/drop-train 1])
+    (dispatch-sync [::ff-events/drop-train-idx 1])
+    (let [r-db @db/app-db
+          trains (:trains r-db)]
+      (prn "r-db=" r-db)
+      (t/is (contains? r-db :trains))
+      (t/is (= (count trains) 2))
+      (t/is (= (:id (get trains 0)) :tr-1))
+      (t/is (= (:id (get trains 1)) :tr-3)))))
+
+(t/deftest drop-train-id
+  (t/testing "drop-train-id"
+    (dispatch-sync [:cube-test.events/seed-db {:trains train-vec-3}])
+    (dispatch-sync [::ff-events/drop-train-id :tr-2])
     (let [r-db @db/app-db
           trains (:trains r-db)]
       (prn "r-db=" r-db)
@@ -86,34 +101,22 @@
      (t/is (not (nil? train)))
      (t/is (= (:id train) :tr-2)))))
 
-(t/deftest update-train-by-id
-  (t/testing "update-train-by-id"
+; (t/deftest update-train-id
+;   (t/testing "update-train-id"
+;     (dispatch-sync [:cube-test.events/seed-db
+;                      {:trains train-vec-3}])
+;     (let [r-db @db/app-db
+;           r (ff-train/update-train-id :tr-2 (:trains r-db) {:length 3})]
+;       (prn "***r=" r)
+;       (t/is (= (:length r) 3)))))
+
+(t/deftest update-train-id
+  (t/testing "update-train-id"
     (dispatch-sync [:cube-test.events/seed-db
                      {:trains train-vec-3}])
-                     ; {:trains [{:init-row 4, :vx -1, :vy 0, :init-col 7, :id :tr-1}
-                     ;           {:init-row 5, :vx 1, :vy 0, :init-col 7, :id :tr-2}
-                     ;           {:init-row 6, :vx 1, :vy 0, :init-col 7, :id :tr-3}]}])
-    ; (dispatch-sync [::ff-events/update-train-by-id :tr-1 {:length 3}])
-    ; (let [r-db @db/app-db
-    ;       trains (:trains r-db)]
-    ;   (prn "r-db=" r-db)
-    ;   (prn "***trains=" trains))))
-    ;   ; (t/is (contains? r-db :trains))
-    ;   ; (t/is (= (count trains) 3))
-    ;   ; (t/is (= (:id (get trains 1)) :tr-2))
-    ;   ; (t/is (= (:length (get trains 1)) 3)))))
+    (dispatch-sync [::ff-events/update-train-id :tr-2 {:length 3}])
+    ; (dispatch-sync [::ff-events/drop-train-idx 1])
     (let [r-db @db/app-db
-          r (ff-train/update-train-by-id :tr-2 (:trains r-db) {:length 3})]
-      (prn "***r=" r)
-      (t/is (= (:length r) 3)))))
-
-(t/deftest update-train-by-id-dispatch
-  (t/testing "update-train-by-id (dispatch)"
-    (dispatch-sync [:cube-test.events/seed-db
-                     {:trains train-vec-3}])
-
-    (let [r-db @db/app-db
-          tmp (dispatch-sync [::ff-events/get-train-by-id (:trains r-db) :tr-2 {:length 3}])
           trains (:trains r-db)]
       (prn "trains=" trains)
       (t/is (= (count trains) 3))
@@ -125,7 +128,8 @@
 (comment
  ;; run a single test
  (t/test-vars [#'init-train])
- (t/test-vars [#'drop-train])
- (t/test-vars [#'get-train-by-id])
- (t/test-vars [#'update-train-by-id])
- (t/test-vars [#'update-train-by-id-dispatch]))
+ (t/test-vars [#'drop-train-idx])
+ (t/test-vars [#'drop-train-id])
+ (t/test-vars [#'get-train-id])
+ ; (t/test-vars [#'update-train-by-id])
+ (t/test-vars [#'update-train-id]))

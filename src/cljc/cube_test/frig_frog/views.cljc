@@ -18,7 +18,10 @@
         frog-row-col          @(subscribe [:frog-row-col-changed])
         ; frog-mode             @(subscribe [:frog-mode-changed])]
         dev-mode              @(subscribe [:dev-mode-changed])
-        trains                @(subscribe [:trains-changed])]
+        trains                @(subscribe [:trains-changed])
+        quanta-width          @(subscribe [:quanta-width-changed])
+        n-rows                @(subscribe [:n-rows-changed])
+        n-cols                @(subscribe [:n-cols-changed])]
     [:div
      ; [:br]
      ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-game-db ff-game/default-game-db])} "reset-db"]
@@ -56,10 +59,14 @@
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 0])} "drop train 0"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 2])} "drop train 2"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-id :tr-1])} "drop train id :tr-1"]
      [:br]
-     [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train 1])} "update train 1"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-idx 1])} "update train 1"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-1 {:length 3}])} "update train id :tr-1"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-2 {:length 4}])} "update train id :tr-2"]
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-1])} "add train mesh :tr-1"]
-     [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-2])} "add train mesh :tr-2"]]))
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-2])} "add train mesh :tr-2"]
+     [:br]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-trains])} "toggle train anim"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-train "tr-1-0"])} "toggle tr-1-0 anim"]]))

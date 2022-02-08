@@ -1,7 +1,7 @@
 (ns cube-test.frig-frog.scene-l1
   ; (:require-macros [cube-test.macros :as macros])
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as rf]
    [babylonjs :as bjs]
    [cube-test.main-scene :as main-scene]
    [babylonjs-gui :as bjs-gui]
@@ -16,12 +16,18 @@
    ; [cube-test.beat-club.twitch-stream :as twitch-stream]
    [babylonjs-loaders :as bjs-l]
    [cube-test.frig-frog.train :as ff.train]))
+   ; [cube-test.frig-frog.events :as ff.events]))
 
+;; constants
+;; note: some of these may arguably be placed at the object level, but we
+;; aggregate some global constants at the scene level to minimize cross-domain
+;; referencing.
+(def quanta-width 1.2)
 
-(defn init-gui []
-  (prn "frig-frog.scene: init-gui entered")
-  (let []))
-        ; top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))]))
+; (defn init-gui []
+;   (prn "frig-frog.scene: init-gui entered")
+;   (let []))
+;         ; top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))]))
 
 (defn init-non-vr-view
   ([] (init-non-vr-view 180))
@@ -231,13 +237,54 @@
   (prn "scene-l1: secondary-btn-handler: stateObject=" stateObject)
   ; (remove-walls)
   (when (.-pressed stateObject)
-    (re-frame/dispatch [:cube-test.frig-frog.events/toggle-dev-mode])))
+    (rf/dispatch [:cube-test.frig-frog.events/toggle-dev-mode])))
 
 (defn init-vr-hooks [webVRController]
   (prn "scene-l1: init-vr-hooks: webVRController=" webVRController)
   ; (-> webVRController (.-onSecondaryButtonStateChangedObservable) (.add secondary-btn-handler))
   (-> webVRController (.-onBButtonStateChangedObservable) (.add secondary-btn-handler)))
 
+(defn init-start-gui []
+  (prn "frig-frog.scene-l1: init-gui entered")
+  (let [start-plane (bjs/Mesh.CreatePlane. "start-plane" 2)
+        ; start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. start-plane 2048 1024)
+        start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. start-plane 840 680)
+        ; start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. start-plane 680 680)
+        start-pnl (bjs-gui/Grid.)
+        start-hdr (bjs-gui/TextBlock.)
+        start-btn (bjs-gui/Button.CreateImageButton. "start-btn" "start" "imgs/frig-frog/green_start_btn.png")
+        start-btn-img (.-image start-btn)]
+    (prn "board-width=" cube-test.frig-frog.board/board-width)
+    (prn "board-length=" cube-test.frig-frog.board/board-length)
+    (prn "n-cols=" cube-test.frig-frog.board/n-cols)
+    (set! (.-position start-plane) (bjs/Vector3.
+                                    (/ cube-test.frig-frog.board/board-width 2)
+                                    6.0
+                                    (/ cube-test.frig-frog.board/board-length 1)))
+    (.addRowDefinition start-pnl 1.0 false)
+    ; (.addRowDefinition start-pnl 0.25)
+    ; (.addRowDefinition start-pnl 0.25)
+    ; (.addRowDefinition start-pnl 0.25)
+    (.addColumnDefinition start-pnl 1.0)
+    ; (.addColumnDefinition start-pnl 0.5)
+    ; (.addColumnDefinition bottom-pnl 0.33)
+    (.addControl start-texture start-pnl)
+    ;;start-btn
+    (set! (.-horizontalAlignment start-btn) bjs-gui/Control.HORIZONTAL_ALIGNMENT_RIGHT)
+    (set! (.-verticalAlignment start-btn) bjs-gui/Control.VERTICAL_ALIGNMENT_TOP)
+    (set! (.-autoScale start-btn-img) true)
+    (-> start-btn .-onPointerUpObservable (.add (fn [value]
+                                                  (println "start btn pressed")
+                                                  (rf/dispatch
+                                                   [:cube-test.frig-frog.events/init-train
+                                                    {:id :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 8}]))))
+                                                                                                                            ; (re-frame/dispatch [:face-slot-super-anim-fwd])])))
+    (.addControl start-pnl start-btn 1 2)))
+
+(defn init-gui []
+  (init-start-gui))
+
+(defn start-btn-handler [])
 (defn init [db]
   (let [scene main-scene/scene
         ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) scene)
@@ -245,6 +292,10 @@
     ; (when-let [vrHelper main-scene/vrHelper]
     ;   (-> vrHelper .-onControllerMeshLoadedObservable (.add init-vr-hooks)))
     ;   ; (-> vrHelper .-onBButtonStateChangedObservable (.add init-vr-hooks)))
+    ; (prn "scene-l1.init: n-cols=" (:n-cols db) ",quanta-width=" (:quanta-width db) ",prod=" (* (:n-cols db) (:quanta-width db)))
+    (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
+    (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
+    ; (prn "scene-l1.init: board-width=" cube-test.frig-frog.board/board-width)
     (init-gui)))
     ; (create-walls)))
 

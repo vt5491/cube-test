@@ -732,4 +732,12 @@
 (some? 7)
 
 (-> cube-test/main-scene)
-(let [scene (main-scene/scene)])
+(let [scene main-scene/scene
+      m (.getMeshByID scene "tr-1-0")]
+    (prn "m=" m)
+    (-> m (.-metadata) (.-vx)))
+
+(-> (re-find #"^(tr-\d{1,4})-(\d{1,4})" "tr-0-1"))
+(-> (re-find #"^(tr-\d{1,4})-(\d{1,4})" "tr-666-14") (second) (keyword))
+
+(* 8 1.2)

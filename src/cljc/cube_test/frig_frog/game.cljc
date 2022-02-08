@@ -1,3 +1,4 @@
+;; game is refer to many, referred by few.
 (ns cube-test.frig-frog.game
   (:require
    [re-frame.core :as re-frame]
@@ -20,11 +21,14 @@
    ; :n-cols 10 :n-rows 10
    :board {}
    :active-scene :ff-l1
-   :dev-mode false})
+   :dev-mode false
+   :quanta-width 1.2})
 
-(defn dmy []
-  8)
+; (defn dmy []
+;   8)
 (def active-scene)
+; (def quanta-width 1.2)
+(def quanta-width nil)
 
 ; (defn change-abc [new-val db]
 (defn change-abc [db new-val]
@@ -33,25 +37,10 @@
   (prn "game.change-abc: db.abc=" (db :abc))
   (assoc db :abc new-val))
 
-;; This is the top-level tick for the (sub) game
-(defn render-loop []
-  (if (= main-scene/xr-mode "vr")
-    (controller/tick)
-    (controller-xr/tick))
-  (if fps-panel/fps-pnl
-    (fps-panel/tick main-scene/engine))
-  (frog/tick)
-  (.render main-scene/scene)
-  (condp = active-scene
-    :scene-l1  (ff.scene-l1/tick)))
-
-(defn run-game []
-  (.runRenderLoop main-scene/engine (fn [] (render-loop))))
-
-(defn init-game-db [game-db]
-  ; (re-frame/dispatch [:common/init-game-db d])
-  (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
-  ; default-game-db)
+; (defn init-game-db [game-db]
+;   ; (re-frame/dispatch [:common/init-game-db d])
+;   (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
+;   ; default-game-db)
 
 (defn init-ctrl-2 [webVRController]
   (prn "frig-frog.game: init-ctrl-2 entered: webVRController=" webVRController))
@@ -124,7 +113,7 @@
   (re-frame/console :warn "console msg from frig-frog.game.init")
   ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
   ; (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db])
-  (init-game-db default-game-db)
+  ;vt-x (init-game-db default-game-db)
   ; (init-ctrl)
   ; (let [
   ;       ; scene main-scene/scene
@@ -137,7 +126,8 @@
   ;   ;; at the moment.
   ;   (prn "frig-frog.game: adding observable to vrHelper")
   ;   (-> vrHelper .-onAfterEnteringVRObservable (.add init-ctrl)))
-  (set! active-scene :scene-l1)
+  ; (set! active-scene :scene-l1)
+  (set! active-scene (:active-scene default-game-db))
   (when-let [vrHelper main-scene/vrHelper]
     (prn "frig-frog.game: adding observable to vrHelper")
     (-> vrHelper .-onAfterEnteringVRObservable (.add init-ctrl))
@@ -149,3 +139,19 @@
   (re-frame/dispatch [:cube-test.frig-frog.events/init-board])
   ; (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
   (re-frame/dispatch [:cube-test.frig-frog.events/init-frog 0 0]))
+
+;; This is the top-level tick for the (sub) game
+(defn render-loop []
+  (if (= main-scene/xr-mode "vr")
+    (controller/tick)
+    (controller-xr/tick))
+  (if fps-panel/fps-pnl
+    (fps-panel/tick main-scene/engine))
+  (frog/tick)
+  (.render main-scene/scene)
+  (condp = active-scene
+    ; :scene-l1  (ff.scene-l1/tick)
+    :ff-l1  (ff.scene-l1/tick)))
+
+(defn run-game []
+  (.runRenderLoop main-scene/engine (fn [] (render-loop))))

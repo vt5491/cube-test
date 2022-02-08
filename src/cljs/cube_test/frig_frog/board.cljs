@@ -9,6 +9,12 @@
    ;; note can't refernce events directly due to "circular dependencies"
    ; [cube-test.frig-frog.events :as events]))
 
+;; constants for quick access from bjs e.g. that don't require rf/db
+(def n-rows nil)
+(def n-cols nil)
+(def board-width nil)
+(def board-length nil)
+
 (defn create-row [row-num n-cols]
   ; (prn "create-row: row-num=" row-num ", n-cols=" n-cols)
   (let [

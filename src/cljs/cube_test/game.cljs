@@ -97,6 +97,7 @@
                 (re-frame/dispatch [:init-main-scene
                                     (fn [] (do
                                              ;;TODO: call init-db from init-game in events
+                                             (re-frame/dispatch [::frig-frog-events/init-game-db cube-test.frig-frog.game/default-game-db])
                                              ; (re-frame/dispatch [::beat-club-events/init-db])
                                              (re-frame/dispatch [::frig-frog-events/init-game])
                                              ; (re-frame/dispatch [::beat-club-events/run-game])

@@ -3,6 +3,7 @@
   (:require
    [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx after ] :as re-frame]
    [cube-test.frig-frog.game :as ff.game]
+   [cube-test.main-scene :as main-scene]
    [cube-test.frig-frog.scene-l1 :as ff.scene-l1]
    [cube-test.frig-frog.db :as ff.db]
    [cube-test.frig-frog.tile :as ff.tile]
@@ -48,13 +49,10 @@
 (reg-event-db
  ::init-game-db
  (fn [db [_ game-db]]
-   (println ":frig-frog.init-game-db: now running")
-   ; (frig-frog.db/init-game-db db)
+   ; (println ":frig-frog.init-game-db: now running")
    (let [default-db ff.game/default-game-db
          board (ff.board/init-board default-db)]
-     ; (prn "tmp-db=" tmp-db)
      (assoc default-db :board board))))
-   ; game-db))
 
 (re-frame/reg-event-fx
  ::init-game
@@ -66,13 +64,18 @@
        {
         :fx [[:dispatch [::init-scene-l1]]]}))))
 
-    ; {
-    ;  :fx [[:dispatch [::init-scene]]]})))
-
 (re-frame/reg-event-fx
  ::run-game
  (fn [cofx _]
    (ff.game/run-game)
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::update-quanta-width
+ (fn [cofx [_ new-quanta-width]]
+   ; (prn "events: updating quanta-width to" new-quanta-width)
+   (set! ff.game/quanta-width new-quanta-width)
    {
     :db (:db cofx)}))
 
@@ -199,23 +202,9 @@
     ; (-> (:row-0 (nth b 0)) (nth 1) -> (:tile))))
     ; (assoc db :board (ff.board/init-board db))))
 
+;;
 ;; board
-; (re-frame/reg-event-fx
-;  ::draw-board
-;  ; (fn [cofx _])
-;  (fn [{:keys [db] :as cofx}]
-;    ; (ff.board/draw-board (:db cofx))
-;    ; (let [db (:db cofx)]
-;      {
-;       ; :db (ff.board/draw-board (:db cofx))
-;       :db (assoc db :board (ff.board/draw-board db))}))
-;         ; :db (:db cofx)}))
-
-; (reg-event-db
-;   ::draw-board
-;   (fn [db [_ val]]
-;     (assoc db :board (ff.board/draw-board db))))
-
+;;
 (reg-event-db
   ::init-board
   (fn [db [_ val]]
@@ -247,6 +236,26 @@
     ; (assoc db :board (conj (:board db) {:tile-dmy {}}))
     (assoc db :board (conj (:board db) {:row-4 {:tile-4-0 {}, :tile-4-1 {}}}))))
     ; (assoc db :board (conj (:board db) {:row-4 [{:tile-4-0 {}}, {:tile-4-1 {}}]}))))
+
+(re-frame/reg-event-fx
+ ::update-n-rows
+ (fn [cofx [_ n-rows]]
+   (let [db (:db cofx)]
+     (prn "events: updating n-rows to" n-rows)
+     (set! ff.board/n-rows n-rows)
+     (set! ff.board/board-length (* n-rows (:quanta-width db))))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::update-n-cols
+ (fn [cofx [_ n-cols]]
+   (let [db (:db cofx)]
+     (prn "events: updating n-cols to" n-cols)
+     (set! ff.board/n-cols n-cols)
+     (set! ff.board/board-width (* n-cols (:quanta-width db))))
+   {
+    :db (:db cofx)}))
 
 ;;
 ;; frog
@@ -306,6 +315,12 @@
       (assoc db :trains new-trains))))
 
 (reg-event-db
+  ::drop-train-id
+  (fn [db [_ id]]
+    (let [new-trains (ff.train/drop-train-id (:trains db) id)]
+      (assoc db :trains new-trains))))
+
+(reg-event-db
   ::update-train-idx
   (fn [db [_ idx]]
     (let [new-trains (ff.train/drop-train-idx (:trains db) idx)]
@@ -321,12 +336,11 @@
 
 ;; this wraps train/update-train-by-id, but updates the entire :trains field as a whole
 (reg-event-db
-  ::update-train-by-id
+  ::update-train-id
   (fn [db [_ id updates]]
     (let [trains (:trains db)
-          new-train (ff.train/update-train-by-id trains id updates)
+          new-train (ff.train/update-train-id trains id updates)
           idx (common-utils/idx-of-id trains id)]
-      ; (assoc (:trains db) idx new-train)
       (assoc db :trains (assoc trains idx new-train)))))
 
 ; (re-frame/reg-event-fx
@@ -373,3 +387,43 @@
      (ff.train/add-train-mesh train))
    {
      :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::reset-train-mesh
+ (fn [{db :db} [_ train-mesh]]
+   (prn "events.reset-train-mesh: train-mesh=" train-mesh)
+   (ff.train/reset-train-mesh train-mesh db)
+   {
+    ; :db (:db cofx)
+    :db db}))
+
+(re-frame/reg-event-fx
+ ::toggle-animate-trains
+ (fn [{db :db} [_ train-mesh]]
+   (set! ff.train/animate-trains (not ff.train/animate-trains))
+   {
+    :db db}))
+
+(re-frame/reg-event-fx
+ ::toggle-animate-train
+ (fn [{db :db} [_ train-id]]
+   (set! ff.train/animate-trains (not ff.train/animate-trains))
+   (let [scene main-scene/scene
+         train-mesh (.getMeshByID scene train-id)]
+    (prn "events:toggle-animate-train: train-mesh=" train-mesh ",train-id=" train-id)
+    (prn "events:toggle-animate-train: metadata=" (-> train-mesh (.-metadata)))
+    (prn "events:toggle-animate-train: animate=" (-> train-mesh (.-metadata) (.-animate)))
+    (when (not (nil? (and  train-mesh (.-metadata train-mesh) (-> train-mesh (.-metadata) (.-animate)))))
+      (prn "events:toggle-animate-train: metadata=" (-> train-mesh (.-metadata)))
+      ; (prn "hi")
+      ; (when-let [animate (-> train-mesh (.-metadata) (.-animate))]
+      ;   (prn "events:toggle-animate-train: animate=" animate)
+      ;   (set! (-> train-mesh (.-metadata) (.-animate)) (not animate))
+      ;   (prn "events:toggle-animate-train: new animate=" (-> train-mesh (.-metadata) (.-animate))))
+      (when (not (nil? (-> train-mesh (.-metadata) (.-animate))))
+        (let [old-animate (-> train-mesh (.-metadata) (.-animate))]
+          (prn "events:toggle-animate-train: old-animate=" old-animate)
+          (set! (-> train-mesh (.-metadata) (.-animate)) (not old-animate))
+          (prn "events:toggle-animate-train: new animate=" (-> train-mesh (.-metadata) (.-animate)))))))
+   {
+    :db db}))

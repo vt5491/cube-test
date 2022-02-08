@@ -1,8 +1,10 @@
+;; subs is refer to many, referred by few
 (ns cube-test.frig-frog.subs
   (:require
    [re-frame.core :as rf :refer [reg-sub subscribe]]
    [cube-test.frig-frog.events :as ff-events]
    [cube-test.frig-frog.board :as ff-board]
+   ; [cube-test.frig-frog.game :as ff.game]
    [cube-test.frig-frog.scene-l1 :as scene-l1]
    [cube-test.utils :as utils]
    [clojure.data :as clj-data]
@@ -53,6 +55,21 @@
  (fn [db _]
    (:trains db)))
 
+(reg-sub
+ :get-quanta-width
+ (fn [db _]
+   (:quanta-width db)))
+
+(reg-sub
+ :get-n-rows
+ (fn [db _]
+   (:n-rows db)))
+
+(reg-sub
+ :get-n-cols
+ (fn [db _]
+   (:n-cols db)))
+
 ;;
 ;; computations
 ;;
@@ -66,47 +83,15 @@
  :board-changed
  :<- [:get-board]
  (fn [board query-v]
-   ; (re-frame/dispatch [:cube-test.frig-frog.events/draw-tile 0 0])
-   ; (prn "subs: *last-board*=" @*last-board*)
-   ; (prn "subs: diff=" (first (clj-data/diff board @*last-board*)))
-   ; (prn "subs: board-changed: board=" board ",query-v=" query-v)
    (let [diff-full (clj-data/diff board @*last-board*)
          diff-a (first diff-full)
          diff-b (second diff-full)
          diff-c (nth diff-full 2)]
-     ; (let [diff (clj-data/diff  board @*last-board*)]
-     ; (prn "diff-a=" diff-a)
-     ; (prn "count diff-a=" (count diff-a))
-     ; (prn "diff-b=" diff-b)
-     ; (prn "count diff-b=" (count diff-b))
-     ; (prn "diff-c=" diff-c)
-     ; (let [[item1 _ item3 _ item5 _] names])
      (let [[row0 row1 row2 ] diff-a]
-          ; (prn "row0=" row0 ", row1=" row1 ", row2=" row2)
           (let [changed-tiles (filter some? diff-a)]))
-     ; (prn "changed-tiles=" changed-tiles)
-     ; (prn "count changed-tiles=" (count changed-tiles))))
-        ; (-> (re-matches #"row-(\d+)" (name :row-12)) (nth 1) (js/parseInt))))
-     ; (let [[{_ [col0 col1 col2]} ] diff]
-     ;   (prn "col0=" col0 ", col1=" col1 ", col2=" col2)))
-     ; (ff-board/parse-delta diff-1))
-     ; (prn "parse-delta=" (into (sorted-map) (ff-board/parse-delta diff-a)))
-     ; (prn "parse-delta=" (ff-board/parse-delta diff-a))
-     ; "parse-delta=" [{:row 0, :col 0, :abc -15, :state 15} {:row 2, :col 2, :abc -1, :state 1}]
      (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
-       ; (prn "subs: tile-deltas=" tile-deltas)
-       ; (prn "subs: count tile-deltas=" (count tile-deltas))
-       ; (map (fn [{:keys [row col abc state]}]) tile-deltas)
        (doseq [{:keys [row col abc state]} tile-deltas]
-         ; (prn "doseq: row=" row ",col=" col)
-         ; (rf/dispatch [:cube-test.frig-frog.ff-events/draw-tile row col])
          (rf/dispatch [::ff-events/draw-tile row col]))))
-    ; (prn "row=" row
-
-   ; (let [diff-row-1 (first
-   ;                   (clj-data/diff
-   ;                    (get-in board [1 :row-1 1 :state]) (get-in @*last-board* [1 :row-1 1 :state])))]
-   ;   (prn "detailed diff=" diff-row-1))
    (swap! *last-board* (fn [x] board))))
 
 (reg-sub
@@ -192,6 +177,7 @@
         (when (> (count trains) (count @*last-trains*))
           (when diff-a
             (do
+              ;; add-zone
               ; (prn "subs: about to call add-train-mesh: diff-a=" diff-a ",count diff-a=" (count diff-a))
               ; (prn (map (fn [x]
               ;             (prn "x=" x)
@@ -222,3 +208,26 @@
         (prn "bye"))
         ; (prn "trains-changed: diff-a-2=" diff-a-2))
    (swap! *last-trains* (fn [x] trains))))
+
+(reg-sub
+ :quanta-width-changed
+ :<- [:get-quanta-width]
+ (fn [quanta-width query-v]
+   (prn "quanta width has changed")
+   (rf/dispatch [::ff-events/update-quanta-width quanta-width])))
+
+(reg-sub
+ :n-rows-changed
+ :<- [:get-n-rows]
+ (fn [n-rows query-v]
+   (prn "n-rows has changed")
+   (when (not (nil? n-rows))
+     (rf/dispatch [::ff-events/update-n-rows n-rows]))))
+
+(reg-sub
+ :n-cols-changed
+ :<- [:get-n-cols]
+ (fn [n-cols query-v]
+   (prn "n-cols has changed")
+   (when (not (nil? n-cols))
+     (rf/dispatch [::ff-events/update-n-cols n-cols]))))
