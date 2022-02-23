@@ -15,6 +15,8 @@
 (def train-cube-width 1.2)
 (def velocity-factor 0.002)
 (def animate-trains true)
+(def debug-tmp nil)
+; navigator.xr.isSessionSupported('immersive-vr').then( (x) => {console.log("x=", x)})
 
 ;;
 ;; utilites
@@ -134,7 +136,7 @@
       ; (prn "train.move-train-mesh: vx=" vx ",vy=" vy ",id=" id ",new-pos=" new-pos)
       (set! (.-position train-mesh) new-pos)
       ; (when (or (> (.-x new-pos) 9.6) (< (.-x new-pos) 0)))
-      (when (or (> (.-x new-pos) (* cube-test.frig-frog.board/n-cols cube-test.frig-frog.game/quanta-width))
+      (when (or (> (.-x new-pos) (* cube-test.frig-frog.board.n-cols cube-test.frig-frog.game.quanta-width))
                 (< (.-x new-pos) 0))
         (let [id-stem-str (-> (re-find #"^(tr-\d{1,4})-(\d{1,4})" id) (second))
               id-stem-kw (keyword id-stem-str)]
@@ -176,8 +178,15 @@
     (prn "train.tick: train-mesh count=" (count train-meshes))
     ; (when animate-trains)
     (when true
-      (doall (map #(do
-                     ; (prn "tick: true test=" (true? (-> %1 (.-metadata) (.-animate))) ",animate=" (-> %1 (.-metadata) (.-animate)))
-                     (when (-> %1 (.-metadata) (.-animate))
-                       (move-train-mesh %1 delta-time)))
-                  train-meshes)))))
+      (doall (map
+               #(do
+                   ; (prn "tick: true test=" (true? (-> %1 (.-metadata) (.-animate))) ",animate=" (-> %1 (.-metadata) (.-animate)))
+                   ; (prn "tick: %1=" %1)
+                   ; (js-debugger)
+                   (when (-> %1 (.-metadata) (.-animate))
+                     (move-train-mesh %1 delta-time)))
+                ; (fn [tr]
+                ;   (prn "train: tr=" tr)
+                ;   (set! debug-tmp tr)
+                ;   (js-debugger))
+                train-meshes)))))

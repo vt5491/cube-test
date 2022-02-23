@@ -741,3 +741,5 @@
 (-> (re-find #"^(tr-\d{1,4})-(\d{1,4})" "tr-666-14") (second) (keyword))
 
 (* 8 1.2)
+(def a 7)
+(prn "a=" a)

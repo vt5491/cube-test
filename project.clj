@@ -154,7 +154,8 @@
                     [binaryage/devtools "1.0.3"]
                     ;;vt add
                     [day8.re-frame/tracing      "0.6.2"]
-                    [day8.re-frame/re-frame-10x "1.0.2"]]
+                    [day8.re-frame/re-frame-10x "1.2.2"]]
+                    ; [day8.re-frame/re-frame-10x "1.0.2"]]
                     ; [day8.re-frame/re-frame-10x "0.7.0"]]
                         ; [day8.re-frame/re-frame-10x "0.4.7"]]
                         ; [day8.re-frame/tracing "0.5.3"]]

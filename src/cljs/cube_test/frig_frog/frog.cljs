@@ -7,14 +7,35 @@
      ; [cube-test.frig-frog.events :as events]))
 
 (def jumped)
+(def frog-left-thumbstick)
 
 (defn dummy [x y]
   7)
 
+(defn frog-motion-ctrl-added [motion-ctrl]
+  (prn "frog: frog-motion-ctrl-added=" frog-motion-ctrl-added)
+  ; (js-debugger)
+  (when (= (.-handedness motion-ctrl) "left")
+    (set! frog-left-thumbstick (.getComponent motion-ctrl "xr-standard-thumbstick"))))
+
+(defn ctrl-added [xr-ctrl]
+  (prn "frog: ctrl-added")
+  (-> xr-ctrl .-onMotionControllerInitObservable (.add frog-motion-ctrl-added)))
+
 ; (defn init-frog [row col db])
 (defn init-frog [db]
   ;; hook the VRHelper joystick control here.
-  (set! (.-_rotationAllowed main-scene/vrHelper) false)
+  (when (= main-scene/xr-mode "vr")
+    (set! (.-_rotationAllowed main-scene/vrHelper) false))
+  (when (= main-scene/xr-mode "xr")
+    (let [xr-helper main-scene/xr-helper
+          fm (-> xr-helper (.-baseExperience) (.-featuresManager))
+          tf (.getEnabledFeature fm bjs/WebXRFeatureName.TELEPORTATION)]
+        ; (set! (.-rotationAngle tf) base/ONE-DEG)
+        ;; basically turn off the default rotation, so we can override at the frog level
+        (set! (.-rotationAngle tf) 0)
+        (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added))))
+
   ; (js-debugger)
   (set! jumped false)
   (let [n-cols (:n-cols db)
@@ -44,40 +65,11 @@
 ;       (-> (assoc-in db [:frog :row] row)
 ;           (assoc-in [:frog :col] col))))
 ;; control the frog's movement with the left stick of the vr controller
-(defn jump-frog-ctrl [ctrl]
-  (let [l-stick (.-leftStick ctrl)
-        x-val (.-x l-stick)
-        y-val (.-y l-stick)]
-    ; (cond
-    ;   (and (> y-val 0.5) (not jumped))
-    ;   (do
-    ;    (prn "frog: jump bwd")
-    ;    (set! jumped true)
-    ;    (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog -1 0]))
-    ;   (and (< y-val -0.5) (not jumped))
-    ;   (do
-    ;     (prn "frog: jump fwd")
-    ;     (set! jumped true)
-    ;     (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog 1 0]))
-    ;   (and (> y-val -0.5) (< y-val 0.5))
-    ;   (do
-    ;    ; (prn "frog: neutral zone")
-    ;    (set! jumped false)))
-    ; (cond
-    ;  (and (> x-val 0.5) (not jumped))
-    ;  (do
-    ;   (prn "frog: jump right")
-    ;   (set! jumped true)
-    ;   (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog 0 -1]))
-    ;  (and (< x-val -0.5) (not jumped))
-    ;  (do
-    ;    (prn "frog: jump left")
-    ;    (set! jumped true)
-    ;    (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog 0 1]))
-    ;  (and (> x-val -0.5) (< x-val 0.5))
-    ;  (do
-    ;   (set! jumped false)))
-    ;;
+; (defn jump-frog-ctrl [ctrl])
+(defn jump-frog-ctrl [x-val y-val]
+  ; (let [l-stick (.-leftStick ctrl)
+  ;       x-val (.-x l-stick)
+  ;       y-val (.-y l-stick)]
     (cond
       (and (> y-val 0.5) (not jumped))
       (do
@@ -102,18 +94,26 @@
       ; :else
       (and (> y-val -0.5) (< y-val 0.5) (> x-val -0.5) (< x-val 0.5))
       (do
-         (set! jumped false)))))
+         (set! jumped false))))
 
 (defn ^:export tick []
   ;; Note: accessing the vr/xr controller has to be "on the tick".  It's simply not
   ;; available if you're not in full vr mode (hit the vr button *and* have the headset on)
   ; (prn "frig-frog.game.tick: left-ctrl=" (.-leftController main-scene/camera))
-  (when-let [l-ctrl (.-leftController main-scene/camera)]
-    ; (prn "frig-frog.game.tick: left-stick=" (.-leftStick l-ctrl))))
-    ; (js-debugger)))
-    (jump-frog-ctrl l-ctrl)))
-  ; (println "tick2: entry: camera.pos=" (.-position re-con.core/camera))
-  ; (when camera
-  ;   (set! leftController (.-leftController camera)))
-  ; ; (println "tick: camera=" camera ",leftController=" leftController)
-  ; (when (and camera leftController)))
+  ; (js-debugger)
+  (when (= main-scene/xr-mode "vr")
+    (when-let [l-ctrl (.-leftController main-scene/camera)]
+      ; (prn "frig-frog.game.tick: left-stick=" (.-leftStick l-ctrl))))
+      ; (js-debugger)))
+      ; (jump-frog-ctrl l-ctrl)
+      (jump-frog-ctrl (.-x l-ctrl) (.-y l-ctrl))))
+  (when (= main-scene/xr-mode "xr")
+    ; (prn "frog-left-thumbstick=" frog-left-thumbstick)
+    (when (and frog-left-thumbstick (.-hasChanges frog-left-thumbstick))
+      (let [axes (.-axes frog-left-thumbstick)]
+        ; (prn "frog:tick: left-thumbstick change detected, axes=" axes ",x=" (.-x axes) ",y=" (.-y axes))
+        (jump-frog-ctrl (.-x axes) (.-y axes))))))
+      ; (js-debugger))))
+    ; (when-let [l-ctrl (first (.-controllers main-scene/xr-helper.input))]
+    ;   (prn "frig-frog.game.tick: left-ctrl=" l-ctrl)
+    ;   (js-debugger))))

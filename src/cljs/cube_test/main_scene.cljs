@@ -124,13 +124,13 @@
     (re-seq #"Chrome" js/navigator.userAgent)
     (do
       (prn "Chrome detected")
-      ; (set! xr-mode "xr"))
-      (set! xr-mode "vr"))
+      (set! xr-mode "xr"))
+      ; (set! xr-mode "vr"))
     (re-seq #"Firefox" js/navigator.userAgent)
     (do
       (prn "Firefox detected")
-      ; (set! xr-mode "xr"))
-      (set! xr-mode "vr"))
+      (set! xr-mode "xr"))
+      ; (set! xr-mode "vr"))
     true
     (set! xr-mode "xr"))
   (prn "xr-mode=" xr-mode)
@@ -146,7 +146,8 @@
         ; (set! (.-position do-cam) (bjs/Vector3. 0 4 -15))
         ; (set! (.-position do-cam) (bjs/Vector3. 0 4 -7))
         (set! (.-position do-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip))))
-      (set! (.-id camera) "main-camera")
+      ; (js-debugger)
+      ;vt-x(set! (.-id camera) "main-camera")
       (controller/init scene vrHelper camera)
       (controller/setup-controller-handlers vrHelper)
       (.enableTeleportation vrHelper (js-obj "floorMeshName" "ground"))
