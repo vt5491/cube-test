@@ -50,16 +50,16 @@
      [:br]
      [:button.user-action {:on-click #(rf/dispatch
                                        [::ff-events/init-train
-                                        {:id :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}])}
+                                        {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}])}
       "init-train 0"]
      [:button.user-action {:on-click #(rf/dispatch
                                        [::ff-events/init-train
-                                        {:id :tr-2 :vx 1 :vy 0 :length 2 :init-row 5 :init-col 0}])}
+                                        {:id-stem :tr-2 :vx 1 :vy 0 :length 2 :init-row 5 :init-col 0}])}
       "init-train 2"]
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 0])} "drop train 0"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 2])} "drop train 2"]
-     [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-id :tr-1])} "drop train id :tr-1"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-id-stem :tr-1])} "drop train id :tr-1"]
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-idx 1])} "update train 1"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-1 {:length 3}])} "update train id :tr-1"]

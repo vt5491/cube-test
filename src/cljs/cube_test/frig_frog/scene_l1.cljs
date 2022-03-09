@@ -23,6 +23,7 @@
 ;; aggregate some global constants at the scene level to minimize cross-domain
 ;; referencing.
 (def quanta-width 1.2)
+(def scene-initialized false)
 
 ; (defn init-gui []
 ;   (prn "frig-frog.scene: init-gui entered")
@@ -275,24 +276,39 @@
     (set! (.-autoScale start-btn-img) true)
     (-> start-btn .-onPointerUpObservable (.add (fn [value]
                                                   (println "start btn pressed")
-                                                  (rf/dispatch
-                                                   [:cube-test.frig-frog.events/init-train
-                                                    {:id :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 8}]))))
-                                                                                                                            ; (re-frame/dispatch [:face-slot-super-anim-fwd])])))
+                                                  ; (when scene-initialized
+                                                  ;   (rf/dispatch [:cube-test.frig-frog.events/scene-l1-toggle-animation]))
+                                                  ; (when (not scene-initialized))
+                                                  (when true
+                                                    (set! scene-initialized true)
+                                                    (rf/dispatch
+                                                     [:cube-test.frig-frog.events/init-trains
+                                                      {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 8}])))))
+                                                                                                                                ; (re-frame/dispatch [:face-slot-super-anim-fwd])])))
     (.addControl start-pnl start-btn 1 2)))
 
 (defn init-gui []
   (init-start-gui))
 
 (defn start-btn-handler [])
+
+(defn toggle-animation []
+  (prn "scene-l1.pause-animation: entered")
+  (rf/dispatch [:cube-test.frig-frog.events/train-toggle-animation]))
+
 (defn init [db]
   (let [scene main-scene/scene
         ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) scene)
-        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)]
+        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
+        camera main-scene/camera]
     ; (when-let [vrHelper main-scene/vrHelper]
     ;   (-> vrHelper .-onControllerMeshLoadedObservable (.add init-vr-hooks)))
     ;   ; (-> vrHelper .-onBButtonStateChangedObservable (.add init-vr-hooks)))
     ; (prn "scene-l1.init: n-cols=" (:n-cols db) ",quanta-width=" (:quanta-width db) ",prod=" (* (:n-cols db) (:quanta-width db)))
+    (prn "scene-l1.init: pre camera pos=" (.-position camera))
+    (set! (.-position camera) (bjs/Vector3. 1.54 4.77 -7.82))
+    (prn "scene-l1.init: post camera pos=" (.-position camera))
+
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     ; (prn "scene-l1.init: board-width=" cube-test.frig-frog.board/board-width)

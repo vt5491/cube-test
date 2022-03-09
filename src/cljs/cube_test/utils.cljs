@@ -8,7 +8,7 @@
    [re-frame.loggers :as loggers]
    [clojure.spec.alpha :as s]
    [cube-test.main-scene :as main-scene]))
-   
+
 
 ; (defn create-fps-panel [])
 ;; Convert ":17" to 17, for example
@@ -105,3 +105,10 @@
         ag (.getAnimationGroupByName scene anim-name)]
       (prn "utils.stop-animation: ag=" ag)
       (.stop ag)))
+
+
+;; example call:
+;; (sleep #(prn "hi") 5000)
+(defn sleep [f ms]
+  (prn "utils/sleep: f=" f ", ms=" ms)
+  (js/setTimeout f ms))

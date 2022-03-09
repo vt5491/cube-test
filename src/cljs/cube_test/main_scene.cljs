@@ -219,10 +219,15 @@
 ;; this gets control when the "enter xr" button is clicked.
 (defn enter-xr-handler [state]
   (when (= state bjs/WebXRState.IN_XR)
+    (prn "main-scene.enter-xr-handler: enter xr button pressed")
     ;; important that we only assign camera to the xr-camera *after* entring
     ;; full xr, so that downwind scenes can alter the non-xr camera as needed. The xr
     ;; camera, will always start with wherever the non-xr is currently positioned.
     (set! camera (-> xr-helper (.-baseExperience) (.-camera)))
+    ; (let [cam-pos (.-position camera)
+    ;       new-pos (bjs/Vector3. (.-x cam-pos) (+ (.-y cam-pos) 3) (.-z cam-pos))]
+    ;   (set! (.-position camera) new-pos))
+    (prn "main-scene.enter-xr-handler: camera.pos=" (.-position camera))
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [ quat (-> camera .-rotationQuaternion)])))
       ; cur-angles (.toEulerAngles quat)]

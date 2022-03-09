@@ -34,6 +34,26 @@
         ; (set! (.-rotationAngle tf) base/ONE-DEG)
         ;; basically turn off the default rotation, so we can override at the frog level
         (set! (.-rotationAngle tf) 0)
+        ; (-> xr-helper (.-baseExperience) (.-featuresManager) (.getEnabledFeature "xr-controller-teleportation") (.detach))
+        ; (-> xr-helper (.-baseExperience) (.-featuresManager)
+        ;     (.getEnabledFeature "xr-controller-teleportation") (.detach))
+        ; fm.disableFeature(WebXRFeatureName.POINTER_SELECTION)));
+        ; (.disableFeature fm bjs/WebXRFeatureName.TELEPORTATION)
+        ; (.-baseExperience xr-helper)
+        ;; override the enter-xr event locally, so we can customize for just this game.
+        (-> xr-helper (.-baseExperience) (.-onStateChangedObservable)
+            ; (.add #(prn "frog: onStateChangedObservable, state=" %1))
+            (.add #(do
+                     ; (prn "frog.onStateChangedObservable: state=" %1)
+                     ; (prn "frog.onStateChangedObservable: IN_XR=" bjs/WebXRState.IN_XR)
+                     (when (= %1 bjs/WebXRState.IN_XR)
+                       (let [camera main-scene/camera
+                             cam-pos (.-position camera)
+                             new-pos (bjs/Vector3. (.-x cam-pos) (+ (.-y cam-pos) 3) (.-z cam-pos))]
+                          (prn "frog: reseting height of camera")
+                          (set! (.-position camera) new-pos))))))
+
+        ; (.-baseExperience xr-helper)
         (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added))))
 
   ; (js-debugger)
@@ -43,7 +63,7 @@
         tmp-db-2 (assoc-in tmp-db [:frog :row] 0)
         tmp-db-3 (assoc-in tmp-db-2 [:frog :col] (quot (- n-cols 1) 2))
         tmp-db-4 (assoc-in tmp-db-3 [:frog :mode] 0)]
-      tmp-db-4))
+    tmp-db-4))
 
 (defn draw-frog [row col]
   (prn "draw.frog: row=" row ", col=" col)

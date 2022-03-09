@@ -3,7 +3,8 @@
    [clojure.test :refer-macros [is testing deftest run-tests] :as t]
    [re-frame.db       :as db]
    [cube-test.main-scene :as main-scene]
-   [babylonjs :as bjs]))
+   [babylonjs :as bjs]
+   [promesa.core :as p]))
 
 (def h {:models
         {:ybot-rumba {:is-loaded true, :is-enabled true, :is-playing false},
@@ -743,3 +744,48 @@
 (* 8 1.2)
 (def a 7)
 (prn "a=" a)
+
+(let [o (js-obj "a" 7 "b" 8)]
+  (set! o -a 9)
+  (prn o))
+
+(mod 7 5)
+
+(.then (js/Promise.resolve 42)
+       #(js/console.log "cljs.promise: val= "%))
+
+(.then (js/Promise.resolve 43)
+       #(prn "cljs.promise: val= "%))
+  ; function sleep (time) {}
+  ; return new Promise((resolve) => setTimeout(resolve, time)));
+
+(defn sleep-t [time]
+  (js/Promise. #(js/setTimeout %1 time)))
+
+(defn sleep-t2 [time]
+  (js/Promise. (fn [resolve] (js/setTimeout resolve time))))
+
+(defn sleep-t3 [time]
+  (prn "sleep-t3: time=" time)
+  (p/promise (fn [resolve reject]
+               ; (js/setTimeout #(js/Promise.resolve 1) time)
+               ; (js/setTimeout #(resolve 1) time)
+               (js/setTimeout #(prn ":resolved") time))))
+
+  ; (js/Promise. (fn [resolve] (js/setTimeout resolve time))))
+
+(defn get-hi []
+  "aloha there")
+
+(get-hi)
+(-> (sleep-t 1000) (.then #(get-hi)))
+
+(.then (sleep-t 5000) (prn "hello"))
+(.then (sleep-t2 5000) (prn "hello"))
+
+; works
+(js/setTimeout #(prn "loaded2") 6000)
+
+(.then (sleep-t3 5000) (prn "abc"))
+
+(-> (sleep-t3 5000) (p/then #(prn "def")))

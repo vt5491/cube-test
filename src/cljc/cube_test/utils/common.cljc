@@ -62,3 +62,21 @@
     ; (prn "idx-of-id: tmp-2=" tmp-2)
     ; (first (into []) tmp-2)
     (first  tmp-2)))
+
+(defn idx-of-id-stem
+  "Given a vector of hashes (each with an :id-stem key), return the (first occurence)
+   index that matches the supplied id.
+   Example:
+   (idx-of-id-stem [{:a 1 :id-stem :1},{:b 2 :id-stem :3},{:c 3 :id-stem :2},{:d 4 :id-stem :3}] :3) -> 1"
+  [vec id-stem]
+  ; (let [r (into [] (filter #(= (:id %1) id) vec))])
+  (let [tmp (map-indexed #(if (= (:id-stem %2) id-stem)
+                            %1
+                            nil)
+                          vec)
+        tmp-2 (filter #(not (nil? %1)) tmp)]
+    (first  tmp-2)))
+
+;; get all the meshes that start with the given stem-id
+;; e.g. return [(mesh tr-1-0) (mesh tr-1-1)] for stem-id "tr-1"
+(defn get-meshes-by-stem [stem-id])

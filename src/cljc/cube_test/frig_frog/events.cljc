@@ -177,6 +177,14 @@
    {
      :db (:db cofx)}))
 
+(re-frame/reg-event-fx
+ ::scene-l1-toggle-animation
+ (fn [cofx [_]]
+   ; (prn "events.reset-view: entered")
+   (ff.scene-l1/toggle-animation)
+   {
+     :db (:db cofx)}))
+
 ;;
 ;; tile
 ;; defunct as board calls 'draw-tile' natively for performance and various other reasons.
@@ -303,10 +311,35 @@
 ;;
 ;; train
 ;;
+(def train-1-interval-id)
+
 (reg-event-db
   ::init-train
   (fn [db [_ opts]]
+    (prn "events.init-train opts=" opts)
     (ff.train/init opts db)))
+; setInterval((x) => {console.log("hi")}, 1000)
+; clearInterval(78)
+
+(reg-event-fx
+  ::init-trains
+  (fn [cofx [_ opts]]
+    ; (ff.train/init opts db)
+    (let [db (:db cofx)
+          ; interval-id (js/setInterval #(re-frame/dispatch [:cube-test.frig-frog.events/init-train] opts db) 1000)
+          ; interval-id (js/setInterval #(re-frame/dispatch [:init-train opts] ) 1000)
+          tmp (prn "hi-a")
+          ; interval-id (js/setInterval #(prn "hi from interval" ) 1000)
+          interval-id (js/setInterval #(re-frame/dispatch [::init-train opts] ) 2000)
+          ; interval-id (js/setInterval #(ff.train/add-train-mesh opts) 2000)
+          tmp (prn "hi-b")]
+      (prn "interval-id=" interval-id)
+      (utils/sleep #(js/clearInterval interval-id) 10000))
+    {
+     :db (:db cofx)}))
+
+
+
 
 (reg-event-db
   ::drop-train-idx
@@ -315,9 +348,9 @@
       (assoc db :trains new-trains))))
 
 (reg-event-db
-  ::drop-train-id
-  (fn [db [_ id]]
-    (let [new-trains (ff.train/drop-train-id (:trains db) id)]
+  ::drop-train-id-stem
+  (fn [db [_ id-stem]]
+    (let [new-trains (ff.train/drop-train-id-stem (:trains db) id-stem)]
       (assoc db :trains new-trains))))
 
 (reg-event-db
@@ -336,11 +369,16 @@
 
 ;; this wraps train/update-train-by-id, but updates the entire :trains field as a whole
 (reg-event-db
-  ::update-train-id
-  (fn [db [_ id updates]]
+  ::update-train-id-stem
+  (fn [db [_ id-stem updates]]
     (let [trains (:trains db)
-          new-train (ff.train/update-train-id trains id updates)
-          idx (common-utils/idx-of-id trains id)]
+          new-train (ff.train/update-train-id-stem trains id-stem updates)
+          tmp (prn "hi3")
+          ; idx (common-utils/idx-of-id trains id-stem)
+          idx (common-utils/idx-of-id-stem trains id-stem)
+          tmp-2 (prn "hi4")]
+      (prn "events.update-train-id-stem: new-train=" new-train)
+      (prn "events.update-train-id-stem: idx=" idx)
       (assoc db :trains (assoc trains idx new-train)))))
 
 ; (re-frame/reg-event-fx
@@ -427,3 +465,11 @@
           (prn "events:toggle-animate-train: new animate=" (-> train-mesh (.-metadata) (.-animate)))))))
    {
     :db db}))
+
+(re-frame/reg-event-fx
+ ::train-toggle-animation
+ (fn [cofx [_]]
+   ; (prn "events.reset-view: entered")
+   (ff.train/toggle-animation)
+   {
+     :db (:db cofx)}))
