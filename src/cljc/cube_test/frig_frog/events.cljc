@@ -1,7 +1,7 @@
 ;; events is refer to many
 (ns cube-test.frig-frog.events
   (:require
-   [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx after ] :as re-frame]
+   [re-frame.core :refer [dispatch dispatch-sync reg-event-db reg-event-fx reg-fx after ] :as re-frame]
    [cube-test.frig-frog.game :as ff.game]
    [cube-test.main-scene :as main-scene]
    [cube-test.frig-frog.scene-l1 :as ff.scene-l1]
@@ -11,8 +11,14 @@
    [cube-test.frig-frog.frog :as ff.frog]
    [cube-test.frig-frog.train :as ff.train]
    [cube-test.utils :as utils]
-   [cube-test.utils.common :as common-utils]))
+   [cube-test.utils.common :as common-utils]
+   [cube-test.frig-frog.demo-workers-setup-cljs :as tmp]
+   [cube-test.frig-frog.demo-workers-cljs :as tmp-2]))
+   ; [worker-simple.core :as ws-core]))
 
+;;
+;; dev stuff
+;;
 (re-frame/reg-event-fx
  ::ff-dummy
  (fn [cofx _]
@@ -20,7 +26,151 @@
    {
     :db (:db cofx)}))
 
+(re-frame/reg-event-fx
+ ::web-worker-demo
+ (fn [cofx _]
+   (prn "frig-frog: web-worker-demo, i=" (js/inc_i))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::start-worker
+ (fn [cofx _]
+   ; (prn "frig-frog: startWorker, i=" (js/startWorker))
+   ; (prn "frig-frog: startWorker, i=" (cube-test.frig-frog.demo-workers-setup-cljs/startWorker))
+   (prn "frig-frog: startWorker, i=" (tmp/startWorker))
+   ; (prn "frig-frog: startWorker, i=" (ws-core/startWorker))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::stop-worker
+ (fn [cofx _]
+   ; (prn "frig-frog: stopWorker, i=" (js/stopWorker))
+   (prn "frig-frog: stopWorker, i=" (tmp/stopWorker))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::post-hi
+ (fn [cofx _]
+   (prn "events: service post-hi")
+   (tmp/post-hi)
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::start-worker-2
+ (fn [cofx _]
+   (prn "frig-frog: startWorker-2, i=" (tmp/startWorker2))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::stop-worker-2
+ (fn [cofx _]
+   (prn "frig-frog: stopWorker-2, i=" (tmp/stopWorker2))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::post-hi-2
+ (fn [cofx _]
+   (prn "events: service post-hi-2")
+   (tmp/post-hi-2)
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::worker-print-db
+ (fn [cofx _]
+   (prn "server.events: call print-db")
+   (tmp/print-db)
+   {
+    :db (:db cofx)}))
+(re-frame/reg-event-fx
+ ::post-add-train
+ (fn [cofx _]
+   (prn "server.events: call post-add-train")
+   (tmp/post-add-train)
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::worker-abc
+ (fn [cofx _]
+   ; (prn "frig-frog: stopWorker, i=" (js/stopWorker))
+   (prn "frig-frog: worker-abc entered")
+   ; []
+   {
+    ; :fx [[:dispatch [:test-worker-fx {:handler :mirror, :arguments {:abc 7}} :on-success [:on-worker-fx-success]]]]
+    ; :db (:db cofx)
+    :dispatch-n [[:test-worker-fx {:handler :mirror, :arguments {:a "Hello" :b "World2" :c 10} :on-success [:on-worker-fx-success] :on-error [:on-worker-fx-error]}]
+                 [:test-worker-fx {:handler :mirror, :arguments {:a "Hallo" :b "Welt" :c 10 :d (js/ArrayBuffer. 10) :transfer [:d]} :transfer [:d] :on-success [:on-worker-fx-success] :on-error [:on-worker-fx-error]}]]}))
+
+(re-frame/reg-event-fx
+ ::post-ping
+ (fn [cofx _]
+   (prn "server.events: call post-ping")
+   (tmp/post-ping)
+   {
+    :db (:db cofx)}))
+
 ;; used for development
+(defn heavy-cpu []
+   (prn "heavy-cpu: starting")
+   (let [r 0
+         big-num (js/Math.pow 10 9.5)]
+      (prn "big-num=" big-num)
+      (doall (dotimes [i big-num
+                              (+ r (* (js/Math.atan i) (js/Math.tan i)))])))
+   (prn "heavy-cpu: done"))
+
+(re-frame/reg-event-fx
+ ::heavy-cpu
+ (fn [cofx _]
+   (heavy-cpu)
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::heavy-cpu-worker
+ (fn [cofx [_ task]]
+   (prn "heavy-cpu-worker: task=" task)
+   (prn "heavy-cpu-worker: cofx.db=" (-> cofx :db))
+   (let [worker-pool (-> cofx :db :worker-pool)
+         task-with-pool (assoc task :pool worker-pool)]
+     {:worker task-with-pool})
+   (heavy-cpu)
+   {
+    :db (:db cofx)}))
+
+(defn heavy-cpu-2 []
+  (let [big-num (js/Math.pow 10 7)]
+    (prn "big-num=" big-num)
+    (reduce (fn [a v] (+ a (* (js/Math.atan v) (js/Math.tan v))))
+            0
+            (range big-num))))
+
+(re-frame/reg-event-fx
+ ::heavy-cpu-2
+ (fn [cofx _]
+   (prn "heavy-cpu-2 r=" (heavy-cpu-2))
+   {
+    :db (:db cofx)}))
+
+(re-frame/reg-event-fx
+ ::heavy-cpu-2-worker
+ (fn [cofx [_ task]]
+   (prn "heavy-cpu-2-worker: task=" task)
+   (prn "heavy-cpu-2-worker: cofx.db=" (-> cofx :db))
+   (let [worker-pool (-> cofx :db :worker-pool)
+         task-with-pool (assoc task :pool worker-pool)]
+     {:worker task-with-pool})))
+   ; (heavy-cpu)
+   ; {
+   ;  :db (:db cofx)}))
+
 (reg-event-db
  ::echo-db
  (fn [db [_ val]]
@@ -317,6 +467,8 @@
   ::init-train
   (fn [db [_ opts]]
     (prn "events.init-train opts=" opts)
+    ; (dispatch-sync [:heavy-cpu])
+    ; (heavy-cpu)
     (ff.train/init opts db)))
 ; setInterval((x) => {console.log("hi")}, 1000)
 ; clearInterval(78)
@@ -337,9 +489,6 @@
       (utils/sleep #(js/clearInterval interval-id) 10000))
     {
      :db (:db cofx)}))
-
-
-
 
 (reg-event-db
   ::drop-train-idx
@@ -473,3 +622,9 @@
    (ff.train/toggle-animation)
    {
      :db (:db cofx)}))
+
+;; worker
+(reg-event-db
+  ::init-worker
+  (fn [db [_]]
+    (assoc db :worker-pool cube-test.core.worker-pool)))

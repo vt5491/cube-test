@@ -52,6 +52,12 @@
                                        [::ff-events/init-train
                                         {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}])}
       "init-train 0"]
+     ; [:button.user-action {:on-click #(cube-test.frig-frog.train/init)} "init-train 0 min"]
+     ; [:button.user-action {:on-click #(prn "db=" re-frame.db/app-db)} "init-train 0 min"]
+     [:button.user-action {:on-click #(cube-test.frig-frog.train/init-2
+                                         {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}
+                                         ; js/window.re_frame.db.app_db.state)} "init-train 0 min"]
+                                         re-frame.db/app-db)} "init-train 0 min"]
      [:button.user-action {:on-click #(rf/dispatch
                                        [::ff-events/init-train
                                         {:id-stem :tr-2 :vx 1 :vy 0 :length 2 :init-row 5 :init-col 0}])}
@@ -69,4 +75,37 @@
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-2])} "add train mesh :tr-2"]
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-trains])} "toggle train anim"]
-     [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-train "tr-1-0"])} "toggle tr-1-0 anim"]]))
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-train "tr-1-0"])} "toggle tr-1-0 anim"]
+     [:br]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/web-worker-demo ])} "web worker demo"]
+     [:br]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/start-worker ])} "start worker"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/stop-worker ])} "stop worker"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-hi ])} "post hi"]
+     [:br]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/start-worker-2 ])} "start worker 2"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/stop-worker-2 ])} "stop worker 2"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-hi-2 ])} "post hi 2"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/worker-print-db ])} "worker print-db"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-add-train ])} "worker post-add-train"]
+     [:button.user-action {:on-click cube-test.frig-frog.demo-workers-setup-cljs/post-add-train} "worker post-add-train min"]
+     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-add-train ])} "worker post-add-train min"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-ping ])} "worker post-ping"]
+     ; [:button.user-action {:on-click
+     ;                       ; (fn [](.postMessage cube-test.frig-frog.demo-workers-setup-cljs/w2 (js-obj "msg" "ping")))
+     ;                       cube-test.frig-frog.demo-workers-setup-cljs/post-ping
+     ;                       "worker post-ping"}]
+     [:button.user-action {:on-click cube-test.frig-frog.demo-workers-setup-cljs/post-ping} "worker min ping"]
+     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-ping ])} "worker min ping"]
+     [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/worker-abc ])} "worker abc"]
+       ; [:button.user-action {:on-click #(rf/dispatch-sync [:cube-test.core/initialize-2])} "worker abc"]
+     [:button.user-action {:on-click #(rf/dispatch-sync [:initialize-2])} "worker abc"]
+     [:button.user-action {:on-click #(rf/dispatch [:db-hook])} "db hook"]
+     ; [:button.user-action {:on-click #(rf/dispatch [:test-worker-fx]
+     ;                                               {:handler :mirror,
+     ;                                                :arguments {:a "Hallo" :b "Welt" :c 10}
+     ;                                                :on-success [:on-worker-fx-success]
+     ;                                                :on-error [:on-worker-fx-error]})} "test-worker-fx"]
+     [:br]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/heavy-cpu-2])} "heavy cpu 2"]]))

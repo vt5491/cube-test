@@ -21,7 +21,7 @@
                  [cljstache "2.0.6"]
                  [net.sekao/odoyle-rules "0.8.0"]
                  [cljs-ajax "0.8.3"]
-                 [day8.re-frame/http-fx "0.2.3"]]
+                 [day8.re-frame/http-fx "0.2.3"]
                  ; [org.clojure/math.numeric-tower "0.0.4"]]
                  ; [org.clojure/data.json "2.4.0"]]
                  ;;vt end
@@ -34,13 +34,17 @@
                  ;; vt add for string interpolation
                  ;; nope: only works for clj
                  ; [org.clojure/core.incubator "0.1.4"]]
+                 ;; attempt to add web workers support
+                 [jtk-dvlp/cljs-workers "1.1.2"]
+                 [jtk-dvlp/re-frame-worker-fx "1.0.3"]]
 
   :plugins [
             ; [lein-shadow "0.2.0"]
             [lein-shadow "0.3.1"]
-            [lein-shell "0.5.0"]]
+            [lein-shell "0.5.0"]
             ;;vt add
             ; [lein-npm "0.6.2"]]
+            [lein-pdo "0.1.1"]]
             ;;vt end
 
   :min-lein-version "2.9.0"
@@ -49,7 +53,9 @@
   ;;vt end
 
   ;;:source-paths ["src/clj" "src/cljs"]
-  :source-paths ["src/clj" "src/cljs" "src/cljc" "src/test" "test2" "test"]
+  ; :source-paths ["src/clj" "src/cljs" "src/cljc" "src/test" "test2" "test"]
+  :source-paths ["src/clj" "src/cljs" "src/cljc" "src/test" "test2" "test"
+                 "workers/worker_frig_frog/src/cljs" "workers/worker_frig_frog/src/cljc"]
 
   ;;vt add for re-frame-10x
   :compiler    {
@@ -116,7 +122,17 @@
                                                                :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
                                                                :optimizations :none}}
                                       :devtools {:http-root "resources/public"
-                                                      :http-port 8281}}}}
+                                                      :http-port 8281}}
+                         ;;vt end
+                         ;;vt add
+                         :worker-frig-frog {
+                                            :target :browser
+                                            ; :output-dir "resources/public/libs/worker_frig_frog_2"
+                                            :output-dir "resources/public/libs/worker_frig_frog"
+                                            :asset-path "/js/compiled_vt"
+                                            :modules {:app {:init-fn worker-frig-frog.core/init
+                                                            :preload [devtools.preload
+                                                                      day8.re-frame-10x.preload]}}}}}
                          ;;vt end
 
 
@@ -143,6 +159,15 @@
             ; "devfw" ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]
             ; run with: lein.bat trampoline devfw
             ; update: run with: lein.bat devfw since we added "trampoline" before "run" below
+            ;;vt-add
+            "worker-frig-frog" ["with-profile" "worker-frig-frog" "do"
+                                ; ["shadow" "release" "app"]
+                                ["shadow" "release" "worker-frig-frog"]]
+            "worker-frig-frog-dev" ["with-profile" "worker-frig-frog" "do"
+                                      ["shadow" "watch" "worker-frig-frog"]]
+            ; "watch" ["pdo" ["less" "auto"]
+            ;                ["minify-assets" "watch"]]}
+            ;;vt end
             "devfw" ["with-profile" "devfw" "do"
                      ; ["run" "-m" "figwheel.main" "-b" "devfw" "-r"]
                      ["trampoline" "run" "-m" "figwheel.main" "-b" "devfw" "-r"]]}
@@ -176,6 +201,14 @@
      :source-paths ["src"]
      ;; need to add the compiled assets to the :clean-targets
      :clean-targets ^{:protect false} ["target"]}
+   ;; vt-end
+   ;;vt add
+   :worker-frig-frog
+    {:dependencies [
+                    [binaryage/devtools "1.0.3"]
+                    [day8.re-frame/tracing "0.6.2"]
+                    [day8.re-frame/re-frame-10x "1.2.2"]]
+     :source-paths ["workers/worker_frig_frog/"]}
    ;; vt-end
    :prod {}}
 

@@ -38,8 +38,9 @@
 ;; app/db level
 ;;
 (defn init [opts db]
-  (prn "train.init: opts=" opts)
-  (let [db-1 (if (not (contains? db :trains)) (assoc db :trains []) db)
+  (prn "train.init: opts=" opts, "db=" db)
+  (let [;db @db
+        db-1 (if (not (contains? db :trains)) (assoc db :trains []) db)
         train (-> (hash-map)
                   (assoc :id-stem (if (nil? (:id-stem opts)) 0 (:id-stem opts)))
                   (assoc :vx (if (nil? (:vx opts)) 0 (:vx opts)))
@@ -49,6 +50,12 @@
                   (assoc :init-row (if (nil? (:init-row opts)) 0 (:init-row opts))))
         db-2 (assoc db-1 :trains (conj (:trains db-1) train))]
     db-2))
+
+(defn init-2 [opts db]
+  (let [r (init opts @db)]
+    (prn "init-2: r=" r)
+    ; (swap! db (init opts @db))
+    (swap! db (fn [x] r))))
 
 ;; drop train hash at index 'idx' in a trains vector
 (defn drop-train-idx [trains idx]
@@ -88,7 +95,7 @@
 ;; mesh level
 ;;
 (defn add-train-mesh-cube [id-stem idx pos vx vy]
-  (prn "train.add-train-mesh-cube: id-stem=" id-stem)
+  (prn "train.add-train-mesh-cube: id-stem=" id-stem ",vx=" vx)
   (let [scene main-scene/scene
         ; id (:id train)
         cube (bjs/MeshBuilder.CreateBox. (str (name id-stem) "-" idx) (js-obj "height" 1 "width" 1 "depth" 1) scene)]
@@ -218,6 +225,8 @@
         train-meshes (.getMeshesByTags scene "train")]
     ; (prn "train.tick: train-mesh count=" (count train-meshes))
     ; (prn "train.tick: delta-time=" delta-time)
+    (when (> delta-time 30)
+      (prn "***train.tick: delta-time=" delta-time))
     (when animate-trains
     ; (when true
       (doall (map

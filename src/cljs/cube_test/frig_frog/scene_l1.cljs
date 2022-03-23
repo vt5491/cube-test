@@ -300,7 +300,8 @@
   (let [scene main-scene/scene
         ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) scene)
         light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
-        camera main-scene/camera]
+        camera main-scene/camera
+        spin-cube (bjs/MeshBuilder.CreateBox. "spin_cube" (js-obj "height" 1 "width" 1 "depth" 1) scene)]
     ; (when-let [vrHelper main-scene/vrHelper]
     ;   (-> vrHelper .-onControllerMeshLoadedObservable (.add init-vr-hooks)))
     ;   ; (-> vrHelper .-onBButtonStateChangedObservable (.add init-vr-hooks)))
@@ -312,11 +313,13 @@
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     ; (prn "scene-l1.init: board-width=" cube-test.frig-frog.board/board-width)
-    (init-gui)))
+    (init-gui)
+    ;; spin-cube is used for testing delays
+    (set! (.-position spin-cube) (bjs/Vector3. 4 2 4))))
     ; (create-walls)))
 
 (defn tick []
-  (ff.train/tick))
+  (ff.train/tick)
   ; (let [scene main-scene/scene
   ;       engine main-scene/engine
   ;       delta-time (.getDeltaTime engine)
@@ -324,3 +327,6 @@
   ;   (prn "scene_l1.tick: train-mesh count=" (count train-meshes))
   ;   (doall (map #()))))
         ; bldg-cube-rot-y-delta (* (.-y bldg-cube-ang-vel) delta-time)]))
+  (when-let [spin-cube (.getMeshByID main-scene/scene "spin_cube")]
+    (let [rot (.-rotation spin-cube)]
+      (set! (.-rotation spin-cube)(bjs/Vector3. (.-x rot) (+ (.-y rot) (* base/ONE-DEG 0.5) (.-z rot)))))))

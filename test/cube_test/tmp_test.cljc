@@ -6,6 +6,14 @@
    [babylonjs :as bjs]
    [promesa.core :as p]))
 
+(comment
+  ;; Don't forget to ctrl-alt-shift-e these lines not ctrl-alt-shift-b
+  ;; (because they're under a global comment)
+  ;; Also, need to be on left-paren not on end-paren
+
+  ;; switch to cljs repl
+  (shadow.cljs.devtools.api/nrepl-select :app))
+
 (def h {:models
         {:ybot-rumba {:is-loaded true, :is-enabled true, :is-playing false},
          :ybot-head-bang {:is-loaded true, :is-enabled false, :is-playing false}}})
@@ -770,7 +778,7 @@
   (p/promise (fn [resolve reject]
                ; (js/setTimeout #(js/Promise.resolve 1) time)
                ; (js/setTimeout #(resolve 1) time)
-               (js/setTimeout #(prn ":resolved") time))))
+               (js/setTimeout #(prn ":resolved") 5000))))
 
   ; (js/Promise. (fn [resolve] (js/setTimeout resolve time))))
 
@@ -789,3 +797,84 @@
 (.then (sleep-t3 5000) (prn "abc"))
 
 (-> (sleep-t3 5000) (p/then #(prn "def")))
+
+(p/then #(prn "def") (sleep-t3 3000))
+
+; function sleep (time) {}
+;   return new Promise((resolve) => setTimeout(resolve, time));
+(defn sleep-t4 [time]
+  (p/promise (fn [resolve]
+               (prn "hi")
+               (js/setTimeout resolve time))))
+
+(-> (sleep-t4 6000) (p/then #(prn (+ 1 1))))
+
+(p/then)
+
+(defn sleep-t5 [f ms]
+  (js/setTimeout f ms))
+
+(sleep-t5 #(prn "hi") 5000)
+
+(+ 1 1)
+(name :abc)
+(let [h {:db {:abc 7}}]
+  (prn "abc=" (-> h :db :abc)))
+
+  ; let result = 0;
+  ; for (var i = Math.pow(baseNumber, 7)); i >= 0; i--) {
+  ;   result += Math.atan(i) * Math.tan(i));
+  ; ;
+(js/Math.pow 2 7)
+
+(let [r 0
+      big-num (js/Math.pow 10 9)]
+    (prn "big-num=" big-num)
+    (doall (dotimes [i big-num]
+                    (+ r (* (js/Math.atan i) (js/Math.tan i))))))
+    ; (prn "r=" r))
+
+;       (set! r) ()))
+;
+; (dotimes [i 5] (println "i is" i))
+
+(reduce (fn [a v] (+ a (* (js/Math.atan v) (js/Math.tan v))))
+        0
+        (range (js/Math.pow 10 7)))
+
+(range 5)
+
+(count [1 2])
+
+(let [a [1 2 3]]
+  (-> a (nth 2)))
+
+(prn "r=" js/self.document)
+(conj [1 2] 3)
+
+(let [h {:trains []}
+      trains (:trains h)]
+  (assoc h :trains (conj trains {:a 7 :b 8})))
+
+(complement true)
+(not true)
+(-> js/self .-document (cljs.core/undefined?))
+(-> js/self .-document undefined?)
+(defn w? []
+  (-> js/self .-document cljs.core/undefined?))
+
+(cljs.core/undefined? 7)
+(-> js/self .-document)
+
+(w?)
+(not (w?))
+(complement w?)
+
+(let [h (clj->js {:msg "hi" :abc 7})
+      h2 (js->clj h)]
+  (prn "h=" h)
+  (prn "h2=" h2)
+  (prn "msg=" (:msg h2))
+  (prn "abc=" (:abc h2))
+  (prn "abc=" (get h2 "abc"))
+  (prn "keys=" (keys h2)))

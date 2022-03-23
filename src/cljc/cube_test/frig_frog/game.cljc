@@ -113,20 +113,6 @@
   (re-frame/console :warn "console msg from frig-frog.game.init")
   ; (re-frame/dispatch [:frig-frog-db/init-game-level-db])
   ; (re-frame/dispatch [:cube-test.frig-frog.events/init-game-db])
-  ;vt-x (init-game-db default-game-db)
-  ; (init-ctrl)
-  ; (let [
-  ;       ; scene main-scene/scene
-  ;       ; vrHelper main-scene/scene.vrHelper
-  ;       vrHelper main-scene/vrHelper]
-  ;   ; (js-debugger)
-  ;   (prn "frig-frog.game: vrHelper=" vrHelper))
-  ; (when vrHelper
-  ;   ;; yes, we are coupling this app to vr only, since I don't have a good xr test environment
-  ;   ;; at the moment.
-  ;   (prn "frig-frog.game: adding observable to vrHelper")
-  ;   (-> vrHelper .-onAfterEnteringVRObservable (.add init-ctrl)))
-  ; (set! active-scene :scene-l1)
   (set! active-scene (:active-scene default-game-db))
   (when-let [vrHelper main-scene/vrHelper]
     (prn "frig-frog.game: adding observable to vrHelper")
@@ -136,7 +122,10 @@
     ; (-> vrHelper .-onControllerMeshLoadedObservable (.add ctrl-mesh-loaded-handler)))
     ; (-> vrHelper .-onControllerMeshLoaded (.add ctrl-mesh-loaded-handler))
     ; (-> vrHelper .-onAfterEnteringVRObservable (.add ctrl-mesh-loaded-handler)))
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-worker])
+  ; (prn "game.init: pre-init-board db=" (re-frame/dispatch [:db-hook]))
   (re-frame/dispatch [:cube-test.frig-frog.events/init-board])
+  ; (prn "game.init: post-init-board db=" (re-frame/dispatch [:db-hook]))
   ; (re-frame/dispatch [:cube-test.events/init-game-db default-game-db]))
   (re-frame/dispatch [:cube-test.frig-frog.events/init-frog 0 0]))
 

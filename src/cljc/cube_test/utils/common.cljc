@@ -30,6 +30,7 @@
 
 (defn merge-dbs [db1 db2]
   "Merge two maps into one"
+  (prn "hi2 from cube-test.utils.common.merge-dbs")
   (reduce #(do
              (assoc %1 (first %2) (second %2)))
           db1 db2))

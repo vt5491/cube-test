@@ -1,0 +1,6 @@
+# worker
+date;shadow-cljs release worker-frig-frog
+
+# note: date is so you know when you last compiled, but you sometimes forget if you compiled it or not.
+# main
+lein.bat dev

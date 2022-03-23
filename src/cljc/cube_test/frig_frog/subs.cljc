@@ -104,7 +104,7 @@
  :frog-row-changed
  :<- [:get-frog-row]
  (fn [row query-v]
-   (prn "sub: frog-row-changed: row=" row ", qv=" query-v)))
+   (prn "sub-2: frog-row-changed: row=" row ", qv=" query-v)))
 
 ;; main frog pos handler
 (reg-sub
