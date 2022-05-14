@@ -24,6 +24,7 @@
 ;; referencing.
 (def quanta-width 1.2)
 (def scene-initialized false)
+(def reflector)
 
 ; (defn init-gui []
 ;   (prn "frig-frog.scene: init-gui entered")
@@ -245,56 +246,145 @@
   ; (-> webVRController (.-onSecondaryButtonStateChangedObservable) (.add secondary-btn-handler))
   (-> webVRController (.-onBButtonStateChangedObservable) (.add secondary-btn-handler)))
 
-(defn init-start-gui []
-  (prn "frig-frog.scene-l1: init-gui entered")
-  (let [start-plane (bjs/Mesh.CreatePlane. "start-plane" 2)
-        ; start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. start-plane 2048 1024)
-        start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. start-plane 840 680)
-        ; start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. start-plane 680 680)
-        start-pnl (bjs-gui/Grid.)
-        start-hdr (bjs-gui/TextBlock.)
-        start-btn (bjs-gui/Button.CreateImageButton. "start-btn" "start" "imgs/frig-frog/green_start_btn.png")
-        start-btn-img (.-image start-btn)]
-    (prn "board-width=" cube-test.frig-frog.board/board-width)
-    (prn "board-length=" cube-test.frig-frog.board/board-length)
-    (prn "n-cols=" cube-test.frig-frog.board/n-cols)
-    (set! (.-position start-plane) (bjs/Vector3.
-                                    (/ cube-test.frig-frog.board/board-width 2)
-                                    6.0
-                                    (/ cube-test.frig-frog.board/board-length 1)))
-    (.addRowDefinition start-pnl 1.0 false)
-    ; (.addRowDefinition start-pnl 0.25)
-    ; (.addRowDefinition start-pnl 0.25)
-    ; (.addRowDefinition start-pnl 0.25)
-    (.addColumnDefinition start-pnl 1.0)
-    ; (.addColumnDefinition start-pnl 0.5)
-    ; (.addColumnDefinition bottom-pnl 0.33)
-    (.addControl start-texture start-pnl)
-    ;;start-btn
-    (set! (.-horizontalAlignment start-btn) bjs-gui/Control.HORIZONTAL_ALIGNMENT_RIGHT)
-    (set! (.-verticalAlignment start-btn) bjs-gui/Control.VERTICAL_ALIGNMENT_TOP)
-    (set! (.-autoScale start-btn-img) true)
-    (-> start-btn .-onPointerUpObservable (.add (fn [value]
-                                                  (println "start btn pressed")
-                                                  ; (when scene-initialized
-                                                  ;   (rf/dispatch [:cube-test.frig-frog.events/scene-l1-toggle-animation]))
-                                                  ; (when (not scene-initialized))
-                                                  (when true
-                                                    (set! scene-initialized true)
-                                                    (rf/dispatch
-                                                     [:cube-test.frig-frog.events/init-trains
-                                                      {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 8}])))))
-                                                                                                                                ; (re-frame/dispatch [:face-slot-super-anim-fwd])])))
-    (.addControl start-pnl start-btn 1 2)))
+(defn init-start-gui-2 []
+  (let [
+        top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))
+        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh top-plane 2048 1024)
+        top-pnl (bjs-gui/Grid.)
+        top-hdr (bjs-gui/TextBlock.)
+        rot-cam-btn (bjs-gui/Button.CreateSimpleButton "rot-cam" "rot-cam")
+        stop-twitch-btn (bjs-gui/Button.CreateSimpleButton "stop-twitch-btn" "stop twitch")
+        toggle-dancer-btn (bjs-gui/Button.CreateSimpleButton "toggle-dancer-btn" "toggle dancer")
+        firework-btn (bjs-gui/Button.CreateSimpleButton "firework-btn" "firework")]
+    (set! (.-position top-plane) (bjs/Vector3. 0 3 8))
+    (.enableEdgesRendering top-plane)
+
+    (.addControl top-adv-texture top-pnl)
+    (set! (.-text top-hdr) "commands")
+    (set! (.-height top-hdr) "500px")
+    (set! (.-fontSize top-hdr) "160")
+    (set! (.-color top-hdr) "white")
+
+    ;; create 4 rows and 2 cols
+    (.addRowDefinition top-pnl 0.25 false)
+    (.addRowDefinition top-pnl 0.25)
+    (.addRowDefinition top-pnl 0.25)
+    (.addRowDefinition top-pnl 0.25)
+    (.addColumnDefinition top-pnl 0.5)
+    (.addColumnDefinition top-pnl 0.5)
+    (.addControl top-pnl top-hdr 0 0)
+
+    ;; rot-cam-btn
+    (set! (.-autoScale rot-cam-btn) true)
+    (set! (.-fontSize rot-cam-btn) "100")
+    (set! (.-color rot-cam-btn) "white")
+    (-> rot-cam-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "rot-cam-btn pressed")
+                (let [cam main-scene/camera]
+                  ; (prn "isRig=" (.-isRigCamera cam))
+                  ; (set! (.-rotationQuaternion cam) (bjs/Quaternion.RotationAxis bjs/Axis.Y (* 10 base/ONE-DEG)))
+                  (-> (.-rotationQuaternion cam) (.multiplyInPlace (bjs/Quaternion.FromEulerAngles 0 (* 10 base/ONE-DEG) 0)))))))
+                  ; (re-frame/dispatch [:cube-test.beat-club.events/full-twitch-seq]))))
+    (.addControl top-pnl rot-cam-btn 1 0)
+
+    ;; stop-twitch-btn
+    (set! (.-autoScale stop-twitch-btn) true)
+    (set! (.-fontSize stop-twitch-btn) "100")
+    (set! (.-color stop-twitch-btn) "white")
+    (-> stop-twitch-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "stop-twitch-btn pressed"))))
+                ; (re-frame/dispatch [:cube-test.beat-club.events/stop-song-anim]))))
+    (.addControl top-pnl stop-twitch-btn 1 1)
+
+    ;; toggle-dancer-btn
+    (set! (.-autoScale toggle-dancer-btn) true)
+    (set! (.-fontSize toggle-dancer-btn) "100")
+    (set! (.-color toggle-dancer-btn) "white")
+    (-> toggle-dancer-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "toggle-dancer-btn pressed"))))
+                ; (re-frame/dispatch [:cube-test.beat-club.events/toggle-dancer]))))
+    (.addControl top-pnl toggle-dancer-btn 2 0)
+
+    ;; firework-btn
+    (set! (.-autoScale firework-btn) true)
+    (set! (.-fontSize firework-btn) "100")
+    (set! (.-color firework-btn) "white")
+    (-> firework-btn .-onPointerUpObservable
+        (.add (fn [value]
+                (println "firework-btn pressed"))))
+                ; (re-frame/dispatch [:cube-test.beat-club.events/firework]))))
+    (.addControl top-pnl firework-btn 3 0)))
+
+;; defunct
+; (defn init-start-gui []
+;   (prn "frig-frog.scene-l1:  init-gui entered 2")
+;   (let [start-plane (bjs/Mesh.CreatePlane. "start-plane" (js-obj "width" 5 "height" 3))
+;         start-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh start-plane 2048 1024 true false true #(prn "done"))
+;         start-pnl (bjs-gui/Grid.)
+;         start-hdr (bjs-gui/TextBlock.)
+;         ; start-btn (bjs-gui/Button.CreateImageButton "start-btn" "start" "imgs/frig-frog/green_start_btn.png")
+;         start-btn (bjs-gui/Button.CreateSimpleButton "start-btn" "start" "imgs/frig-frog/green_start_btn.png")
+;         cam-rot-btn (bjs-gui/Button.CreateSimpleButton "cam-rot" "cam-rot")]
+;     (prn "board-width=" cube-test.frig-frog.board/board-width)
+;     (prn "board-length=" cube-test.frig-frog.board/board-length)
+;     (prn "n-cols=" cube-test.frig-frog.board/n-cols)
+;     (prn "start-btn=" start-btn)
+;     (set! (.-position start-plane) (bjs/Vector3.
+;                                     (/ cube-test.frig-frog.board/board-width 2)
+;                                     6.0
+;                                     (/ cube-test.frig-frog.board/board-length 1)))
+;     ; (.addRowDefinition start-pnl 1.0 false)
+;     (.addRowDefinition start-pnl 0.25)
+;     (.addRowDefinition start-pnl 0.25)
+;     (.addRowDefinition start-pnl 0.25)
+;     (.addRowDefinition start-pnl 0.25)
+;     ; (.addColumnDefinition start-pnl 1.0)
+;     (.addColumnDefinition start-pnl 0.5)
+;     (.addColumnDefinition start-pnl 0.5)
+;     (.addControl start-texture start-pnl)
+;     ;;start-btn
+;     (set! (.-horizontalAlignment start-btn) bjs-gui/Control.HORIZONTAL_ALIGNMENT_RIGHT)
+;     (set! (.-verticalAlignment start-btn) bjs-gui/Control.VERTICAL_ALIGNMENT_TOP)
+;     ; (set! (.-autoScale start-btn-img) true)
+;     (-> start-btn .-onPointerUpObservable
+;         (.add (fn [value]
+;                 (println "start btn pressed")
+;                 (when true
+;                   (set! scene-initialized true)
+;                   (rf/dispatch
+;                    [:cube-test.frig-frog.events/init-trains
+;                     {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 8}])))))
+;                                                                                                                                 ; (re-frame/dispatch [:face-slot-super-anim-fwd])])))
+;     (.addControl start-pnl start-btn 1 2)
+;     ;; cam-rot-btn
+;     (set! (.-width cam-rot-btn) "100px")
+;     (set! (.-height cam-rot-btn) "100px")
+;     (set! (.-autoScale cam-rot-btn) true)
+;     (set! (.-fontSize cam-rot-btn) "100")
+;     (set! (.-color cam-rot-btn) "white")
+;     (-> cam-rot-btn .-onPointerUpObservable
+;       (.add
+;        (fn [val]
+;          (let [cam (main-scene/camera)]
+;            (set! (.-rotationQuaternion cam) (bjs/Quaternion.RotationAxis bjs/Axis.Y (* 10 base/ONE-DEG)))))))
+;     (.addControl start-pnl cam-rot-btn 1 1)))
 
 (defn init-gui []
-  (init-start-gui))
+  (init-start-gui-2))
 
 (defn start-btn-handler [])
 
 (defn toggle-animation []
   (prn "scene-l1.pause-animation: entered")
   (rf/dispatch [:cube-test.frig-frog.events/train-toggle-animation]))
+
+(defn init-reflector []
+  (prn "scene_l1. now creating reflector")
+  (set! reflector (bjs/Reflector. main-scene/scene "localhost" 1234))
+  (prn "scene_l1. reflector=" reflector))
 
 (defn init [db]
   (let [scene main-scene/scene
@@ -316,6 +406,9 @@
     (init-gui)
     ;; spin-cube is used for testing delays
     (set! (.-position spin-cube) (bjs/Vector3. 4 2 4))))
+    ; (.registerView main-scene/engine main-scene/canvas main-scene/camera)))
+
+    ; const reflector = new BABYLON.Reflector(scene, "localhost", 1234)));
     ; (create-walls)))
 
 (defn tick []

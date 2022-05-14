@@ -7,8 +7,9 @@
 (def i 0)
 
 (defn say-hi []
-  (prn "ff-worker: thank you, im fine")
-  (js/postMessage "worker-hi"))
+  (prn "ff-worker: thank you, im fine dude 3")
+  ; (js/postMessage "worker-hi")
+  (js/postMessage (clj->js {:msg "worker-hi"})))
 
 (defn handle-main-msg [e]
   ; (prn "handle-main-msg: data=" (.-data e))

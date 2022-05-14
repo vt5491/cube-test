@@ -1,24 +1,23 @@
 {
 	"name": "cube-test",
 	"dependencies": {
-		"@hapi/ammo": "^5.0.1",
-		"babylonjs": "^4.2.0",
-		"babylonjs-gui": "^4.2.0",
-		"babylonjs-loaders": "^4.2.0",
-		"babylonjs-materials": "^4.2.0",
+		"@hapi/ammo": "^6.0.0",
+		"babylonjs": "^5.5.6",
+		"babylonjs-gui": "^5.5.6",
+		"babylonjs-loaders": "^5.5.6",
+		"babylonjs-materials": "^5.5.6",
 		"cannon": "^0.6.2",
-		"highlight.js": "^9.18.1",
+		"highlight.js": "^11.5.1",
 		"oimo": "^1.0.9",
 		"pepjs": "^0.5.2",
-		"react": "16.13.0",
-		"react-dom": "16.13.0",
-		"react-highlight.js": "1.0.7",
+		"react": "18.1.0",
+		"react-dom": "18.1.0",
 		"webxr-polyfill": "^2.0.3"
 	},
 	"devDependencies": {
 		"@cljs-oss/module-deps": "^1.1.1",
 		"shadow-cljs": "2.11.7",
-		"webpack": "^4.43.0",
-		"webpack-cli": "^3.3.11"
+		"webpack": "^5.72.1",
+		"webpack-cli": "^4.9.2"
 	}
 }

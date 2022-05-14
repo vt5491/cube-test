@@ -224,13 +224,13 @@
 (defn init-gui []
   (let [
         top-plane (bjs/MeshBuilder.CreatePlane "top-plane" (js-obj "width" 5 "height" 3))
-        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 2048 1024)
+        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh top-plane 2048 1024)
         top-pnl (bjs-gui/Grid.)
         top-hdr (bjs-gui/TextBlock.)
-        play-twitch-btn (bjs-gui/Button.CreateSimpleButton. "play-twitch-btn" "play twitch")
-        stop-twitch-btn (bjs-gui/Button.CreateSimpleButton. "stop-twitch-btn" "stop twitch")
-        toggle-dancer-btn (bjs-gui/Button.CreateSimpleButton. "toggle-dancer-btn" "toggle dancer")
-        firework-btn (bjs-gui/Button.CreateSimpleButton. "firework-btn" "firework")]
+        play-twitch-btn (bjs-gui/Button.CreateSimpleButton "play-twitch-btn" "play twitch")
+        stop-twitch-btn (bjs-gui/Button.CreateSimpleButton "stop-twitch-btn" "stop twitch")
+        toggle-dancer-btn (bjs-gui/Button.CreateSimpleButton "toggle-dancer-btn" "toggle dancer")
+        firework-btn (bjs-gui/Button.CreateSimpleButton "firework-btn" "firework")]
     (set! (.-position top-plane) (bjs/Vector3. 0 3 8))
     (.enableEdgesRendering top-plane)
 

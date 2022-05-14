@@ -25,10 +25,10 @@
 
 (defn init-left-gui []
   (let [left-plane (bjs/Mesh.CreatePlane. "left-plane" 2)
-        left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. left-plane 1024 1024)
+        left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh left-plane 1024 1024)
         left-pnl (bjs-gui/StackPanel.)
         left-hdr (bjs-gui/TextBlock.)
-        bwd-btn (bjs-gui/Button.CreateImageButton. "bwd-spin" "bwd" "textures/tux_tada.jpg")
+        bwd-btn (bjs-gui/Button.CreateImageButton "bwd-spin" "bwd" "textures/tux_tada.jpg")
         cb-top (bjs-gui/Checkbox.)
         cb-mid (bjs-gui/Checkbox.)
         cb-bottom (bjs-gui/Checkbox.)]
@@ -63,10 +63,10 @@
 
 (defn init-right-gui []
   (let [right-plane (bjs/Mesh.CreatePlane. "right-plane" 2)
-        right-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. right-plane 1024 1024)
+        right-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh right-plane 1024 1024)
         right-pnl (bjs-gui/StackPanel.)
         right-hdr (bjs-gui/TextBlock.)
-        bwd-btn (bjs-gui/Button.CreateImageButton. "bwd-spin" "bwd" "textures/tux_tada.jpg")
+        bwd-btn (bjs-gui/Button.CreateImageButton "bwd-spin" "bwd" "textures/tux_tada.jpg")
         cb-top (bjs-gui/Checkbox.)
         cb-mid (bjs-gui/Checkbox.)
         cb-bottom (bjs-gui/Checkbox.)]
@@ -107,16 +107,16 @@
 (defn init-bottom-gui []
   (println "init-bottom-gui entered")
   (let [bottom-plane (bjs/Mesh.CreatePlane. "bottom-plane" 2)
-        bottom-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. bottom-plane 1024 1024)
+        bottom-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh bottom-plane 1024 1024)
         ; bottom-pnl (bjs-gui/StackPanel.)
         bottom-pnl (bjs-gui/Grid.)
         bottom-hdr (bjs-gui/TextBlock.)
-        ; bwd-btn (bjs-gui/Button.CreateImageButton. "super-bwd-btn" "bwd" "imgs/left_arrow_fat.png")
-        bwd-btn (bjs-gui/Button.CreateImageButton. "super-bwd-btn" "bwd" "imgs/left_arrow_fat_small.png")
+        ; bwd-btn (bjs-gui/Button.CreateImageButton "super-bwd-btn" "bwd" "imgs/left_arrow_fat.png")
+        bwd-btn (bjs-gui/Button.CreateImageButton "super-bwd-btn" "bwd" "imgs/left_arrow_fat_small.png")
         bwd-btn-img (.-image bwd-btn)
-        ; bwd-btn (bjs-gui/Button.CreateImageWithCenterTextButton. "super-bwd-btn" "bwd" "imgs/left_arrow_fat.png")
+        ; bwd-btn (bjs-gui/Button.CreateImageWithCenterTextButton "super-bwd-btn" "bwd" "imgs/left_arrow_fat.png")
         ; fwd-btn (bjs-gui/Button.CreateImageButton. "super-fwd-btn" "fwd" "imgs/right_arrow_fat.png")
-        fwd-btn (bjs-gui/Button.CreateImageButton. "super-fwd-btn" "fwd" "imgs/right_arrow_fat_small.png")
+        fwd-btn (bjs-gui/Button.CreateImageButton "super-fwd-btn" "fwd" "imgs/right_arrow_fat_small.png")
         fwd-btn-img (.-image fwd-btn)
         cb-frame (bjs-gui/Checkbox.)
         cb-rnd (bjs-gui/Checkbox.)

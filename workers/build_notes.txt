@@ -1,0 +1,17 @@
+1. workers can be built like so:
+lein.bat worker-frig-frog
+
+this will create an 'app.js' under 'resources/public/libs/worker_frig_frog'
+
+The only problem with this is interferes with a 'lein.bat dev' build you probably have going on.
+It cause messages to appear on that build and subsequent edits to the main code will not be compiled.
+
+Get around this by using
+#npx shadow-cljs release worker-frig-frog
+npx shadow-cljs release ff-worker
+
+to build the worker.
+It takes about 8s to compile.
+
+Note: it's the 'release' which does a one-time build.
+Using watch does compile dynamically, however I can't get the worker to properly load: I get a "browser bootstrap used in incorrect target" message and no messages are serviced.  I think the reason is because release "bundles" into one package, and watch doesn't.

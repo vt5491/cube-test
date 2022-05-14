@@ -177,8 +177,8 @@
 
 (defn init-gui []
   (let [gui-plane (bjs/Mesh.CreatePlane. "gui-plane" 2)
-        gui-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. gui-plane 1024 1024)
-        ; gui-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. gui-plane 512 512)
+        gui-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh gui-plane 1024 1024)
+        ; gui-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh gui-plane 512 512)
         gui-pnl (bjs-gui/Grid.)
         gui-hdr (bjs-gui/TextBlock.)
         cube-radio-text-blk (bjs-gui/TextBlock.)

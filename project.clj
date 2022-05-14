@@ -100,6 +100,8 @@
                                                         ;;vt add
                                                         ;; don't optimize fn names so we can use cljs as native js cb handlers
                                                         ; :output-feature-set :es6}}
+                                                        ; :output-feature-set :es2018
+                                                        :output-feature-set :es2020
                                                         ; :optimizations :simple
                                                         :optimizations :none}}
                                                         ;vt-x :preloads             [day8.re-frame-10x.preload]}}
@@ -127,12 +129,22 @@
                          ;;vt add
                          :worker-frig-frog {
                                             :target :browser
-                                            ; :output-dir "resources/public/libs/worker_frig_frog_2"
                                             :output-dir "resources/public/libs/worker_frig_frog"
+                                            ; :js-options {:js-provider :require}
                                             :asset-path "/js/compiled_vt"
                                             :modules {:app {:init-fn worker-frig-frog.core/init
                                                             :preload [devtools.preload
-                                                                      day8.re-frame-10x.preload]}}}}}
+                                                                      day8.re-frame-10x.preload]}}}
+                         :ff-worker {
+                                       :target :browser
+                                       :output-dir "resources/public/libs/workers/ff-worker"
+                                       ; :js-options {:js-provider :require}
+                                       :asset-path "/js/compiled_vt"
+                                       ;; Note: the ":ff-worker" under modules is what determines the output
+                                       ;; file name of "ff-worker.cljs"
+                                       :modules {:ff-worker {:init-fn worker-frig-frog.core/init
+                                                                               :preload [devtools.preload
+                                                                                         day8.re-frame-10x.preload]}}}}}
                          ;;vt end
 
 
@@ -140,7 +152,8 @@
                             ["shadow" "watch" "app"]]
             ;; vt add watch from a more modern project
             "watch"         ["with-profile" "dev" "do"
-                             ["shadow" "watch" "app" "browser-test" "karma-test"]]
+                              ["shadow" "watch" "app" "browser-test" "karma-test"]]
+                             ; ["shadow" "watch" "app" "browser-test" "karma-test" "worker-frig-frog"]]
             "prod"         ["with-profile" "prod" "do"
                             ["shadow" "release" "app"]]
             "build-report" ["with-profile" "prod" "do"

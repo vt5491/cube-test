@@ -49,7 +49,9 @@
                   (assoc :init-col (if (nil? (:init-col opts)) 0 (:init-col opts)))
                   (assoc :init-row (if (nil? (:init-row opts)) 0 (:init-row opts))))
         db-2 (assoc db-1 :trains (conj (:trains db-1) train))]
-    db-2))
+      (prn "train.init: db-1=" db-1)
+      (prn "train.init: db-2=" db-2)
+      db-2))
 
 (defn init-2 [opts db]
   (let [r (init opts @db)]
@@ -156,6 +158,11 @@
         ;      (dummy 2)
         ;      (prn "hi-b"))
         ;    100))))
+
+; (defn train-stream [train-opts db]
+;   ; (init train-opts db)
+;   ; (utils/sleep #(init train-opts db) 1000)
+;   (init train-opts db))
 
 (defn drop-train-mesh [train]
   (let [scene main-scene/scene

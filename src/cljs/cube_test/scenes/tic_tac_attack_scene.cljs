@@ -80,14 +80,14 @@
 
 (defn init-top-gui []
   (let [top-plane (bjs/Mesh.CreatePlane. "top-plane" 2)
-        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 1024 1024)
+        top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh top-plane 1024 1024)
         ; top-pnl (bjs-gui/StackPanel.)
         top-pnl (bjs-gui/Grid.)
         top-hdr (bjs-gui/TextBlock.)
-        rot-btn (bjs-gui/Button.CreateSimpleButton. "rot-btn" "rotate")
-        rot-btn-2 (bjs-gui/Button.CreateSimpleButton. "rot-btn-2" "rotate2")
-        rot-btn-3 (bjs-gui/Button.CreateSimpleButton. "rot-btn-3" "rotate3")
-        left-side-rot-btn (bjs-gui/Button.CreateSimpleButton. "left-side-rot-btn" "left side rot")]
+        rot-btn (bjs-gui/Button.CreateSimpleButton "rot-btn" "rotate")
+        rot-btn-2 (bjs-gui/Button.CreateSimpleButton "rot-btn-2" "rotate2")
+        rot-btn-3 (bjs-gui/Button.CreateSimpleButton "rot-btn-3" "rotate3")
+        left-side-rot-btn (bjs-gui/Button.CreateSimpleButton "left-side-rot-btn" "left side rot")]
     (set! (.-position top-plane)(bjs/Vector3. 0 6 -2))
     (.addControl top-adv-texture top-pnl)
     (set! (.-text top-hdr) "commands")

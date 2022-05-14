@@ -1,7 +1,7 @@
 ;; events is refer to many
 (ns cube-test.frig-frog.events
   (:require
-   [re-frame.core :refer [dispatch dispatch-sync reg-event-db reg-event-fx reg-fx after ] :as re-frame]
+   [re-frame.core :refer [dispatch dispatch-sync reg-event-db reg-event-fx reg-fx after ] :as rf]
    [cube-test.frig-frog.game :as ff.game]
    [cube-test.main-scene :as main-scene]
    [cube-test.frig-frog.scene-l1 :as ff.scene-l1]
@@ -13,27 +13,29 @@
    [cube-test.utils :as utils]
    [cube-test.utils.common :as common-utils]
    [cube-test.frig-frog.demo-workers-setup-cljs :as tmp]
-   [cube-test.frig-frog.demo-workers-cljs :as tmp-2]))
+   [cube-test.frig-frog.demo-workers-cljs :as tmp-2]
+   [cube-test.frig-frog.demo-workers-cljs :as tmp-2]
+   [cube-test.frig-frog.ff-worker :as ff-worker]))
    ; [worker-simple.core :as ws-core]))
 
 ;;
 ;; dev stuff
 ;;
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::ff-dummy
  (fn [cofx _]
    (prn "frig-frog: dummy event")
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::web-worker-demo
  (fn [cofx _]
    (prn "frig-frog: web-worker-demo, i=" (js/inc_i))
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::start-worker
  (fn [cofx _]
    ; (prn "frig-frog: startWorker, i=" (js/startWorker))
@@ -43,7 +45,7 @@
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::stop-worker
  (fn [cofx _]
    ; (prn "frig-frog: stopWorker, i=" (js/stopWorker))
@@ -51,7 +53,7 @@
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::post-hi
  (fn [cofx _]
    (prn "events: service post-hi")
@@ -59,21 +61,21 @@
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::start-worker-2
  (fn [cofx _]
    (prn "frig-frog: startWorker-2, i=" (tmp/startWorker2))
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::stop-worker-2
  (fn [cofx _]
    (prn "frig-frog: stopWorker-2, i=" (tmp/stopWorker2))
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::post-hi-2
  (fn [cofx _]
    (prn "events: service post-hi-2")
@@ -81,14 +83,15 @@
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::worker-print-db
  (fn [cofx _]
    (prn "server.events: call print-db")
    (tmp/print-db)
    {
     :db (:db cofx)}))
-(re-frame/reg-event-fx
+
+(rf/reg-event-fx
  ::post-add-train
  (fn [cofx _]
    (prn "server.events: call post-add-train")
@@ -96,7 +99,7 @@
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::worker-abc
  (fn [cofx _]
    ; (prn "frig-frog: stopWorker, i=" (js/stopWorker))
@@ -108,7 +111,7 @@
     :dispatch-n [[:test-worker-fx {:handler :mirror, :arguments {:a "Hello" :b "World2" :c 10} :on-success [:on-worker-fx-success] :on-error [:on-worker-fx-error]}]
                  [:test-worker-fx {:handler :mirror, :arguments {:a "Hallo" :b "Welt" :c 10 :d (js/ArrayBuffer. 10) :transfer [:d]} :transfer [:d] :on-success [:on-worker-fx-success] :on-error [:on-worker-fx-error]}]]}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::post-ping
  (fn [cofx _]
    (prn "server.events: call post-ping")
@@ -126,14 +129,14 @@
                               (+ r (* (js/Math.atan i) (js/Math.tan i)))])))
    (prn "heavy-cpu: done"))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::heavy-cpu
  (fn [cofx _]
    (heavy-cpu)
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::heavy-cpu-worker
  (fn [cofx [_ task]]
    (prn "heavy-cpu-worker: task=" task)
@@ -152,14 +155,14 @@
             0
             (range big-num))))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::heavy-cpu-2
  (fn [cofx _]
    (prn "heavy-cpu-2 r=" (heavy-cpu-2))
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::heavy-cpu-2-worker
  (fn [cofx [_ task]]
    (prn "heavy-cpu-2-worker: task=" task)
@@ -204,7 +207,7 @@
          board (ff.board/init-board default-db)]
      (assoc default-db :board board))))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::init-game
  (fn [cofx _]
    (ff.game/init)
@@ -214,14 +217,14 @@
        {
         :fx [[:dispatch [::init-scene-l1]]]}))))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::run-game
  (fn [cofx _]
    (ff.game/run-game)
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::update-quanta-width
  (fn [cofx [_ new-quanta-width]]
    ; (prn "events: updating quanta-width to" new-quanta-width)
@@ -241,7 +244,7 @@
     ; db))
 
 ;; defunct
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::ff-ctrl-mesh-loaded
  (fn [cofx [_ webVRController]]
    (prn "frig-frog.events: now calling ctrl-mesh-loaded-handler")
@@ -280,14 +283,14 @@
 ;;
 ;; scene-l1
 ;;
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::init-scene-l1
  (fn [cofx _]
    (ff.scene-l1/init (:db cofx))
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::init-non-vr-view
  (fn [cofx [_ rot-delta]]
    (prn "events.init-view: rot-delta=" rot-delta)
@@ -298,7 +301,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::init-vr-view
  (fn [cofx [_ rot-delta]]
    (prn "events.init-view: rot-delta=" rot-delta)
@@ -309,7 +312,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::init-view
  (fn [cofx [_ rot-delta]]
    (prn "events.init-view: rot-delta=" rot-delta)
@@ -319,7 +322,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::reset-view
  (fn [cofx [_]]
    (prn "events.reset-view: entered")
@@ -327,7 +330,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::scene-l1-toggle-animation
  (fn [cofx [_]]
    ; (prn "events.reset-view: entered")
@@ -335,11 +338,18 @@
    {
      :db (:db cofx)}))
 
+(rf/reg-event-fx
+ ::init-reflector
+ (fn [cofx _]
+   (ff.scene-l1/init-reflector)
+   {
+    :db (:db cofx)}))
+
 ;;
 ;; tile
 ;; defunct as board calls 'draw-tile' natively for performance and various other reasons.
 ;; Nope: active once again
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::draw-tile
  (fn [cofx [_ pos-x pos-y]]
    (ff.tile/draw pos-x pos-y)
@@ -395,7 +405,7 @@
     (assoc db :board (conj (:board db) {:row-4 {:tile-4-0 {}, :tile-4-1 {}}}))))
     ; (assoc db :board (conj (:board db) {:row-4 [{:tile-4-0 {}}, {:tile-4-1 {}}]}))))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::update-n-rows
  (fn [cofx [_ n-rows]]
    (let [db (:db cofx)]
@@ -405,7 +415,7 @@
    {
     :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::update-n-cols
  (fn [cofx [_ n-cols]]
    (let [db (:db cofx)]
@@ -450,7 +460,7 @@
     (let [last-frog-mode (get-in db [:frog :mode])]
       (assoc-in db [:frog :mode] (+ last-frog-mode 1)))))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::draw-frog
  (fn [cofx [_ row col]]
    (prn "events.draw-frog: row=" row ", col=" col)
@@ -478,11 +488,11 @@
   (fn [cofx [_ opts]]
     ; (ff.train/init opts db)
     (let [db (:db cofx)
-          ; interval-id (js/setInterval #(re-frame/dispatch [:cube-test.frig-frog.events/init-train] opts db) 1000)
-          ; interval-id (js/setInterval #(re-frame/dispatch [:init-train opts] ) 1000)
+          ; interval-id (js/setInterval #(rf/dispatch [:cube-test.frig-frog.events/init-train] opts db) 1000)
+          ; interval-id (js/setInterval #(rf/dispatch [:init-train opts] ) 1000)
           tmp (prn "hi-a")
           ; interval-id (js/setInterval #(prn "hi from interval" ) 1000)
-          interval-id (js/setInterval #(re-frame/dispatch [::init-train opts] ) 2000)
+          interval-id (js/setInterval #(rf/dispatch [::init-train opts] ) 2000)
           ; interval-id (js/setInterval #(ff.train/add-train-mesh opts) 2000)
           tmp (prn "hi-b")]
       (prn "interval-id=" interval-id)
@@ -508,7 +518,7 @@
     (let [new-trains (ff.train/drop-train-idx (:trains db) idx)]
       (assoc db :trains new-trains))))
 
-; (re-frame/reg-event-fx
+; (rf/reg-event-fx
 ;  ::get-train-by-id
 ;  (fn [cofx [_ trains id]]
 ;    (prn "events.get-train-by-id: trains=" trains ", id=" id)
@@ -530,7 +540,7 @@
       (prn "events.update-train-id-stem: idx=" idx)
       (assoc db :trains (assoc trains idx new-train)))))
 
-; (re-frame/reg-event-fx
+; (rf/reg-event-fx
 ;  ::add-train-mesh
 ;  (fn [cofx [_ id]]
 ;    (prn "events.add-train-mesh: entered")
@@ -542,7 +552,7 @@
 ;    {
 ;      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::add-train-mesh
  (fn [cofx [_ train]]
    (prn "events.add-train-mesh: entered")
@@ -554,7 +564,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::drop-train-mesh
  (fn [cofx [_ train]]
    (prn "events.drop-train-mesh: entered")
@@ -563,7 +573,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::update-train-mesh-by-idx
  ; (fn [cofx [_ train]])
  (fn [cofx [_ idx]]
@@ -575,7 +585,7 @@
    {
      :db (:db cofx)}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::reset-train-mesh
  (fn [{db :db} [_ train-mesh]]
    (prn "events.reset-train-mesh: train-mesh=" train-mesh)
@@ -584,14 +594,14 @@
     ; :db (:db cofx)
     :db db}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::toggle-animate-trains
  (fn [{db :db} [_ train-mesh]]
    (set! ff.train/animate-trains (not ff.train/animate-trains))
    {
     :db db}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::toggle-animate-train
  (fn [{db :db} [_ train-id]]
    (set! ff.train/animate-trains (not ff.train/animate-trains))
@@ -615,7 +625,7 @@
    {
     :db db}))
 
-(re-frame/reg-event-fx
+(rf/reg-event-fx
  ::train-toggle-animation
  (fn [cofx [_]]
    ; (prn "events.reset-view: entered")
@@ -628,3 +638,70 @@
   ::init-worker
   (fn [db [_]]
     (assoc db :worker-pool cube-test.core.worker-pool)))
+
+;; ff-worker
+(rf/reg-event-fx
+ ; ::start-ff-worker
+ ::ff-worker-start
+ (fn [cofx _]
+   (prn "events.ff-worker-start: entered")
+   (ff-worker/start-worker)
+   {
+    :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ; ::stop-ff-worker
+ ::ff-worker-stop
+ (fn [cofx _]
+   (prn "events.ff-worker-stop: entered")
+   (ff-worker/stop-worker)
+   {
+    :db (:db cofx)}))
+
+; (rf/reg-event-fx
+;  ::post-ff-worker-hi
+;  (fn [cofx _]
+;    (prn "events: service post-hi-2")
+;    (tmp/post-hi-2)
+;    {
+;     :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::ff-worker-ping
+ (fn [cofx _]
+   (prn "server.events: call post-ping")
+   (ff-worker/ping)
+   {
+    :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::ff-worker-print-db
+ (fn [cofx _]
+   (prn "server.events: call print-db")
+   (ff-worker/print-db)
+   {
+    :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::main-train-stream
+ ; (fn [cofx _])
+ (fn [{db :db} [_ train-opts cnt]]
+   (prn "server.events: call main-train-stream, train-opts=" train-opts)
+   (when (> cnt 0)
+     (utils/sleep
+       #(rf/dispatch [::main-train-stream train-opts (- cnt 1)])
+       1000))
+   {
+    ; :db (ff.train/train-stream train-opts db)
+    :db (ff.train/init train-opts db)}))
+
+(rf/reg-event-fx
+ ::ff-worker-train-stream
+ (fn [{db :db} [_ train-opts cnt]]
+   (prn "server.events: call ff-worker-train-stream, train-opts=" train-opts)
+   ; (when (> cnt 0)
+   ;   (utils/sleep
+   ;     #(rf/dispatch [::main-train-stream train-opts (- cnt 1)])
+   ;     1000))
+   {
+    :db (ff.train/init train-opts db)}))

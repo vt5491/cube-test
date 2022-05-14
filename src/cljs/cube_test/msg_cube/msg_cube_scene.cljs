@@ -42,11 +42,11 @@
       (when top-plane
         (.dispose top-plane)))
     (let [top-plane (bjs/Mesh.CreatePlane. "top-plane" 5)
-          top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. top-plane 3048 2048)
+          top-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh top-plane 3048 2048)
           top-pnl (bjs-gui/Grid.)
           top-hdr (bjs-gui/TextBlock.)
-          add-msg-btn (bjs-gui/Button.CreateSimpleButton. "add-msg-btn" "add")
-          max-id-btn (bjs-gui/Button.CreateSimpleButton. "max-id-btn" "inc max-id")]
+          add-msg-btn (bjs-gui/Button.CreateSimpleButton "add-msg-btn" "add")
+          max-id-btn (bjs-gui/Button.CreateSimpleButton "max-id-btn" "inc max-id")]
       (set! (.-position top-plane)(bjs/Vector3. 0 6 2))
       (set! (.-renderOutline top-plane) true)
       (set! gui-plane top-plane)

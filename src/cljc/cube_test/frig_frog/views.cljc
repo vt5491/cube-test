@@ -5,7 +5,8 @@
    [cube-test.frig-frog.events :as ff-events]
    [cube-test.frig-frog.board :as ff-board]
    [cube-test.frig-frog.tile :as ff-tile]
-   [cube-test.frig-frog.game :as ff-game]))
+   [cube-test.frig-frog.game :as ff-game]
+   [cube-test.frig-frog.ff-worker :as ff-worker]))
 
 (defn init-panel []
   (prn "frig-frog-views.init-panel")
@@ -108,4 +109,24 @@
      ;                                                :on-success [:on-worker-fx-success]
      ;                                                :on-error [:on-worker-fx-error]})} "test-worker-fx"]
      [:br]
-     [:button.user-action {:on-click #(rf/dispatch [::ff-events/heavy-cpu-2])} "heavy cpu 2"]]))
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/init-reflector])} "init reflector"]
+     [:br]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/ff-worker-start])} "start ff-worker"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/ff-worker-stop])} "stop ff-worker"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/ff-worker-ping])} "ping ff-worker"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/ff-worker-print-db ])} "ff-worker print-db"]
+     [:button.user-action {:on-click #(rf/dispatch [::ff-events/main-train-stream
+                                                    {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}
+                                                    3])}
+        "train stream (non) ff-worker"]
+     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/ff-worker-train-stream])} "train stream ff-worker"]
+     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/ff-worker-train-stream
+     ;                                                {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 2 :init-col 7}
+     ;                                                3])}
+     ;    "train stream ff-worker"]
+     [:button.user-action {:on-click #(ff-worker/train-stream
+                                        {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 2 :init-col 7}
+                                        3)}
+        "train stream ff-worker"]]))
+     ; [:button.user-action {:on-click #(cube-test.frig-frog.train/train-stream
+     ;                                   {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7})} "train stream ff-worker"]]))
