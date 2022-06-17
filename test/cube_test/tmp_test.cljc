@@ -878,3 +878,50 @@
   (prn "abc=" (:abc h2))
   (prn "abc=" (get h2 "abc"))
   (prn "keys=" (keys h2)))
+
+;; 2022-06-14
+(def a {"id-stem" "tr-1", "length" 4})
+(def b {"id-stem" "tr-1", "length" 4})
+(def c {:a 7 :b 8})
+
+(get a "id-stem")
+(get a "length")
+
+(js->clj "hi")
+(js->clj a :keywordize-keys true)
+(keys a)
+(.parse js/JSON a)
+
+(prn a)
+(prn c)
+
+(ns cube-test.tmp-test)
+
+(map #(prn %1) (vals a))
+
+(hash-map :a 7 :b 8)
+(hash-map "a" 7 "b" 8)
+(zipmap (keys a) (vals a))
+
+(keyword "a")
+
+(zipmap (map #(keyword %1) (keys a)) (vals a))
+
+(array-map a)
+(array-map {:a 7 :b 8})
+
+(map #(prn %1) a)
+(map #(array-map %1) a)
+
+(js-obj "a" 7)
+
+(+ 1 2)
+
+(def db {:trains [{:id "tr-1" :a 7} {:id "tr-2" :a 8} {:id "tr-3" :a 9}]})
+
+(let [trains (:trains db)]
+  (vec (remove #(= (:id %1) "tr-2") trains)))
+
+(let [trains (:trains db)]
+  ; (prn trains)
+  (map #(remoe "hi") trains))

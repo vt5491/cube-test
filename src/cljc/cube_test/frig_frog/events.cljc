@@ -40,7 +40,8 @@
  (fn [cofx _]
    ; (prn "frig-frog: startWorker, i=" (js/startWorker))
    ; (prn "frig-frog: startWorker, i=" (cube-test.frig-frog.demo-workers-setup-cljs/startWorker))
-   (prn "frig-frog: startWorker, i=" (tmp/startWorker))
+   ; (prn "frig-frog: startWorker, i=" (tmp/startWorker))
+   (prn "frig-frog: startWorker, i=" (ff-worker/start-worker))
    ; (prn "frig-frog: startWorker, i=" (ws-core/startWorker))
    {
     :db (:db cofx)}))
@@ -71,7 +72,8 @@
 (rf/reg-event-fx
  ::stop-worker-2
  (fn [cofx _]
-   (prn "frig-frog: stopWorker-2, i=" (tmp/stopWorker2))
+   ; (prn "frig-frog: stopWorker-2, i=" (tmp/stopWorker2))
+   (prn "frig-frog: stopWorker-2, i=" (ff-worker/stop-worker))
    {
     :db (:db cofx)}))
 
@@ -87,15 +89,25 @@
  ::worker-print-db
  (fn [cofx _]
    (prn "server.events: call print-db")
-   (tmp/print-db)
+   ; (tmp/print-db)
+   (ff-worker/print-db)
    {
     :db (:db cofx)}))
 
 (rf/reg-event-fx
  ::post-add-train
- (fn [cofx _]
+ (fn [cofx [_ train]]
    (prn "server.events: call post-add-train")
-   (tmp/post-add-train)
+   ; (tmp/post-add-train)
+   (ff-worker/post-add-train train)
+   {
+    :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::drop-train
+ (fn [cofx [_ id]]
+   (prn "server.events: call drop-train")
+   (ff-worker/drop-train id)
    {
     :db (:db cofx)}))
 
@@ -438,6 +450,7 @@
   ::init-frog
   (fn [db [_]]
     ; (assoc db :frog (ff.frog/init-frog db))
+    ; (js-debugger)
     (ff.frog/init-frog db)))
 
 (reg-event-db

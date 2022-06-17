@@ -14,6 +14,8 @@
 (def use-xr false)
 ; (def use-xr true)
 (def dummy 9)
+;; to be dynamically set at runtime by any app that has a remote reframe worker db
+(def db-worker-thread)
 
 ; (def top-level-scene :cube-spin-scene)
 ; (def top-level-scene :face-slot-scene)

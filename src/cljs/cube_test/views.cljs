@@ -16,7 +16,7 @@
         input-id @(re-frame/subscribe [:input-id])]
     [:div
      [:button.debug-view {:on-click #(re-frame/dispatch [:debug-view])} "debug-view"]
-     ; [:br]
+     [:button.print-grid {:on-click #(re-frame/dispatch [:sync-db base/db-worker-thread])} "sync worker db"]
      ; [:button.print-grid {:on-click #(re-frame/dispatch [:pretty-print-grid])} "pprint-grid"]
      ; [:button.print-grid {:on-click #(re-frame/dispatch [:print-vrubik-grid])} "print-grid"]
      [:br]

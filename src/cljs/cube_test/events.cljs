@@ -28,7 +28,8 @@
    [cube-test.msg-cube.data.msg :as msg-cube.msg]
    [cube-test.msg-cube.spec.db :as msg-cube.spec]
    [cube-test.twizzlers.game :as twizzlers.game]
-   [cube-test.utils.common :as common]))
+   [cube-test.utils.common :as common]
+   [cube-test.worker :as worker]))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -927,6 +928,18 @@
    (println "events.print-db: db=" db)
    db))
 
+(re-frame/reg-event-db
+ :print-hi
+ (fn [db [_]]
+   (println "events.print-hi: hi")
+   db))
+
+(re-frame/reg-event-db
+ :sync-db
+ (fn [db [_ worker-thread]]
+   (println "events.sync-db: entered")
+   (worker/sync-db worker-thread)
+   db))
 ;;
 ;; cell
 ;;

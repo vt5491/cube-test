@@ -122,7 +122,8 @@
     ; (-> vrHelper .-onControllerMeshLoadedObservable (.add ctrl-mesh-loaded-handler)))
     ; (-> vrHelper .-onControllerMeshLoaded (.add ctrl-mesh-loaded-handler))
     ; (-> vrHelper .-onAfterEnteringVRObservable (.add ctrl-mesh-loaded-handler)))
-  (re-frame/dispatch [:cube-test.frig-frog.events/init-worker])
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-worker]) ;; necessary?
+  (re-frame/dispatch [:cube-test.frig-frog.events/ff-worker-start])
   ; (prn "game.init: pre-init-board db=" (re-frame/dispatch [:db-hook]))
   (re-frame/dispatch [:cube-test.frig-frog.events/init-board])
   ; (prn "game.init: post-init-board db=" (re-frame/dispatch [:db-hook]))

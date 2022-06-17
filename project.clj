@@ -59,9 +59,9 @@
 
   ;;vt add for re-frame-10x
   :compiler    {
-                 :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
-                 :preloads             [day8.re-frame-10x.preload]
-                 :main                 "re-con.core"}
+                         :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                         :preloads             [day8.re-frame-10x.preload]
+                         :main                 "re-con.core"}
   ;;vt end
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
@@ -103,8 +103,8 @@
                                                         ; :output-feature-set :es2018
                                                         :output-feature-set :es2020
                                                         ; :optimizations :simple
-                                                        :optimizations :none}}
-                                                        ;vt-x :preloads             [day8.re-frame-10x.preload]}}
+                                                        :optimizations :none
+                                                        :preloads             [day8.re-frame-10x.preload]}}
                                ;;vt end
                                :devtools {:http-root "resources/public"
                                           :http-port 8281}}

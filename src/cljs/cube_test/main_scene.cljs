@@ -158,7 +158,9 @@
     (do
       ;; set up xr
         ;; definitely where you set the non-xr and xr camera position.
+        ; camera.attachControl(canvas, true)
         (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
+        (.attachControl camera canvas true)
         (.setTarget camera (bjs/Vector3.Zero))
         (-> (.createDefaultXRExperienceAsync scene
                                              (js-obj
@@ -297,6 +299,6 @@
 ;; Note: do not want render loop in main scene, since it needs to call the tick of other
 ;; namespaces, thus violating the "refer to few, referenced by many" principle.  We can normally
 ;; use a re-frame event dispatch to get around this, but you do not want to call re-frame on a game
-;; tick for performance rease.  Therefore, it's better to put into a module like 'game'.
+;; tick for performance reasons.  Therefore, it's better to put into a module like 'game'.
 
 (defn tick [])

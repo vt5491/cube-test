@@ -1,5 +1,5 @@
 1. workers can be built like so:
-lein.bat worker-frig-frog
+lein.bat worker-frig-frog (note: do not use this..)
 
 this will create an 'app.js' under 'resources/public/libs/worker_frig_frog'
 

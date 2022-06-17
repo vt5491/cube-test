@@ -19,6 +19,8 @@
    (:trains db)))
 
 ;;
+;; (.parse js/JSON json)
+;; (zipmap (map #(keyword %1) (keys a)) (vals a))
 ;; computations
 ;;
 (reg-sub
@@ -46,9 +48,15 @@
             (do
               ;; add-zone
               (doall (map #(when %1
-                             (prn "worker:%1=" %1)
-                             ; (rf/dispatch [::wff-events/add-train-mesh %1]))
-                             (rf/dispatch [::wff-events/add-train-mesh-min %1]))
+                             (prn "worker:%1=" %1 ",hi2")
+                             (prn "worker: js->clj %1=" (js->clj %1 :keywordize-keys true))
+                            ;;  (prn "worker: json %1=" (.parse js/JSON %1))
+                            ;;  (rf/dispatch [::wff-events/add-train-mesh %1])
+                            ;;  (rf/dispatch [::wff-events/add-train-mesh (js->clj %1 :keywordize-keys false)])
+                             (let [h (zipmap (map (fn [x] (keyword x)) (keys %1)) (vals %1))]
+                               (prn "worker: h=" h)
+                               (rf/dispatch [::wff-events/add-train-mesh h])))
+                            ;;  (rf/dispatch [::wff-events/add-train-mesh-min %1]))
                            diff-a))))))
         ; (when (< (count trains) (count @*last-trains*))
         ;   (when diff-b
