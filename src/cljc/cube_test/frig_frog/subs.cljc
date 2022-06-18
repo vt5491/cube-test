@@ -69,7 +69,7 @@
  :get-n-cols
  (fn [db _]
    (:n-cols db)))
-
+   
 ;;
 ;; computations
 ;;

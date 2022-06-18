@@ -15,7 +15,8 @@
    [cube-test.frig-frog.demo-workers-setup-cljs :as tmp]
    [cube-test.frig-frog.demo-workers-cljs :as tmp-2]
    [cube-test.frig-frog.demo-workers-cljs :as tmp-2]
-   [cube-test.frig-frog.ff-worker :as ff-worker]))
+   [cube-test.frig-frog.ff-worker :as ff-worker]
+   [cube-test.frig-frog.rules :as ff.rules]))
    ; [worker-simple.core :as ws-core]))
 
 ;;
@@ -97,9 +98,14 @@
 (rf/reg-event-fx
  ::post-add-train
  (fn [cofx [_ train]]
-   (prn "server.events: call post-add-train")
+   ; (prn "events.post-add-train, inc-train-id-cnt returns" (ff.rules/inc-train-id-cnt))
+   (ff.rules/inc-train-id-cnt)
+   (prn "server.events: call post-add-train, train-id=" (-> (ff.rules/query-train-id-cnt) (first) (:n)))
    ; (tmp/post-add-train)
-   (ff-worker/post-add-train train)
+   (let [train-n (-> (ff.rules/query-train-id-cnt) (first) (:n))
+         train-id (str "tr-" train-n)
+         updated-train (assoc-in train [:id-stem] train-id)]
+     (ff-worker/post-add-train updated-train))
    {
     :db (:db cofx)}))
 

@@ -12,6 +12,9 @@
 ;     (prn "twizzlers.subs: twizzlers query running")
 ;     (::twizzlers db)))
 
+;;
+;; extractors
+;;
 (reg-sub
   :twizzlers
   (fn [db _]
@@ -19,6 +22,9 @@
     (db :twizzlers)))
     ; (:twizzlers db)))
 
+;;
+;; computations
+;;
 (reg-sub
  :gen-twiz-cube
  :<- [:twizzlers]

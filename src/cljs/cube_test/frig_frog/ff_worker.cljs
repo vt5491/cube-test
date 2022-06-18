@@ -90,6 +90,8 @@
   ;; following 2 work
   ; (.postMessage ff-worker (.stringify js/JSON (js-obj "msg" "add-train", "train" (clj->js train))))
   (.postMessage ff-worker (.stringify js/JSON (clj->js {:msg "add-train" :train train}))))
+  ;; (.postMessage ff-worker (js-obj "msg" "add-train", "train" (js-obj "id-stem" "tr-1"))))
+
   ;; no work
   ; (.postMessage ff-worker (clj->js {:msg "add-train" :train train})))
 

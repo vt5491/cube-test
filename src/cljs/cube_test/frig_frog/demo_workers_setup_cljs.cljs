@@ -1,3 +1,4 @@
+;;defunct
 (ns cube-test.frig-frog.demo-workers-setup-cljs
   (:require
     [re-frame.core :as rf]))
@@ -95,7 +96,7 @@
   (.postMessage w2 (clj->js {:msg "print-db"})))
 
 (defn post-add-train []
-  (prn "main: about to postMessage add-train")
+  (prn "demo-worker.main: about to postMessage add-train")
   (.postMessage w2 (js-obj "msg" "add-train", "train" (js-obj "id-stem" "tr-1"))))
 
 (defn post-ping []

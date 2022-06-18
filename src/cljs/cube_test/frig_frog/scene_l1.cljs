@@ -16,7 +16,8 @@
    ; [cube-test.beat-club.twitch-stream :as twitch-stream]
    [babylonjs-loaders :as bjs-l]
    [cube-test.frig-frog.train :as ff.train]
-   [cube-test.frig-frog.ff-worker :as ff-worker]))
+   [cube-test.frig-frog.ff-worker :as ff-worker]
+   [cube-test.frig-frog.rules :as ff-rules]))
    ; [cube-test.frig-frog.events :as ff.events]))
 
 ;; constants
@@ -356,7 +357,9 @@
     ; (prn "scene-l1.init: board-width=" cube-test.frig-frog.board/board-width)
     (init-gui)
     ;; spin-cube is used for testing delays
-    (set! (.-position spin-cube) (bjs/Vector3. 4 2 4))))
+    (set! (.-position spin-cube) (bjs/Vector3. 4 2 4))
+    ;; seed the initial train id
+    (ff-rules/update-train-id-cnt 1)))
     ; (.registerView main-scene/engine main-scene/canvas main-scene/camera)))
 
     ; const reflector = new BABYLON.Reflector(scene, "localhost", 1234)));

@@ -28,8 +28,8 @@
    [cube-test.msg-cube.data.msg :as msg-cube.msg]
    [cube-test.msg-cube.spec.db :as msg-cube.spec]
    [cube-test.twizzlers.game :as twizzlers.game]
-   [cube-test.utils.common :as common]
-   [cube-test.worker :as worker]))
+   [cube-test.utils.common :as common]))
+   ; [cube-test.worker :as worker]))
 
 (re-frame/reg-event-db
  ::initialize-db
@@ -938,8 +938,16 @@
  :sync-db
  (fn [db [_ worker-thread]]
    (println "events.sync-db: entered")
-   (worker/sync-db worker-thread)
+   ; (worker/sync-db worker-thread)
+   (cube-test.worker/sync-db worker-thread)
    db))
+
+(re-frame/reg-event-db
+ :update-db
+ (fn [db [_ key content]]
+   (println "events.update-db: entered, key=" key ", content=" content)
+   (assoc-in db [key] content)))
+
 ;;
 ;; cell
 ;;

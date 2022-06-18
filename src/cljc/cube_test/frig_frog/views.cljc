@@ -7,7 +7,8 @@
    [cube-test.frig-frog.board :as ff-board]
    [cube-test.frig-frog.tile :as ff-tile]
    [cube-test.frig-frog.game :as ff-game]
-   [cube-test.frig-frog.ff-worker :as ff-worker]))
+   [cube-test.frig-frog.ff-worker :as ff-worker]
+   [cube-test.frig-frog.rules :as ff-rules]))
 
 (defn init-panel []
   (prn "frig-frog-views.init-panel")
@@ -37,68 +38,69 @@
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/worker-print-db ])} "worker print-db"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-add-train
                                                     {:id-stem :tr-1 :vx -1 :vy 0 :length 5 :init-row 2 :init-col 4}])} "worker post-add-train"]
-     [:button.user-action {:on-click cube-test.frig-frog.demo-workers-setup-cljs/post-add-train} "worker post-add-train min"]
+     ; [:button.user-action {:on-click cube-test.frig-frog.demo-workers-setup-cljs/post-add-train} "worker post-add-train min"]
      ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-add-train ])} "worker post-add-train min"]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-ping ])} "worker post-ping"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-game-db ff-game/default-game-db])} "reset-db"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-non-vr-view -10])} "reset non-vr -10"]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-non-vr-view 10])} "reset non-vr 10"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-vr-view -10])} "reset vr -10"]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-vr-view 10])} "reset vr 10"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-view -10])} "reset float vr -10"]
-     ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-view 10])} "reset float vr 10"]
-     ; [:br]
-     ; [:button.user-action
-     ;  {:on-click #(re-frame/dispatch
-     ;               [:cube-test.frig-frog.events/update-tile 0 0
-     ;                ff-tile/state-update-fn])}
-     ;  "update-tile 0 0"]
-     ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/inc-frog-mode])} "inc frog mode"]
-     ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/jump-frog 1 0])} "jump frog forward"]
-     ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/jump-frog -2 0])} "jump frog back -2"]
-     ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/jump-frog 0 1])} "jump frog right"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/toggle-dev-mode])} "toggle dev-mode"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch
-     ;                                   [::ff-events/init-train
-     ;                                    {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}])}
-     ;  "init-train 0"]
-     ; ; [:button.user-action {:on-click #(cube-test.frig-frog.train/init)} "init-train 0 min"]
-     ; ; [:button.user-action {:on-click #(prn "db=" re-frame.db/app-db)} "init-train 0 min"]
-     ; [:button.user-action {:on-click #(cube-test.frig-frog.train/init-2
-     ;                                     {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}
-     ;                                     ; js/window.re_frame.db.app_db.state)} "init-train 0 min"]
-     ;                                     re-frame.db/app-db)} "init-train 0 min"]
-     ; [:button.user-action {:on-click #(rf/dispatch
-     ;                                   [::ff-events/init-train
-     ;                                    {:id-stem :tr-2 :vx 1 :vy 0 :length 2 :init-row 5 :init-col 0}])}
-     ;  "init-train 2"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 0])} "drop train 0"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 2])} "drop train 2"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-id-stem :tr-1])} "drop train id :tr-1"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-idx 1])} "update train 1"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-1 {:length 3}])} "update train id :tr-1"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-2 {:length 4}])} "update train id :tr-2"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-1])} "add train mesh :tr-1"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-2])} "add train mesh :tr-2"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-trains])} "toggle train anim"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-train "tr-1-0"])} "toggle tr-1-0 anim"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/web-worker-demo ])} "web worker demo"]
-     ; [:br]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/start-worker ])} "start worker"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/stop-worker ])} "stop worker"]
-     ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-hi ])} "post hi"]
-     [:br]]))
+     [:br]
+     [:button.user-action {:on-click #(ff-rules/query-train-id-cnt)} "query train-id-cnt"
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-game-db ff-game/default-game-db])} "reset-db"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-non-vr-view -10])} "reset non-vr -10"]
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-non-vr-view 10])} "reset non-vr 10"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-vr-view -10])} "reset vr -10"]
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-vr-view 10])} "reset vr 10"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-view -10])} "reset float vr -10"]
+       ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-view 10])} "reset float vr 10"]
+       ; [:br]
+       ; [:button.user-action
+       ;  {:on-click #(re-frame/dispatch
+       ;               [:cube-test.frig-frog.events/update-tile 0 0
+       ;                ff-tile/state-update-fn])}
+       ;  "update-tile 0 0"]
+       ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/inc-frog-mode])} "inc frog mode"]
+       ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/jump-frog 1 0])} "jump frog forward"]
+       ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/jump-frog -2 0])} "jump frog back -2"]
+       ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/jump-frog 0 1])} "jump frog right"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.frig-frog.events/toggle-dev-mode])} "toggle dev-mode"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch
+       ;                                   [::ff-events/init-train
+       ;                                    {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}])}
+       ;  "init-train 0"]
+       ; ; [:button.user-action {:on-click #(cube-test.frig-frog.train/init)} "init-train 0 min"]
+       ; ; [:button.user-action {:on-click #(prn "db=" re-frame.db/app-db)} "init-train 0 min"]
+       ; [:button.user-action {:on-click #(cube-test.frig-frog.train/init-2
+       ;                                     {:id-stem :tr-1 :vx -1 :vy 0 :length 1 :init-row 4 :init-col 7}
+       ;                                     ; js/window.re_frame.db.app_db.state)} "init-train 0 min"]
+       ;                                     re-frame.db/app-db)} "init-train 0 min"]
+       ; [:button.user-action {:on-click #(rf/dispatch
+       ;                                   [::ff-events/init-train
+       ;                                    {:id-stem :tr-2 :vx 1 :vy 0 :length 2 :init-row 5 :init-col 0}])}
+       ;  "init-train 2"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 0])} "drop train 0"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-idx 2])} "drop train 2"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/drop-train-id-stem :tr-1])} "drop train id :tr-1"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-idx 1])} "update train 1"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-1 {:length 3}])} "update train id :tr-1"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/update-train-by-id :tr-2 {:length 4}])} "update train id :tr-2"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-1])} "add train mesh :tr-1"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/add-train-mesh :tr-2])} "add train mesh :tr-2"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-trains])} "toggle train anim"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/toggle-animate-train "tr-1-0"])} "toggle tr-1-0 anim"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/web-worker-demo ])} "web worker demo"]
+       ; [:br]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/start-worker ])} "start worker"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/stop-worker ])} "stop worker"]
+       ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-hi ])} "post hi"]
+       [:br]]]))
      ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/start-worker-2 ])} "start worker 2"]
      ; [:button.user-action {:on-click
      ;                       ; (fn [](.postMessage cube-test.frig-frog.demo-workers-setup-cljs/w2 (js-obj "msg" "ping")))

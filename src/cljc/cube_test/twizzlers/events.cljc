@@ -87,19 +87,37 @@
    (twizzlers.twizzler/add-twizzler db)))
 
 ;; first odoyle rule
+;; (re-frame/reg-event-fx
+;;  ::update-time
+;;  ; [twizzlers-check-spec-interceptor]
+;;  (fn [_]
+;;    (prn "twizzler.events.update-time: entered")
+;;    (twizzlers.rules/update-time)))
+
 (re-frame/reg-event-fx
  ::update-time
  ; [twizzlers-check-spec-interceptor]
- (fn [_]
+ (fn [cofx _]
    (prn "twizzler.events.update-time: entered")
-   (twizzlers.rules/update-time)))
+   (twizzlers.rules/update-time)
+   {
+     :db (:db cofx)}))
 
 ;; odoyle rule
+;; (re-frame/reg-event-fx
+;;  ::update-twiz-cnt
+;;  (fn [_ [_ new-cnt]]
+;;    (prn "twizzler.events.update-twiz-cnt: entered, new-cnt=" new-cnt)
+;;    (twizzlers.rules/update-twiz-cnt new-cnt)))
+
 (re-frame/reg-event-fx
  ::update-twiz-cnt
- (fn [_ [_ new-cnt]]
-   (prn "twizzler.events.update-twiz-cnt: entered, new-cnt=" new-cnt)
-   (twizzlers.rules/update-twiz-cnt new-cnt)))
+ (fn [cofx [_ new-cnt]]
+  (prn "twizzler.events.update-twiz-cnt: entered, new-cnt=" new-cnt)
+  (twizzlers.rules/update-twiz-cnt new-cnt)
+  {
+    :db (:db cofx)}))
+
 ;; rules end
 
 (re-frame/reg-event-fx

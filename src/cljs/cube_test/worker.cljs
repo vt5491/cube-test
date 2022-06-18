@@ -2,6 +2,8 @@
 (ns cube-test.worker
   (:require
     [re-frame.core :as rf]))
+    ;; [cube-test.events :as events]))
+    ;; [cube-test.events :refer [update-db]]))
 
 ;;
 ;; handle messages sent by the worker to us (the main thread).
@@ -16,7 +18,14 @@
       "post-db-content"
       (do
         (let [db-content (get data :db-content)]
-          (prn "db-content=" db-content))))))
+          (prn "db-content=" db-content)
+          ;; (cube-test.events.update-db :worker-ff db-content)
+          ;; (js-debugger)
+          ;; (rf/dispatch [:cube-test.events/update-db :worker-ff db-content])
+          (rf/dispatch [:update-db :worker-ff db-content]))))))
+          ;; (rf/dispatch [:events/update-db :worker-ff db-content]))))))
+          ;; (rf/dispatch [:cube-test.frig-frog.events/toggle-dev-mode])
+          ;; (rf/dispatch [:cube-test.events/print-hi]))))))
 
 ;;
 ;; Send message to the worker
