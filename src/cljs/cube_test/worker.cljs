@@ -10,7 +10,9 @@
 ;;
 (defn handle-worker-msg [e]
   (prn "main.handle-worker-msg: e=" e)
-  (let [data (js->clj (.-data e) :keywordize-keys true)
+  (let [
+        ;; data (js->clj (.-data e) :keywordize-keys true)
+        data (js->clj (.parse js/JSON (.-data e)) :keywordize-keys true)
         msg (get data :msg)]
     (prn "main.handle-worker-msg: data" data)
     (prn "main.handle-worker-msg: msg=" msg)

@@ -9,6 +9,7 @@
    [cube-test.frig-frog.tile :as ff.tile]
    [cube-test.frig-frog.board :as ff.board]
    [cube-test.frig-frog.frog :as ff.frog]
+   [cube-test.frig-frog.frog-2 :as ff.frog-2]
    [cube-test.frig-frog.train :as ff.train]
    [cube-test.utils :as utils]
    [cube-test.utils.common :as common-utils]
@@ -486,6 +487,29 @@
    (ff.frog/draw-frog row col)
    {
     :db (:db cofx)}))
+;;
+;; frog-2
+;;
+(reg-event-db
+  ::init-frog-2
+  (fn [db [_ row col]]
+    (ff-worker/init-frog-2 row col)))
+
+(rf/reg-event-fx
+ ::move-frog-2
+ (fn [cofx [_ x y]]
+   (prn "events: x=" x ",y=" y)
+   (ff-worker/move-frog-2 x y)))
+
+(rf/reg-event-fx
+ ::draw-frog-2
+ (fn [cofx [_ frog-2]]
+   (prn "events.draw-frog-2: frog-2=" frog-2)
+   (let [row (:row frog-2)
+         col (:col frog-2)]
+     {
+      :db (:db cofx)
+      :fx (ff.frog-2/draw-frog-2 frog-2)})))
 
 ;;
 ;; train
@@ -676,6 +700,15 @@
    (ff-worker/stop-worker)
    {
     :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::ff-worker-restart
+ (fn [cofx _]
+   (prn "events.ff-worker-restart: entered")
+   {
+    :db (:db cofx)
+    :fx  [[:dispatch [::ff-worker-stop]]
+          [:dispatch [::ff-worker-start]]]}))
 
 ; (rf/reg-event-fx
 ;  ::post-ff-worker-hi

@@ -18,9 +18,11 @@
  (fn [db _]
    (:trains db)))
 
+(reg-sub
+ :get-frog-2
+ (fn [db _]
+   (:frog-2 db)))
 ;;
-;; (.parse js/JSON json)
-;; (zipmap (map #(keyword %1) (keys a)) (vals a))
 ;; computations
 ;;
 (reg-sub
@@ -78,3 +80,13 @@
         ;                   idxs)))))
         ; (prn "bye"))
    (swap! *last-trains* (fn [x] trains))))
+
+(reg-sub
+ :frog-2-changed
+ :<- [:get-frog-2]
+ (fn [frog-2 query-v]
+   (prn "worker.sub: frog-2-changed: frog-2" frog-2 ", qv=" query-v)
+   (let [row (:row frog-2)
+         col (:col frog-2)]
+     (rf/dispatch [::wff-events/draw-frog-2 {:row row :col col}]))))
+    ;;  (rf/dispatch [::wff-events/draw-frog-2 row col]))))

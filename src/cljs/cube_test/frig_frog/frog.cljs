@@ -1,3 +1,5 @@
+;; frog uses local re-frame so it causes a noticable jerk.  I'm leaving as is though
+;; for comparison purposes.
 (ns cube-test.frig-frog.frog
    (:require
      [re-frame.core :as re-frame]

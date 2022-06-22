@@ -77,7 +77,23 @@
           ;; (prn "worker-frig-frog: sync-db: db1=" db1)
           ;; (post-db-content db1)
           ;; (post-db-content (rf/dispatch-sync [:worker-frig-frog.events/sync-db]))
-          (post-db-content @re-frame.db/app-db))))))
+          (post-db-content @re-frame.db/app-db)))
+      "init-frog-2"
+      (do 
+        (let [row (get data :row)
+              col (get data :col)]
+         (prn "ff-work: init-frog-2. row=" row ",col=" col)
+         ;; yes, it is necessary to do a 'dispatch-sync'.
+         (rf/dispatch-sync [:worker-frig-frog.events/update-frog-2 row col])
+        ;;  (rf/dispatch [:worker-frig-frog.events/update-frog-2 row col])
+         (let [dmy-sub @(rf/subscribe [:frog-2-changed])])))
+      "move-frog-2"
+      (do 
+        (let [x (get data :x)
+              y (get data :y)]
+         (prn "ff-worker: move-frog-2. x=" x, ",y=" y)
+         (rf/dispatch-sync [:worker-frig-frog.events/move-frog-2 x y])
+         (let [dmy-sub @(rf/subscribe [:frog-2-changed])]))))))
            
        
       ;;  (let [id (get data :id)]
@@ -91,7 +107,19 @@
 (defn post-db-content [db]
   (prn "worker.ff: post-db-content: db=" db)
   ;; (prn "worker.ff: post-db-content: app-db=" @re-frame.db/app-db)
-  (js/postMessage (clj->js {:msg "post-db-content" :db-content (clj->js db)})))
+  ;; (js/postMessage (clj->js {:msg "post-db-content" :db-content (clj->js db)}))
+  ;; (js/postMessage (.stringify js/JSON (clj->js {:msg "post-db-content" :db-content (clj->js db)})))
+  (js/postMessage (.stringify js/JSON (clj->js {:msg "post-db-content" :db-content db}))))
   ;; (js/postMessage (js-obj)))
+
+;; (.postMessage ff-worker (.stringify js/JSON (clj->js {:msg "add-train" :train train})))
+;; Note: called by events.cljs
+;; (defn draw-frog-2 [frog-2]
+;;   (prn "**worker.ff: draw-frog-2: frog-2" frog-2)
+;;   ;; (js/postMessage (clj->js {:msg "draw-frog-2" :frog-2 (clj->js frog-2)})))
+;;   ;; (js/postMessage (.stringify js/JSON (clj->js {:msg "draw-frog-2" :frog-2 frog-2}))))
+;;   ;; (js/postMessage (.stringify js/JSON (clj->js {:msg "draw-frog-2" :frog-2 (clj->js frog-2)}))))
+;;   ;; (js/postMessage (js-obj "msg" "draw-frog-2" "frog-2" (.stringify js/JSON (clj->js frog-2)))))
+;;   (js/postMessage (.stringify js/JSON (clj->js {:msg "draw-frog-2" :frog-2 frog-2}))))
 
 

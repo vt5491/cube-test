@@ -925,3 +925,6 @@
 (let [trains (:trains db)]
   ; (prn trains)
   (map #(remoe "hi") trains))
+
+(let [a [{:n 1}]]
+  (prn (-> (first a) (:n))))

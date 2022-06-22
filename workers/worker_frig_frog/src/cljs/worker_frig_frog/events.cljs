@@ -84,22 +84,11 @@
    (prn "wff-events.add-train-mesh entered, js-obj train=" (js-obj "train" train))
    ; (js/postMessage "worker-add-train-mesh")
    (let [id-stem (:id-stem train)]
-     (js/postMessage (js-obj "msg" "worker-add-train-mesh" 
-                             "abc" 7
-                             "id-stem" id-stem
-                            ;; "train" 7
-                            ;;  "train" (js-obj [])
-                            ;;  "train" "{'a': 7, 'b': 8 }"
-                            ;;  "train" '{"a": 7, "b": 8 }')))
-                            ;; following works
-                            ;;  "train" "{\"a\": 7, \"b\": 8 }"
-                            ;;  "train" (.stringify js/JSON (clj->js {:key "value"}))
-                             "train" (.stringify js/JSON (clj->js train)))))
-                            ;;  "train" "{\":a\": 7, \":b\": 8 }")))
-                            ;;  "train" (js-obj :abc 8))))
-                            ;;  "train" (js-obj [:abc 8]))))
-                            ;;  "train" (js-obj train))))
-                            ;;  "train" (js-obj train))))
+    ;;  (js/postMessage (js-obj "msg" "worker-add-train-mesh" 
+    ;;                          "abc" 7
+    ;;                          "id-stem" id-stem
+    ;;                          "train" (.stringify js/JSON (clj->js train))))
+     (js/postMessage (.stringify js/JSON (clj->js {:msg "worker-add-train-mesh" :train train}))))
    {
     :db (:db cofx)}))
 
@@ -112,6 +101,39 @@
      (js/postMessage (js-obj "msg" "worker-add-train-mesh-min" "id-stem" id-stem)))
    {
     :db (:db cofx)}))
+
+;;
+;; frog-2
+;;
+(reg-event-db
+ ::update-frog-2
+ (fn [db [_ row col]]
+   (prn "events.update-frog-2: db=" db ",row" row ",col=" col)
+   (assoc db :frog-2 {:row row :col col})))
+
+(reg-event-db
+ ::move-frog-2
+ (fn [db [_ x y]]
+   (prn "events.move-frog-2: db=" db ",x=" x ",y=" y)
+   (let [frog-2 (:frog-2 db)
+         row (:row frog-2)
+         col (:col frog-2)]
+     ;;  (assoc db :frog-2 {:row row :col col})
+     (prn "worker.events: row=" row ",col=" col)
+     (-> (assoc-in db [:frog-2 :row] (+ row y))
+         (assoc-in [:frog-2 :col] (+ col x))))))
+
+(rf/reg-event-fx
+ ::draw-frog-2
+;;  (fn [cofx [_ row col]]
+ (fn [cofx [_ frog-2]]
+  ;;  (prn "wff-events.draw-frog-2 entered, row=" row ",col=" col)
+   (prn "wff-events.draw-frog-2 entered, frog-2" frog-2)
+  ;;  (let [id-stem (:id-stem train)])
+  ;;  (js/postMessage (js-obj "msg" "draw-frog-2" 
+  ;;                        "row" row))
+  ;;  (js/postMessage (.stringify js/JSON (clj->js {:msg "draw-frog-2" :frog-2 {:row row :col col}})))
+   (js/postMessage (.stringify js/JSON (clj->js {:msg "draw-frog-2" :frog-2 frog-2})))))
 
 ;; misc
 (defn heavy-cpu []
