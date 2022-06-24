@@ -69,15 +69,15 @@
  :get-n-cols
  (fn [db _]
    (:n-cols db)))
-   
+
 ;;
 ;; computations
 ;;
 (reg-sub
  :board-changed-0
  :<- [:get-board]
- (fn [db query-v]
-   (prn "board has changed")))
+ (fn [db query-v]))
+   ; (prn "board has changed")))
 
 (reg-sub
  :board-changed
@@ -97,22 +97,22 @@
 (reg-sub
  :frog-changed
  :<- [:get-frog :col]
- (fn [frog query-v]
-   (prn "sub: frog-changed: frog=" frog ", qv=" query-v)))
+ (fn [frog query-v]))
+   ; (prn "sub: frog-changed: frog=" frog ", qv=" query-v)))
 
 (reg-sub
  :frog-row-changed
  :<- [:get-frog-row]
- (fn [row query-v]
-   (prn "sub-2: frog-row-changed: row=" row ", qv=" query-v)))
+ (fn [row query-v]))
+   ; (prn "sub-2: frog-row-changed: row=" row ", qv=" query-v)))
 
 ;; main frog pos handler
 (reg-sub
  :frog-row-col-changed
  :<- [:get-frog-row-col]
  (fn [row-col query-v]
-   (prn "sub: frog-row-col-changed: row=" row-col ", qv=" query-v)
-   (prn "sub: frog-row-col-changed: last-frog-row-col=" @*last-frog-row-col*)
+   ; (prn "sub: frog-row-col-changed: row=" row-col ", qv=" query-v)
+   ; (prn "sub: frog-row-col-changed: last-frog-row-col=" @*last-frog-row-col*)
    ; (when (and (:row row-col) (:col row-col)))
    (macros/when-let* [row (:row row-col)
                       col (:col row-col)]
@@ -124,9 +124,9 @@
            diff-b (second diff-full)
            last-row (or (:row diff-b) row)
            last-col (or (:col diff-b) col)]
-       (prn "frog-row-col-changed: diff-a=" diff-a)
-       (prn "frog-row-col-changed: diff-b=" diff-b)
-       (prn "frog-row-col-changed: last-row=" last-row ",last-col=" last-col)
+       ; (prn "frog-row-col-changed: diff-a=" diff-a)
+       ; (prn "frog-row-col-changed: diff-b=" diff-b)
+       ; (prn "frog-row-col-changed: last-row=" last-row ",last-col=" last-col)
        ; (rf/dispatch [:cube-test.frig-frog.ff-events/draw-frog row col])
        (rf/dispatch [::ff-events/draw-frog row col])
        (swap! *last-frog-row-col* #(identity row-col))))))
@@ -135,15 +135,15 @@
 (reg-sub
  :frog-mode-changed
  :<- [:get-frog-mode]
- (fn [mode query-v]
-   (prn "sub: frog-mode-changed: mode=" mode ", qv=" query-v)))
+ (fn [mode query-v]))
+   ; (prn "sub: frog-mode-changed: mode=" mode ", qv=" query-v)))
    ; (re-frame/dispatch [:events/jump-frog])))
 
 (reg-sub
  :dev-mode-changed
  :<- [:get-dev-mode]
  (fn [mode query-v]
-   (prn "sub: dev-mode-changed: mode=" mode ", qv=" query-v)
+   ; (prn "sub: dev-mode-changed: mode=" mode ", qv=" query-v)
    ; (re-frame/dispatch [:cube-test.frig-frog.events/echo-db mode])
    ; (re-frame/dispatch [:cube-test.frig-frog.events/echo-fx mode])
    ;; handle the logic in the dispatch, since we need access to other parms in the db
@@ -167,11 +167,11 @@
          ; when count of last_trains > count trains
          diff-diff-b (second (clj-data/diff diff-a diff-b))]
         ; (prn "trains-changed: diff-full=" diff-full)
-        (prn "trains-changed: diff-a=" diff-a)
-        (prn "trains-changed: diff-b=" diff-b)
-        (prn "cnt new-trains=" (count trains) ", cnt last-trains=" (count @*last-trains*))
-        (prn "trains-changed: diff-diff-a=" diff-diff-a)
-        (prn "trains-changed: diff-diff-b=" diff-diff-b)
+        ; (prn "trains-changed: diff-a=" diff-a)
+        ; (prn "trains-changed: diff-b=" diff-b)
+        ; (prn "cnt new-trains=" (count trains) ", cnt last-trains=" (count @*last-trains*))
+        ; (prn "trains-changed: diff-diff-a=" diff-diff-a)
+        ; (prn "trains-changed: diff-diff-b=" diff-diff-b)
         ; (prn (filter (fn [x] (even? x)) [4 5 6 7 8]))
         ; (prn (map (fn [x] (prn "x=" x)) [4 5 6]))
         (when (> (count trains) (count @*last-trains*))
@@ -184,28 +184,28 @@
               ;             x)
               ;           [1 2 3]))
               (doall (map #(when %1
-                             (prn "%1=" %1)
+                             ; (prn "%1=" %1)
                              (rf/dispatch [::ff-events/add-train-mesh %1]))
                            diff-a)))))
         (when (< (count trains) (count @*last-trains*))
           (when diff-b
             (prn "in drop zone")
             (doall (map #(when %1
-                           (prn "about to dispatch drop")
+                           ; (prn "about to dispatch drop")
                            (rf/dispatch [::ff-events/drop-train-mesh %1]))
                         diff-b))))
         (when (= (count trains) (count @*last-trains*))
           (when diff-a
-            (prn "in alter zone")
+            ; (prn "in alter zone")
             (let [idxs-raw (map-indexed (fn [i x] (if (not (nil? x)) i x)) diff-a)
                   idxs (doall (filter #(some? %1) idxs-raw))]
-              (prn "subs.idxs-raw=" idxs-raw)
-              (prn "subs.idxs=" idxs)
+              ; (prn "subs.idxs-raw=" idxs-raw)
+              ; (prn "subs.idxs=" idxs)
               (doall (map #(when %1
-                             (prn "%1=" %1)
+                             ; (prn "%1=" %1)
                              (rf/dispatch [::ff-events/update-train-mesh-by-idx %1]))
-                          idxs)))))
-        (prn "bye"))
+                          idxs))))))
+        ; (prn "bye"))
         ; (prn "trains-changed: diff-a-2=" diff-a-2))
    (swap! *last-trains* (fn [x] trains))))
 
@@ -213,14 +213,14 @@
  :quanta-width-changed
  :<- [:get-quanta-width]
  (fn [quanta-width query-v]
-   (prn "quanta width has changed")
+   ; (prn "quanta width has changed")
    (rf/dispatch [::ff-events/update-quanta-width quanta-width])))
 
 (reg-sub
  :n-rows-changed
  :<- [:get-n-rows]
  (fn [n-rows query-v]
-   (prn "n-rows has changed")
+   ; (prn "n-rows has changed")
    (when (not (nil? n-rows))
      (rf/dispatch [::ff-events/update-n-rows n-rows]))))
 
@@ -228,6 +228,6 @@
  :n-cols-changed
  :<- [:get-n-cols]
  (fn [n-cols query-v]
-   (prn "n-cols has changed")
+   ; (prn "n-cols has changed")
    (when (not (nil? n-cols))
      (rf/dispatch [::ff-events/update-n-cols n-cols]))))

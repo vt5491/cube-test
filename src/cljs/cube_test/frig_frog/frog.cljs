@@ -4,6 +4,7 @@
    (:require
      [re-frame.core :as re-frame]
      [babylonjs :as bjs]
+     [odoyle.rules :as o]
      [cube-test.main-scene :as main-scene]
      [cube-test.base :as base]))
      ; [cube-test.frig-frog.events :as events]))
@@ -86,7 +87,7 @@
 ;       (prn "move-frog row=" row ", col=" col)
 ;       (-> (assoc-in db [:frog :row] row)
 ;           (assoc-in [:frog :col] col))))
-;; control the frog's movement with the left stick of the vr controller
+;; control the fuog's movement with the left stick of the vr controller
 ; (defn jump-frog-ctrl [ctrl])
 (defn jump-frog-ctrl [x-val y-val]
   ; (let [l-stick (.-leftStick ctrl)
@@ -134,7 +135,12 @@
     (when (and frog-left-thumbstick (.-hasChanges frog-left-thumbstick))
       (let [axes (.-axes frog-left-thumbstick)]
         ; (prn "frog:tick: left-thumbstick change detected, axes=" axes ",x=" (.-x axes) ",y=" (.-y axes))
-        (jump-frog-ctrl (.-x axes) (.-y axes))))))
+        (jump-frog-ctrl (.-x axes) (.-y axes))
+        ; (cube-test.frig-frog.rules/swap-session
+        ;   (fn [session](-> session
+        ;                    (o/insert ::left-ctrl ::thumbstick axes)
+        ;                    o/fire-rules)))
+        (cube-test.frig-frog.rules/update-left-ctrl-thumbstick axes)))))
       ; (js-debugger))))
     ; (when-let [l-ctrl (first (.-controllers main-scene/xr-helper.input))]
     ;   (prn "frig-frog.game.tick: left-ctrl=" l-ctrl)

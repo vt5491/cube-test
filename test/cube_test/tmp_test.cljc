@@ -928,3 +928,25 @@
 
 (let [a [{:n 1}]]
   (prn (-> (first a) (:n))))
+
+(let [id "ball"]
+  (nth (re-matches #"^([a-z]*)[-]*\d*" id) 1))
+
+(let [id "cube-test.frig-frog.rules/player-"
+      id-2 "ball"
+      id-3 "ball-1"
+      re #"^([a-z\\.\\/]+)([\\-]*)(\d*)"
+      r (re-matches re id)
+      r2 (re-matches re id-2)
+      r3 (re-matches re id-3)]
+  (prn "r=" r)
+  (prn "r2=" r2)
+  (prn "r3=" r3))
+
+(let [a "abc-def"
+      b "abc-ghi"
+      c "def-abc"
+      re #"^abc.*"]
+  (prn (re-matches re a))
+  (prn (re-matches re b))
+  (prn (re-matches re c)))

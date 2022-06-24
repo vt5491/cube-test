@@ -101,6 +101,7 @@
                                              ; (re-frame/dispatch [::frig-frog-events/init-game-db cube-test.frig-frog.game/default-game-db])
                                              (re-frame/dispatch [::frig-frog-events/init-game-db ff.game/default-game-db])
                                              ; (re-frame/dispatch [::beat-club-events/init-db])
+                                             (re-frame/dispatch [::frig-frog-events/init-rules])
                                              (re-frame/dispatch [::frig-frog-events/init-game])
                                              ; (re-frame/dispatch [::beat-club-events/run-game])
                                              (re-frame/dispatch [:init-fps-panel main-scene/scene])

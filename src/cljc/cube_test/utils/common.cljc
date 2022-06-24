@@ -23,7 +23,7 @@
 (defn round-places [number decimals]
   ; (float (/ (int (* 100 123.1299)) 100)))
   (let [factor (Math/pow 10 decimals)]
-    (prn "round-places: factor=" factor ", number=" number)
+    ; (prn "round-places: factor=" factor ", number=" number)
     ; (float (/ (int (* factor number)) number))
     ; (float (/ (int (* factor number)) factor))
     (float (/ (Math/round (* factor number)) factor))))

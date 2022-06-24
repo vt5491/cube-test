@@ -53,7 +53,11 @@
      [:button.user-action {:on-click #(ff-worker/move-frog-2 0 1)} "move frog-2 forward"]
      [:br]
      [:br]
-     [:button.user-action {:on-click #(ff-rules/init-frog)} "init frog rule"]]))
+     [:label "rules: "]
+     [:button.user-action {:on-click #(ff-rules/init-frog)} "init frog rule"]
+     ; [:h3 "rules"]
+     [:button.user-action {:on-click #(ff-rules/init-game-piece "ball-1" 4 7 -1 0)} "init ball"]
+     [:button.user-action {:on-click #(ff-rules/init-game-piece "ball-1" 4 6 -1 0)} "move ball left"]]))
         ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-game-db ff-game/default-game-db])} "reset-db"]
         ; [:br]
         ; [:button.user-action {:on-click #(re-frame/dispatch [:cube-test.frig-frog.events/init-non-vr-view -10])} "reset non-vr -10"]

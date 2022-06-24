@@ -235,6 +235,7 @@
      (do
        {
         :fx [[:dispatch [::init-scene-l1]]]}))))
+             ; [:dispatch [::init-rules]]]}))))
 
 (rf/reg-event-fx
  ::run-game
@@ -757,3 +758,17 @@
    ;     1000))
    {
     :db (ff.train/init train-opts db)}))
+
+;;
+;; rules
+;;
+(rf/reg-event-fx
+ ::init-rules
+ (fn [cofx _]
+   (prn "events.init-rules: entered")
+   (ff.rules/init-session)
+   {
+    :db (:db cofx)}))
+    ; :fx (ff.rules/init-session)}))
+    ; :fx  [[:dispatch [::ff-worker-stop]]
+    ;       [:dispatch [::ff-worker-start]]]}))
