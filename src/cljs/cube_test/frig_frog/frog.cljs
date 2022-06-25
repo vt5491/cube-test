@@ -6,7 +6,8 @@
      [babylonjs :as bjs]
      [odoyle.rules :as o]
      [cube-test.main-scene :as main-scene]
-     [cube-test.base :as base]))
+     [cube-test.base :as base]
+     [cube-test.frig-frog.player :as ff.player]))
      ; [cube-test.frig-frog.events :as events]))
 
 (def jumped)
@@ -122,26 +123,12 @@
 (defn ^:export tick []
   ;; Note: accessing the vr/xr controller has to be "on the tick".  It's simply not
   ;; available if you're not in full vr mode (hit the vr button *and* have the headset on)
-  ; (prn "frig-frog.game.tick: left-ctrl=" (.-leftController main-scene/camera))
-  ; (js-debugger)
   (when (= main-scene/xr-mode "vr")
     (when-let [l-ctrl (.-leftController main-scene/camera)]
-      ; (prn "frig-frog.game.tick: left-stick=" (.-leftStick l-ctrl))))
-      ; (js-debugger)))
-      ; (jump-frog-ctrl l-ctrl)
       (jump-frog-ctrl (.-x l-ctrl) (.-y l-ctrl))))
   (when (= main-scene/xr-mode "xr")
-    ; (prn "frog-left-thumbstick=" frog-left-thumbstick)
     (when (and frog-left-thumbstick (.-hasChanges frog-left-thumbstick))
       (let [axes (.-axes frog-left-thumbstick)]
-        ; (prn "frog:tick: left-thumbstick change detected, axes=" axes ",x=" (.-x axes) ",y=" (.-y axes))
-        (jump-frog-ctrl (.-x axes) (.-y axes))
-        ; (cube-test.frig-frog.rules/swap-session
-        ;   (fn [session](-> session
-        ;                    (o/insert ::left-ctrl ::thumbstick axes)
-        ;                    o/fire-rules)))
-        (cube-test.frig-frog.rules/update-left-ctrl-thumbstick axes)))))
-      ; (js-debugger))))
-    ; (when-let [l-ctrl (first (.-controllers main-scene/xr-helper.input))]
-    ;   (prn "frig-frog.game.tick: left-ctrl=" l-ctrl)
-    ;   (js-debugger))))
+        (ff.player/player-ctrl-handler axes)
+        (jump-frog-ctrl (.-x axes) (.-y axes))))))
+        ; (cube-test.frig-frog.rules/update-left-ctrl-thumbstick axes)
