@@ -4,6 +4,7 @@
    [re-frame.db       :as db]
    [cube-test.main-scene :as main-scene]
    [babylonjs :as bjs]
+   [babylonjs-gui :as bjs-gui]
    [promesa.core :as p]))
 
 (comment
@@ -932,16 +933,18 @@
 (let [id "ball"]
   (nth (re-matches #"^([a-z]*)[-]*\d*" id) 1))
 
-(let [id "cube-test.frig-frog.rules/player-"
+(let [id "cube-test.frig-frog.rules/player-1"
       id-2 "ball"
       id-3 "ball-1"
-      re #"^([a-z\\.\\/]+)([\\-]*)(\d*)"
+      re #"^([a-z\.\/\-]+)([\-]*)(\d*)"
       r (re-matches re id)
       r2 (re-matches re id-2)
-      r3 (re-matches re id-3)]
+      r3 (re-matches re id-3)
+      r4 (re-matches #"^cube-test.frig-frog.rules/player.*" id)]
   (prn "r=" r)
   (prn "r2=" r2)
-  (prn "r3=" r3))
+  (prn "r3=" r3)
+  (prn "r4=" r4))
 
 (let [a "abc-def"
       b "abc-ghi"
@@ -950,3 +953,31 @@
   (prn (re-matches re a))
   (prn (re-matches re b))
   (prn (re-matches re c)))
+
+(let [a [{:x 6, :y 0, :vx 0, :vy 0}]]
+  (prn (-> (first a) (:vx))))
+
+(not nil)
+(Math/abs -0.5)
+
+    ; // Load a GUI from a URL JSON.
+    ; let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene);
+    ; let loadedGUI = await advancedTexture.parseFromURLAsync("https://doc.babylonjs.com/examples/ColorPickerGui.json"));
+
+(+ 1 1)
+(def v (bjs/Vector3. 2 5 4))
+(.-x v)
+(def v2 (bjs/Vector3. 3 5 4))
+
+(def adv-t (bjs-gui/AdvancedDynamicTexture.CreateFullscreenUI "GUI" true cube-test.main-scene.scene))
+(prn "scene=" cube-test.main-scene.scene)
+; (set! engine (bjs/Engine. canvas true))
+(prn "a=" bjs-gui/AdvancedDynamicTexture.CreateFullscreenUI)
+(prn "a=" BABYLON/GUI)
+(p/then #(prn "def"))
+
+(def loaded-gui (-> adv-t
+                    (.parseFromURLAsync "models/frig_frog/guiTexture.json")
+                    (p/then #(prn "loaded 1=" %1))))
+
+(prn "lg=" loaded-gui)

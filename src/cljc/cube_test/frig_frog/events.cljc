@@ -772,3 +772,12 @@
     ; :fx (ff.rules/init-session)}))
     ; :fx  [[:dispatch [::ff-worker-stop]]
     ;       [:dispatch [::ff-worker-start]]]}))
+
+(rf/reg-event-fx
+ ::reset-rules
+ (fn [cofx _]
+   (prn "events.reset-rules: entered")
+   ; (ff.rules/reset-session)
+   (ff.rules/init-session)
+   {
+    :db (:db cofx)}))

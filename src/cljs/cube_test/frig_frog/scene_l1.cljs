@@ -13,7 +13,8 @@
    [babylonjs-loaders :as bjs-l]
    [cube-test.frig-frog.train :as ff.train]
    [cube-test.frig-frog.ff-worker :as ff.worker]
-   [cube-test.frig-frog.rules :as ff.rules]))
+   [cube-test.frig-frog.rules :as ff.rules]
+   [promesa.core :as p]))
 
 ;; constants
 ;; note: some of these may arguably be placed at the object level, but we
@@ -177,7 +178,7 @@
         add-train-btn (bjs-gui/Button.CreateSimpleButton "add-train-btn" "add train")
         toggle-dancer-btn (bjs-gui/Button.CreateSimpleButton "toggle-dancer-btn" "toggle dancer")
         firework-btn (bjs-gui/Button.CreateSimpleButton "firework-btn" "firework")]
-    (set! (.-position top-plane) (bjs/Vector3. 0 3 8))
+    (set! (.-position top-plane) (bjs/Vector3. 0 5 10))
     (.enableEdgesRendering top-plane)
 
     (.addControl top-adv-texture top-pnl)
@@ -241,6 +242,35 @@
 (defn init-gui []
   (init-start-gui-2))
 
+  ; // Load a GUI from a URL JSON.
+  ; let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene);
+  ; let loadedGUI = await advancedTexture.parseFromURLAsync("https://doc.babylonjs.com/examples/ColorPickerGui.json"));
+
+  ; let screenUI = BABYLON.GUI.AdvancedDynamicTexture.CreateForMeshTexture(device.screen, 2048, 2048, true, false));
+  ; var advancedTexture2 = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh()
+  ;   myPlane,
+  ;   1024,
+  ;   1024)
+  ; ;
+(defn load-gui []
+  (let [scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 2, "height" 2) scene)
+        _ (set! (.-position plane) (bjs/Vector3. 3 4 7))
+        _ (.enableEdgesRendering plane)
+        _ (set! (.-edgesWidth plane) 2.0)
+        ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMeshTexture plane 2048 2048)
+        ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 2048 2048)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 512 512)]
+    (-> adv-text
+     (.parseFromURLAsync "models/frig_frog/guiTexture.json")
+     (p/then #(prn "scene-l1.load-gui: loaded %=" %)))))
+; (defn load-gui []
+;   (let [adv-text (bjs-gui/AdvancedDynamicTexture.CreateFullscreenUI "GUI" true main-scene/scene)]
+;     (-> adv-text
+;      (.parseFromURLAsync "models/frig_frog/guiTexture.json")
+;      (p/then #(prn "scene-l1.load-gui: loaded 1=" %1)))))
+
+
 (defn start-btn-handler [])
 
 (defn toggle-animation []
@@ -259,13 +289,15 @@
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     (init-gui)
-    (set! (.-position spin-cube) (bjs/Vector3. 4 4 4))
+    (load-gui)
+    (set! (.-position spin-cube) (bjs/Vector3. 4 6 10))
     ;; seed the initial train id
     (ff.rules/update-train-id-cnt 1)
     ; (ff.rules/init-player)
     ; (ff.rules/init-game-piece "player" 0 5 0 0)
     ; (ff.rules/init-game-piece ff.rules/player 0 5 0 0)
-    (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)))
+    ; (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)
+    (ff.rules/init-player :cube-test.frig-frog.rules/player 0 5)))
 
 (defn tick []
   (ff.train/tick)

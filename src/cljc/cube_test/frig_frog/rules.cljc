@@ -14,6 +14,8 @@
 (declare session)
 (declare query-train-id-cnt)
 (declare player-move-to)
+(declare init-ball)
+(declare ball-move-to-2)
 ; ::stop-player
 ; [:what
 ;  [::player ::x x]
@@ -43,26 +45,29 @@
       [:what
         [::train-id-cnt ::new-cnt n]]
 
-      ::game-piece
+      ::ball
       [:what
         [id ::x x]
         [id ::y y]
+        [id ::vx vx]
+        [id ::vy vy]
         :then
-        (prn "rules.game-piece-move matched: id=" id ",x=" x ",y=" y)
+        (prn "rules.ball-move matched: id=" id ",x=" x ",y=" y)
         (let [
               ; piece-type (nth (re-matches #"^([a-z]*)[-]*\d*" id) 1)
               piece-type id]
-          (prn "piece-type=" piece-type)
+          ; (prn "piece-type=" piece-type)
           ; (condp = piece-type
           ;   "ball"   (ff.ball/draw-ball id x y)
           ;   "player" (ff.player/draw-player id x y)
           ;   "cube-test.frig-frog.rules/player" (ff.player/draw-player id x y))
-          (cond
-            ; (re-matches #"^cube-test.frig-frog.rules/player.*" id)
-            (= :cube-test.frig-frog.rules/player id)
-            (ff.player/move-player-to id x y)
-            (re-matches #"^ball.*" id)
-            (ff.ball/draw-ball id x y)))]
+          ; (cond)
+            ; (= :cube-test.frig-frog.rules/player id)
+            ; (ff.player/move-player-to id x y)
+            ; (re-matches #"^ball.*" id) (ff.ball/draw-ball id x y)
+          (ff.ball/draw-ball id x y))]
+          ; o/reset!)]
+      ;;vt-x
 
             ; (re-matches #"^cube-test.frig-frog.rules/player.*" id)
             ; (ff.player/draw-player id x y
@@ -80,17 +85,42 @@
       ;    (re-matches #"^ball.*" id))]
 
       ; ::game-piece-glide
-      ; [:what
-      ;   [::time ::delta dt]
-      ;   [id ::x x {:then false}]
-      ;   [id ::y y {:then false}]
-      ;   [id ::vx vx]
-      ;   [id ::vy vy]
-      ;   :then
-      ;   (let [a 7]
-      ;     ; (prn "rules: game-piece-glide matched: dt=" dt ",vx=" vx ",id=" id)
-      ;     (when (= id "ball-1")
-      ;       (ff.ball/move-ball id (* vx dt 0.001) (* vy dt 0.001))))]
+      ::ball-glide
+      [:what
+        [::time ::delta dt]
+        ; [id ::x x {:then false}]
+        [id ::x x]
+        ; [id ::y y {:then false}]
+        [id ::y y]
+        [id ::vx vx]
+        [id ::vy vy]
+        :then
+        (let [a 7]
+          ; (prn "rules: game-piece-glide matched: dt=" dt ",vx=" vx ",id=" id)
+          (when (= id "ball-1")
+            (let [
+                  mesh-pos (ff.ball/get-mesh-pos id)
+                  x (.-x mesh-pos)
+                  ;; note how mesh z equals out logical y.
+                  y (.-z mesh-pos)
+                  ; ball (o/query-all @*session :cube-test.frig-frog.rules/ball)
+                  ; x (-> (first ball) (:x))
+                  ; y (-> (first ball) (:y))
+                  dx (* vx dt 0.001)
+                  dy (* vy dt 0.001)
+                  new-x (+ x dx)
+                  new-y (+ y dy)]
+              ; (prn "rules.ball-glide: new-x=" new-x ",new-y" new-y ",x=" x ",y=" y)
+              (if (< new-x 0)
+                ; (init-ball id 4 6 vx vy)
+                ; (init-ball "ball-2" 4 6 vx vy)
+                ; (ff.ball/move-ball id 6 0)
+                (do
+                  (ball-move-to-2 id 8 5))
+                  ; (o/insert! id ::x 6)
+                  ; (o/insert! id ::y 6))
+                (ff.ball/move-ball id (* vx dt 0.001) (* vy dt 0.001))))))]
+              ; o/reset!)))]
 
       ::frog
       [:what
@@ -105,17 +135,19 @@
         ; [::player ::vy vy]
         :then
         (prn "rules: player match, x=" x ",y=" y)
-        (ff.player/move-player-to "player" x y)]
+        (ff.player/move-player-to "player" x y)]}))
+        ; (set! cube-test.frig-frog.player.jumped false)]
 
-      ::left-ctrl
-      [:what
-        [::left-ctrl ::thumbstick x]
-        [::left-ctrl ::thumbstick y]
-        ; [::left-ctrl ::open-for-service open]
-        :then
-        (prn "rules: left-ctrl matched")
-        ; (ff.player/jump-player-ctrl ::player x y)
-        (ff.player/jump-player-ctrl ::player 0 1)]}))
+      ; ::left-ctrl
+      ; [:what
+      ;   [::left-ctrl ::thumbstick x]
+      ;   [::left-ctrl ::thumbstick y]
+      ;   ; [::left-ctrl ::open-for-service open]
+      ;   :then
+      ;   (prn "rules: left-ctrl matched x=" x ",y=" y)
+      ;   ; (ff.player/jump-player-ctrl ::player x y)
+      ;   (ff.player/jump-player-ctrl ::player 0 1)]}))
+
         ; :then-finally
         ; (-> o/*session* o/reset!)]}))
         ; (set! ff.player/open-for-service true)]}))
@@ -152,10 +184,13 @@
 ;;
 ;; game-piece
 ;;
-(defn init-game-piece [id row col vx vy]
+; (defn init-game-piece [id row col vx vy])
+(defn init-ball [id row col vx vy]
+  (prn "rules.init-ball: id=" id ",row=" row ",col=" col)
   (swap! *session
     (fn [session]
       (-> session
+          ; (prn "rules: inserting ball")
           (o/insert id ::x (* col ff.board/tile-width))
           (o/insert id ::y (* row ff.board/tile-height))
           (o/insert id ::vx vx)
@@ -163,9 +198,22 @@
           ; (o/insert id ::dx 0)
           ; (o/insert id ::dy 0)
           o/fire-rules))))
+          ; o/reset!))))
 
-(defn game-piece-move-to [id x y]
-  (prn "rules: game-piece-move-to: x=" x ",y=" y ",id=" id)
+(defn init-ball-pos [id x y vx vy]
+  (prn "rules.init-ball-pos: x=" x ",y=" y)
+  (swap! *session
+    (fn [session]
+      (-> session
+          (o/insert id ::x x)
+          (o/insert id ::y y)
+          (o/insert id ::vx vx)
+          (o/insert id ::vy vy)
+          o/fire-rules))))
+
+; (defn game-piece-move-to [id x y])
+(defn ball-move-to [id x y]
+  ; (prn "rules: ball-move-to: x=" x ",y=" y ",id=" id)
   (swap! *session
     (fn [session]
       (-> session
@@ -173,24 +221,9 @@
           (o/insert id ::y y)
           o/fire-rules))))
 
-;; the dx,dy is in integral values of rows and cols.  We will scale
-;; up to tile-width inside the function.
-(defn game-piece-move-tile-delta [id dx dy]
-  (prn "rule: game-piece-move-tile-delta: dx=" dx ",dy=" dy ",id=" id)
-  (let [player-pos (o/query-all @*session :cube-test.frig-frog.rules/player)
-        x (-> (first player-pos) (:x))
-        y (-> (first player-pos) (:y))
-        tile-width ff.board/tile-width
-        tile-height ff.board/tile-height]
-    (prn "rule: game-piece-move-tile-delta: x=" x ",y=" y ",tile-width=" tile-width ",tile-height=" tile-height)
-    ; (game-piece-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))
-    (player-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))))
-    ; (swap! *session
-    ;   (fn [session]
-    ;     (-> session
-    ;         (o/insert id ::x (+ x (* dx tile-width)))
-    ;         (o/insert id ::y (+ y (* dy tile-height)))
-    ;      o/fire-rules)))))
+(defn ball-move-to-2 [id x y]
+  (o/insert! id ::x x)
+  (o/insert! id ::y y))
 
 ;;
 ;; frog
@@ -224,31 +257,44 @@
 ;;
 ;; player
 ;;
-; (defn init-player []
-;   (swap! *session
-;     (fn [session]
-;       (-> session
-;           (o/insert ::player ::x 5)
-;           (o/insert ::player ::y 0)
-;           o/fire-rules))))
+(defn init-player [id row col]
+  (swap! *session
+    (fn [session]
+      (-> session
+          (o/insert ::player ::x 5)
+          (o/insert ::player ::y 0)
+          o/fire-rules))))
+
 (defn player-move-to [id x y]
   (prn "rules.player-move-to: x=" x ",y=" y ",id=" id)
   (swap! *session
     (fn [session]
       (-> session
           (o/insert ::player ::x x)
-          (o/insert ::player ::y y)
+          (o/insert ::player ::y y)))))
           ;; following is nec.
-          o/reset!))))
+          ; o/reset!))))
           ; o/fire-rules))))
 
+;; the dx,dy is in integral values of rows and cols.  We will scale
+;; up to tile-width inside the function.
+(defn player-move-tile-delta [id dx dy]
+  (prn "rule: player-move-tile-delta: dx=" dx ",dy=" dy ",id=" id)
+  (let [player-pos (o/query-all @*session :cube-test.frig-frog.rules/player)
+        x (-> (first player-pos) (:x))
+        y (-> (first player-pos) (:y))
+        tile-width ff.board/tile-width
+        tile-height ff.board/tile-height]
+    (prn "rule: player-move-tile-delta: x=" x ",y=" y ",dy=" dy ",tile-width=" tile-width ",tile-height=" tile-height)
+    ; (game-piece-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))
+    (player-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))))
 ;;
 ;; left-ctrl
 ;;
 ; (defn update-left-ctrl-thumbstick [x y open-for-service])
 (defn update-left-ctrl-thumbstick [x y]
   ; (prn "rules.update-left-ctrl-thumbstick: axes=" axes)
-  (prn "rules.update-left-ctrl-thumbstick: x=" x ",y=" y)
+  ; (prn "rules.update-left-ctrl-thumbstick: x=" x ",y=" y)
   (swap! *session
     (fn [session]
       (-> session
@@ -303,6 +349,13 @@
     cnt))
 
 ;;
+;; admin
+;;
+;;
+(defn reset-session []
+  (prn "rules: resetting session")
+  (o/reset! *session))
+
 ;; tick
 ;;
 ; (swap! *session

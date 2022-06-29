@@ -30,7 +30,7 @@
       (move-player-to mesh-id (+ (.-x pos) dx) (.-y pos) (+ (.-z pos) dy))))
 
 (defn jump-player-ctrl [id x-val y-val]
-    (prn "player.jump-player-ctrl: id=" id ",x=" x-val ",y=" y-val ",jumped=" jumped)
+    ; (prn "player.jump-player-ctrl: id=" id ",x=" x-val ",y=" y-val ",jumped=" jumped)
     (cond
       (and (> y-val 0.5) (not jumped))
       ; (and (> y-val 0.5) true)
@@ -38,26 +38,56 @@
        (prn "player: jump bwd")
        (set! jumped true)
        ; (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog -1 0])
-       (cube-test.frig-frog.rules.game-piece-move-tile-delta id 0 -1))
+       (cube-test.frig-frog.rules.player-move-tile-delta id 0 -1))
        ; (cube-test.frig-frog.rules.player-move-to id 0 -1))
       (and (< y-val -0.5) (not jumped))
       (do
         (prn "player: jump fwd")
         (set! jumped true)
         ; (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog 1 0])
-       (cube-test.frig-frog.rules.game-piece-move-tile-delta id 0 1))
+        (cube-test.frig-frog.rules.player-move-tile-delta id 0 1))
+      (and (> x-val 0.5) (not jumped))
+      (do
+       (prn "player: jump right")
+       (set! jumped true)
+       (cube-test.frig-frog.rules.player-move-tile-delta id 1 0))
+      (and (< x-val -0.5) (not jumped))
+      (do
+       (prn "player: jump left")
+       (set! jumped true)
+       (cube-test.frig-frog.rules.player-move-tile-delta id -1 0))))
        ; (cube-test.frig-frog.rules.player-move-to id 0 1))
       ; :else
-      (and (> y-val -0.5) (< y-val 0.5) (> x-val -0.5) (< x-val 0.5))
-      (do
-         (set! jumped false))))
+      ; (and (> y-val -0.5) (< y-val 0.5) (> x-val -0.5) (< x-val 0.5))
+      ; (do
+      ;    (prn "player.jump-player-ctrl: setting jumped to false")
+      ;    (set! jumped false))))
+
+; (defn player-ctrl-handler-old [axes]
+;   (prn "player.player-ctrl-handler: axes=" axes)
+;   (let [x (.-x axes)
+;         y (.-y axes)]
+;     ; (when (and (or (> x 0.5) (> y 0.5)) open-for-service))
+;     (cond
+;       (or (> x 0.5) (> y 0.5))
+;       (do
+;         (prn "player.player-ctrl-handler: x=" x ",y=" y ",open-for-service=" open-for-service)
+;         ; (set! open-for-service false)
+;         (cube-test.frig-frog.rules.update-left-ctrl-thumbstick x y true))
+;       :else
+;       (set! jumped false))))
 
 (defn player-ctrl-handler [axes]
-  (prn "player.player-ctrl-handler: axes=" axes)
+  ; (prn "player.player-ctrl-handler: axes=" axes)
   (let [x (.-x axes)
         y (.-y axes)]
     ; (when (and (or (> x 0.5) (> y 0.5)) open-for-service))
-    (when (or (> x 0.5) (> y 0.5))
-      (prn "player.player-ctrl-handler: x=" x ",y=" y ",open-for-service=" open-for-service)
-      ; (set! open-for-service false)
-      (cube-test.frig-frog.rules.update-left-ctrl-thumbstick x y true))))
+    (cond
+      (or (> (Math/abs x) 0.5) (> (Math/abs y) 0.5))
+      (do
+        ; (prn "player.player-ctrl-handler: x=" x ",y=" y ",open-for-service=" open-for-service)
+        ; (set! open-for-service false)
+        ; (cube-test.frig-frog.rules.update-left-ctrl-thumbstick x y true)
+        (jump-player-ctrl "player" x y))
+      :else
+        (set! jumped false))))

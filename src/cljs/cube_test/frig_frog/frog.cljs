@@ -129,6 +129,6 @@
   (when (= main-scene/xr-mode "xr")
     (when (and frog-left-thumbstick (.-hasChanges frog-left-thumbstick))
       (let [axes (.-axes frog-left-thumbstick)]
-        (ff.player/player-ctrl-handler axes)
-        (jump-frog-ctrl (.-x axes) (.-y axes))))))
+        (ff.player/player-ctrl-handler axes)))))
+        ; (jump-frog-ctrl (.-x axes) (.-y axes))))))
         ; (cube-test.frig-frog.rules/update-left-ctrl-thumbstick axes)

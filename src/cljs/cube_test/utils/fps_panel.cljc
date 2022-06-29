@@ -28,7 +28,7 @@
         fpp (.-position fp)
         fpc cube-test.utils.fps-panel/fps-spin-cube]
     ; (js-debugger)
-    (set! (.-position fpc) (bjs/Vector3. (.-x fpp) (+ (.-y fpp) 2.0) (.-z fpp)))))
+    (set! (.-position fpc) (bjs/Vector3. (.-x fpp) (+ (.-y fpp) 2.0) (+ (.-z fpp) 0)))))
 
 (defn tick [engine]
   ;  (prn "fps-pnl.tick: entered, fps=" (.getFps engine))
