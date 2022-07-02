@@ -2,8 +2,10 @@
   :dependencies [
                  ; [org.clojure/clojure "1.10.1"]
                  [org.clojure/clojure "1.10.3"]
+                 ; [org.clojure/clojure "1.11.1"]
                  ; [org.clojure/clojurescript "1.10.764"]
                  [org.clojure/clojurescript "1.10.879"
+                 ; [org.clojure/clojurescript "1.11.60"
                   :exclusions [
                                ; com.google.javascript/closure-compiler-unshaded
                                org.clojure/google-closure-library

@@ -81,3 +81,7 @@
 ;; get all the meshes that start with the given stem-id
 ;; e.g. return [(mesh tr-1-0) (mesh tr-1-1)] for stem-id "tr-1"
 (defn get-meshes-by-stem [stem-id])
+
+(defn gen-mesh-id-from-rule-id [id sub-id]
+  (let [kind (second (re-matches #"^.*/(.*)" (str :cube-test.frig-frog.rules/ball)))]
+    (str kind "-" sub-id)))

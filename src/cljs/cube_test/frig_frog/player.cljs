@@ -90,4 +90,4 @@
         ; (cube-test.frig-frog.rules.update-left-ctrl-thumbstick x y true)
         (jump-player-ctrl "player" x y))
       :else
-        (set! jumped false))))
+      (set! jumped false))))

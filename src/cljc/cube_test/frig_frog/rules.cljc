@@ -13,6 +13,8 @@
 (declare rules)
 (declare session)
 (declare query-train-id-cnt)
+(declare query-all-rules)
+(declare query-all)
 (declare player-move-to)
 (declare init-ball)
 (declare ball-move-to-2)
@@ -47,25 +49,29 @@
 
       ::ball
       [:what
+        [id ::sub-id sub-id]
         [id ::x x]
         [id ::y y]
         [id ::vx vx]
         [id ::vy vy]
+        [id ::anim anim]
+        ; [id ::abc abc]
         :then
-        (prn "rules.ball-move matched: id=" id ",x=" x ",y=" y)
-        (let [
-              ; piece-type (nth (re-matches #"^([a-z]*)[-]*\d*" id) 1)
-              piece-type id]
-          ; (prn "piece-type=" piece-type)
-          ; (condp = piece-type
-          ;   "ball"   (ff.ball/draw-ball id x y)
-          ;   "player" (ff.player/draw-player id x y)
-          ;   "cube-test.frig-frog.rules/player" (ff.player/draw-player id x y))
-          ; (cond)
-            ; (= :cube-test.frig-frog.rules/player id)
-            ; (ff.player/move-player-to id x y)
-            ; (re-matches #"^ball.*" id) (ff.ball/draw-ball id x y)
-          (ff.ball/draw-ball id x y))]
+        (prn "rules.ball matched: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",vx=" vx ",vy=" vy)
+        (ff.ball/draw-ball id sub-id x y)]
+        ; (let [
+        ;       ; piece-type (nth (re-matches #"^([a-z]*)[-]*\d*" id) 1)
+        ;       piece-type id]
+        ;   ; (prn "piece-type=" piece-type)
+        ;   ; (condp = piece-type
+        ;   ;   "ball"   (ff.ball/draw-ball id x y)
+        ;   ;   "player" (ff.player/draw-player id x y)
+        ;   ;   "cube-test.frig-frog.rules/player" (ff.player/draw-player id x y))
+        ;   ; (cond)
+        ;     ; (= :cube-test.frig-frog.rules/player id)
+        ;     ; (ff.player/move-player-to id x y)
+        ;     ; (re-matches #"^ball.*" id) (ff.ball/draw-ball id x y)
+        ;   (ff.ball/draw-ball id x y))]
           ; o/reset!)]
       ;;vt-x
 
@@ -84,43 +90,63 @@
       ;    (ff.player/draw-player id x y)
       ;    (re-matches #"^ball.*" id))]
 
-      ; ::game-piece-glide
       ::ball-glide
       [:what
         [::time ::delta dt]
         ; [id ::x x {:then false}]
+        [id ::sub-id sub-id]
         [id ::x x]
         ; [id ::y y {:then false}]
         [id ::y y]
         [id ::vx vx]
         [id ::vy vy]
+        [id ::anim anim]
         :then
-        (let [a 7]
-          ; (prn "rules: game-piece-glide matched: dt=" dt ",vx=" vx ",id=" id)
-          (when (= id "ball-1")
-            (let [
-                  mesh-pos (ff.ball/get-mesh-pos id)
-                  x (.-x mesh-pos)
-                  ;; note how mesh z equals out logical y.
-                  y (.-z mesh-pos)
-                  ; ball (o/query-all @*session :cube-test.frig-frog.rules/ball)
-                  ; x (-> (first ball) (:x))
-                  ; y (-> (first ball) (:y))
-                  dx (* vx dt 0.001)
-                  dy (* vy dt 0.001)
-                  new-x (+ x dx)
-                  new-y (+ y dy)]
-              ; (prn "rules.ball-glide: new-x=" new-x ",new-y" new-y ",x=" x ",y=" y)
-              (if (< new-x 0)
-                ; (init-ball id 4 6 vx vy)
-                ; (init-ball "ball-2" 4 6 vx vy)
-                ; (ff.ball/move-ball id 6 0)
-                (do
-                  (ball-move-to-2 id 8 5))
-                  ; (o/insert! id ::x 6)
-                  ; (o/insert! id ::y 6))
-                (ff.ball/move-ball id (* vx dt 0.001) (* vy dt 0.001))))))]
-              ; o/reset!)))]
+        (let [
+              mesh-id (common/gen-mesh-id-from-rule-id id sub-id)
+              _ (prn "ball-glide: mesh-id" mesh-id)
+              mesh-pos (ff.ball/get-mesh-pos mesh-id)
+              x (.-x mesh-pos)
+              ;; note how mesh z equals out logical y.
+              y (.-z mesh-pos)
+              dx (* vx dt 0.001)
+              dy (* vy dt 0.001)
+              new-x (+ x dx)
+              new-y (+ y dy)]
+          ;;TODO try to restict in the rule before doing all the let calcs
+          (when anim
+            (if (< new-x 0)
+              (do
+                (ball-move-to-2 id 8 5))
+                        ; (o/insert! id ::x 6)
+                        ; (o/insert! id ::y 6))
+              (ff.ball/move-ball id sub-id (* vx dt 0.001) (* vy dt 0.001)))))]
+        ; (let [a 7]
+        ;   ; (prn "rules: game-piece-glide matched: dt=" dt ",vx=" vx ",id=" id)
+        ;   (when (= id "ball-1")
+        ;     (let [
+        ;           mesh-pos (ff.ball/get-mesh-pos id)
+        ;           x (.-x mesh-pos)
+        ;           ;; note how mesh z equals out logical y.
+        ;           y (.-z mesh-pos)
+        ;           ; ball (o/query-all @*session :cube-test.frig-frog.rules/ball)
+        ;           ; x (-> (first ball) (:x))
+        ;           ; y (-> (first ball) (:y))
+        ;           dx (* vx dt 0.001)
+        ;           dy (* vy dt 0.001)
+        ;           new-x (+ x dx)
+        ;           new-y (+ y dy)]
+        ;       ; (prn "rules.ball-glide: new-x=" new-x ",new-y" new-y ",x=" x ",y=" y)
+        ;       (if (< new-x 0)
+        ;         ; (init-ball id 4 6 vx vy)
+        ;         ; (init-ball "ball-2" 4 6 vx vy)
+        ;         ; (ff.ball/move-ball id 6 0)
+        ;         (do
+        ;           (ball-move-to-2 id 8 5))
+        ;           ; (o/insert! id ::x 6)
+        ;           ; (o/insert! id ::y 6))
+        ;         (ff.ball/move-ball id (* vx dt 0.001) (* vy dt 0.001))))))]
+        ;       ; o/reset!)))]
 
       ::frog
       [:what
@@ -182,7 +208,7 @@
   (prn "rules.swap-session, f=" f)
   (swap! *session f))
 ;;
-;; game-piece
+;; ball
 ;;
 ; (defn init-game-piece [id row col vx vy])
 (defn init-ball [id row col vx vy]
@@ -199,17 +225,24 @@
           ; (o/insert id ::dy 0)
           o/fire-rules))))
           ; o/reset!))))
-
-(defn init-ball-pos [id x y vx vy]
-  (prn "rules.init-ball-pos: x=" x ",y=" y)
+; (defn blah [& {:keys [key1 key2 key3]}])
+; (defn init-ball-pos [id x y vx vy anim])
+(defn init-ball-pos [& {:keys [id sub-id x y vx vy anim] :as opts}]
+  (prn "rules.init-ball-pos: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",anim=" anim)
+  ; (prn "query-all pre" (query-all-rules))
   (swap! *session
     (fn [session]
       (-> session
+          (o/insert id ::sub-id sub-id)
           (o/insert id ::x x)
           (o/insert id ::y y)
           (o/insert id ::vx vx)
           (o/insert id ::vy vy)
-          o/fire-rules))))
+          (o/insert id ::anim true)))))
+          ; (o/insert id ::abc 7))))
+  ; (prn "query-all post" (query-all-rules)))
+  ; (js-debugger))
+          ; o/fire-rules))))
 
 ; (defn game-piece-move-to [id x y])
 (defn ball-move-to [id x y]
@@ -224,6 +257,38 @@
 (defn ball-move-to-2 [id x y]
   (o/insert! id ::x x)
   (o/insert! id ::y y))
+
+  ; (o/insert session id {::x (rand-int 50) ::y (rand-int 50)}))
+(defn ball-toggle-anim [id sub-id]
+  (let [balls (query-all :cube-test.frig-frog.rules/ball)
+        ;; TODO: add more general way to filter for appropriate id
+        ball (first balls)
+        anim (:anim ball)
+        toggled-anim (not anim)
+        _ (prn "ball-toggle-anim: ball=" ball ",anim=" anim)
+        mesh-id (common/gen-mesh-id-from-rule-id id sub-id)
+        ball-grid-pos (ff.ball/get-mesh-grid-pos mesh-id)
+        row (:row ball-grid-pos)
+        col (:col ball-grid-pos)]
+    (swap! *session
+      (fn [session]
+        (-> session
+          (o/insert id {::sub-id sub-id ::x row ::y col ::anim toggled-anim}))))))
+
+; (defn update-ball-vel [id vx vy]
+;   (swap! *session
+;     (fn [session]
+;       ;; sync the the current mesh grid-pos into the rules db
+;       (let [ball-grid-pos (ff.ball/get-mesh-grid-pos id)
+;             row (:row ball-grid-pos)
+;             col (:col ball-grid-pos)
+;             _ (prn "update-ball-vel")]
+;         (-> session
+;             (o/insert id ::x row)
+;             (o/insert id ::y col)
+;             (o/insert id ::vx vx)
+;             (o/insert id ::vy vy)
+;             o/fire-rules)))))
 
 ;;
 ;; frog
@@ -336,6 +401,11 @@
     (prn "rules: r=" r)
     r))
 
+(defn query-all [id]
+  (let [rs (o/query-all @*session id)]
+    (prn "rules: rs=" rs)
+    rs))
+
 (defn query-frog []
   ; (prn "rules: train-id-cnt=" (o/query-all @*session ::train-id-cnt))
   (let [frg (o/query-all @*session ::frog)]
@@ -358,11 +428,6 @@
 
 ;; tick
 ;;
-; (swap! *session
-;   (fn [session]
-;     (-> session
-;         (o/insert ::time ::total 100)
-;         o/fire-rules)))
 (defn tick []
   ; (prn "rules.tick: entered")
   (let [dt (.getDeltaTime cube-test.main-scene/engine)
@@ -373,9 +438,4 @@
        (-> session
            (o/insert ::time ::delta dt)
            o/fire-rules)))))
-  ; o/fire-rules)
-
-
-    ; (o/insert ::time ::delta dt)
-  ; (o/insert ::time { ::delta (.getDeltaTime cube-test.main-scene/engine)})
   ; o/fire-rules)

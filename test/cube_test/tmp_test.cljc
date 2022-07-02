@@ -981,3 +981,13 @@
                     (p/then #(prn "loaded 1=" %1))))
 
 (prn "lg=" loaded-gui)
+(prn "hi")
+(js/setTimeout #(prn "loaded2") 6000)
+(js/setTimeout #(do (prn "loaded1")(prn "loaded2")) 6000)
+
+(defn destr [& {:keys [a b] :as opts}]
+  [a b opts])
+
+(destr :a 1)
+
+(destr {:a 1 :b 2})

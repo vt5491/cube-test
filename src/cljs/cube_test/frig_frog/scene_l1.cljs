@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :as rf]
    [babylonjs :as bjs]
+   ; [odoyle.rules :as o]
    [cube-test.main-scene :as main-scene]
    [babylonjs-gui :as bjs-gui]
    [babylonjs-materials :as bjs-m]
@@ -23,6 +24,8 @@
 (def quanta-width 1.2)
 (def scene-initialized false)
 (def reflector)
+(def gui-adv-text)
+(def ball-moving false)
 
 (defn init-non-vr-view
   ([] (init-non-vr-view 180))
@@ -252,24 +255,85 @@
   ;   1024,
   ;   1024)
   ; ;
-(defn load-gui []
-  (let [scene main-scene/scene
-        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 2, "height" 2) scene)
-        _ (set! (.-position plane) (bjs/Vector3. 3 4 7))
-        _ (.enableEdgesRendering plane)
-        _ (set! (.-edgesWidth plane) 2.0)
-        ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMeshTexture plane 2048 2048)
-        ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 2048 2048)
-        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 512 512)]
-    (-> adv-text
-     (.parseFromURLAsync "models/frig_frog/guiTexture.json")
-     (p/then #(prn "scene-l1.load-gui: loaded %=" %)))))
+;   let colorPickerButton = advancedTexture.getControlByName("ColorPickerButton"));
+; colorPickerButton.onPointerClickObservable.add( () => {})
+;     backgroundBox.isVisible = true;
+;     colorPickerButton.isVisible = false;
+;
+; (defn gui-loaded []
+;   (prn "player.gui-loaded: gui-adv-text=" gui-adv-text)
+;   (let [bye-btn (.getControlByName gui-adv-text "say_bye_btn")
+;         ; hi-btn (.getControlByName gui-adv-text "Button")
+;         hi-btn (.getControlByName gui-adv-text "say_hi_btn")]
+;     (prn "player.gui-loaded: bye-btn=" bye-btn)
+;     (-> bye-btn (.-onPointerClickObservable) (.add #(prn "player: you clicked bye")))
+;     (-> hi-btn (.-onPointerClickObservable) (.add #(prn "player: you clicked hi")))))
+;
 ; (defn load-gui []
-;   (let [adv-text (bjs-gui/AdvancedDynamicTexture.CreateFullscreenUI "GUI" true main-scene/scene)]
+;   (let [scene main-scene/scene
+;         plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 2, "height" 2) scene)
+;         _ (set! (.-position plane) (bjs/Vector3. 3 4 7))
+;         _ (.enableEdgesRendering plane)
+;         _ (set! (.-edgesWidth plane) 2.0)
+;         ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMeshTexture plane 2048 2048)
+;         ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 2048 2048)
+;         adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 512 512)
+;         _ (set! gui-adv-text adv-text)]
+;     ; (set!)
 ;     (-> adv-text
 ;      (.parseFromURLAsync "models/frig_frog/guiTexture.json")
-;      (p/then #(prn "scene-l1.load-gui: loaded 1=" %1)))))
+;      ; (p/then #(prn "scene-l1.load-gui: loaded %=" %))
+;      (p/then #(gui-loaded)))))
 
+(defn gui-loaded []
+  (prn "player.gui-loaded: gui-adv-text=" gui-adv-text)
+  (let [add-train-btn (.getControlByName gui-adv-text "add_train_btn")
+        init-ball-btn (.getControlByName gui-adv-text "init_ball_btn")
+        toggle-ball-btn (.getControlByName gui-adv-text "toggle_ball_btn")]
+    (-> add-train-btn (.-onPointerClickObservable)
+        (.add #(rf/dispatch [:cube-test.frig-frog.events/post-add-train
+                              {:id-stem :tr-1 :vx -1 :vy 0 :length 5 :init-row 2 :init-col 4}])))
+    (-> init-ball-btn (.-onPointerClickObservable)
+        (.add #(do
+                 (set! ball-moving true)
+                 ; (ff.rules/init-ball-pos "ball-1" 8 5 -1 0 true)
+                 ; (ff.rules/init-ball-pos :cube-test.frig-frog.rules/ball  8 5 -1 0 true)
+                 (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/ball
+                                          :sub-id 1
+                                          :x 8 :y 5
+                                          :vx -1 :vy 0
+                                          :anim true))))
+                 ; (ff.rules/init-ball-pos {:id :cube-test.frig-frog.rules/ball
+                 ;                          :sub-id 1
+                 ;                          :x 8 :y 5
+                 ;                          :vx -1 :vy 0
+                 ;                          :anim true}))))
+    (-> toggle-ball-btn (.-onPointerClickObservable)
+        (.add #(do
+                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/ball 1))))))
+                 ; (let [balls (ff.rules/query-all :cube-test.frig-frog.rules/ball)
+                 ;       ball (first balls)
+                 ;       anim (:anim ball)]
+                 ; ; (let [ball (ff.rules/query-all :ff.rules/ball)]
+                 ;   (prn "toggle: ball=" ball ", anim=" anim ",balls=" balls)))))))
+                 ; (ff.rules))))))
+                 ; (set! ball-moving (not ball-moving))
+                 ; (if ball-moving
+                 ;   (ff.rules/update-ball-vel "ball-1" -1 0)
+                 ;   (ff.rules/update-ball-vel "ball-1" 0 0)))))))
+
+(defn load-gui []
+  (let [scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 3, "height" 3) scene)
+        ; _ (set! (.-position plane) (bjs/Vector3. 3 4 7))
+        _ (set! (.-position plane) (bjs/Vector3. 0 5 10))
+        _ (.enableEdgesRendering plane)
+        _ (set! (.-edgesWidth plane) 1.0)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 768 768)
+        _ (set! gui-adv-text adv-text)]
+    (-> adv-text
+     (.parseFromURLAsync "models/frig_frog/scene_l1_cmd_pnl.json")
+     (p/then #(gui-loaded)))))
 
 (defn start-btn-handler [])
 
@@ -288,7 +352,7 @@
 
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
-    (init-gui)
+    ; (init-gui)
     (load-gui)
     (set! (.-position spin-cube) (bjs/Vector3. 4 6 10))
     ;; seed the initial train id
