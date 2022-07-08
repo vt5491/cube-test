@@ -41,11 +41,7 @@
 (declare x-btn-handler)
 (declare gamepad-evt-handler)
 
-; const ray = getWorldPointerRayToRef(controller);
-; (defn init [tgt-scene xr-helper])
 (defn init [xr-helper]
-  (println "controller-xr.init entered")
-  ; (set! scene tgt-scene)
   (set! xr xr-helper)
   (set! last-grip-time (.now js/Date))
   (set! last-grip-vel (js/BABYLON.Vector3. 0 0 0))
@@ -55,22 +51,18 @@
   (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
 
 (defn motion-controller-added [motion-ctrl]
-  (prn "gamepad-evt-hander entered, motion-ctrl=" motion-ctrl)
   (set! grip (-> motion-ctrl (.getComponent "xr-standard-squeeze")))
   (when grip
-    (prn "setting up grip btn handler")
     (-> grip (.-onButtonStateChangedObservable) (.add grip-handler-xr))))
 
 ;; Note: should also be able to directly access the controllers via:
 ;; xr.input.controllers[0 or 1]
 (defn ctrl-added [xr-controller]
-  (println "controller-xr.ctrl-added: xr-controller.uniqueId=" (.-uniqueId xr-controller) ",handedness=" (get-ctrl-handedness xr-controller))
   (let [handedness (get-ctrl-handedness xr-controller)]
      (when (= handedness :left)
        (set! left-ctrl-xr xr-controller))
      (when (= handedness :right)
        (set! right-ctrl-xr xr-controller)))
-  ; (when (-> xr-controller .-inputSource .-gamepad)
   (-> xr-controller .-onMotionControllerInitObservable (.add motion-controller-added)))
 
 (defn trigger-handler-xr [trigger-state]
@@ -82,19 +74,14 @@
 ;; deltas of motion are calculated i.e if you call 'grip-handler-xr' without calling
 ;; controller-xr.tick, you'll get no movement.
 (defn grip-handler-xr [cmpt]
-  ; (prn "controller-xr: now in grip-handler-xr")
-  ; (js-debugger)
   (if (.-pressed cmpt)
     (when (and left-ctrl-xr (not is-gripping))
-      ; (println "grip-handler-xr: path a")
       (set! grip-start-pos (-> left-ctrl-xr (.-grip) (.-position) (.clone)))
       (set! is-gripping true)
       (set! player-start-pos (.-position main-scene/camera))
       (set! last-grip-time (.now js/Date)))
-    ; (println "grip-handler-xr: a-b: is-gripping=" is-gripping)
     (if is-gripping
       (do
-        ; (println "grip-handler-xr: path b")
         ;; transition from gripping to non-gripping
         (set! is-gripping false)
         (set! last-grip-time (.now js/Date))
@@ -116,7 +103,6 @@
 
 (defn x-btn-handler [state]
   (when (.-pressed state)
-    (println "x-btn pressed")
     (set! (.-position main-scene/camera) main-scene/camera-init-pos)))
 
 ;; determine if id of the ctrl is "left" or "right"
@@ -138,7 +124,6 @@
       is-gripping
       (let [ctrl-delta-pos (-> left-ctrl-xr (.-grip) (.-position) (.subtract grip-start-pos) (.multiplyByFloats grip-factor grip-factor grip-factor))
             new-pos (.subtract (.-position main-scene/camera) ctrl-delta-pos)]
-        ; (println "tick: is-gripping=true")
         (set! (.-position main-scene/camera) new-pos)
         (set! last-grip-vel (.subtract new-pos last-player-pos))
         (set! last-player-pos (.-position main-scene/camera)))
@@ -146,5 +131,4 @@
       (let [delta-time (- (.now js/Date) last-grip-time)
             vel-strength (* 5.6 (- 1.0 (/ delta-time GRIP_DECELERATION_INT)))
             delta-pos (.multiplyByFloats last-grip-vel vel-strength vel-strength vel-strength)]
-        ; (println "tick: is-gripping=false")
         (set! (.-position main-scene/camera) (.add (.-position main-scene/camera) delta-pos))))))

@@ -39,8 +39,6 @@
 (re-frame/reg-event-db
  ::seed-db
  (fn [db [_ seed]]
-   (prn "events.seed-db: seed=" seed)
-   ; db/default-db
    seed))
 
 (reg-event-db
@@ -55,7 +53,6 @@
 (defn check-and-throw
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
-  (println "check-and-throw: a-spec=" a-spec ", db=" db)
   (when-not (s/valid? a-spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
 

@@ -10,12 +10,10 @@
    ;; Note: you need this to get the controller models loaded
    [babylonjs-loaders :as bjs-l]
    [babylonjs-gui :as bjs-gui]
-   ; ["@hapi/ammo" :as ammo]
    [cannon :as cannon]
    [oimo :as oimo]
    [promesa.core :as p]
    [webxr-polyfill :as xr-pf]))
-; import * as GUI from 'babylonjs-gui';
 (defn dummy [])
 
 (def canvas)
@@ -73,7 +71,6 @@
 (declare enter-vr-handler)
 
 (defn init [top-level-scene-initializer]
-  (println "main-scene.init: entered")
   (set! top-level-scene-init top-level-scene-initializer)
 
   ;; following line necessary for mixamo animations.
@@ -96,7 +93,6 @@
              scene))
   ;; manually create a ground with a physicsImposter.
   (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 30 "subdivisions" 10))]
-    ; (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
     (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
     (set! (.-physicsImpostor grnd)
       (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
@@ -143,11 +139,7 @@
       (set! camera (.-webVRCamera vrHelper))
       (let [do-cam (.-deviceOrientationCamera vrHelper)
             ip @*camera-init-pos*]
-        ; (set! (.-position do-cam) (bjs/Vector3. 0 4 -15))
-        ; (set! (.-position do-cam) (bjs/Vector3. 0 4 -7))
         (set! (.-position do-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip))))
-      ; (js-debugger)
-      ;vt-x(set! (.-id camera) "main-camera")
       (controller/init scene vrHelper camera)
       (controller/setup-controller-handlers vrHelper)
       (.enableTeleportation vrHelper (js-obj "floorMeshName" "ground"))
@@ -183,17 +175,9 @@
                ;; this is an attempt to reset the camera rotation upon entering XR.  Can't say if it works
                ;; because somehow during testing my Rift automatically reset somehow.
                (-> xr-default-exp (.-baseExperience)
-                   ; (.-onXRSessionInit)
                    (.-onInitialXRPoseSetObservable)
-                   ; (.add #(do))
-                   (.addOnce #(do
-                                (prn "hi from onInitialXRPoseSetObservable")
-                                (prn "camera=" camera ",arg-1=" %1))))
-               ;                  ; (js-debugger))))
-               ;                  ; (-> (.-rotationQuaternion %1)
-               ;                  ;     (.multiplyInPlace (bjs/Quaternion.FromEulerAngles 0 (* 0 base/ONE-DEG) 0))))))
+                   (.addOnce #(do)))
 
-               (println "main-scene: top-level scene=" top-level-scene-initializer)
                (top-level-scene-initializer)))))))
 
 ;; This gets control when the "enter vr" button is clicked.
@@ -234,50 +218,46 @@
 ;; this gets control when the "enter xr" button is clicked.
 (defn enter-xr-handler [state]
   (when (= state bjs/WebXRState.IN_XR)
-    (prn "main-scene.enter-xr-handler: enter xr button pressed")
     ;; important that we only assign camera to the xr-camera *after* entring
     ;; full xr, so that downwind scenes can alter the non-xr camera as needed. The xr
     ;; camera, will always start with wherever the non-xr is currently positioned.
     (set! camera (-> xr-helper (.-baseExperience) (.-camera)))
-    ; (let [cam-pos (.-position camera)
-    ;       new-pos (bjs/Vector3. (.-x cam-pos) (+ (.-y cam-pos) 3) (.-z cam-pos))]
-    ;   (set! (.-position camera) new-pos))
-    (prn "main-scene.enter-xr-handler: camera.pos=" (.-position camera))
+    (.setTransformationFromNonVRCamera camera)
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [quat (-> camera .-rotationQuaternion)
           cur-angles (.toEulerAngles quat)
           new-quat (bjs/Quaternion. (.-x quat) 0.785 (.-z quat) (.-w quat))]
-        (prn "cur-angles=" cur-angles ", new-quat=" new-quat)
-        (prn "camera pos=" (.-position camera))
-        ; (.setTarget camera (bjs/Vector3. 0 (.-y camera) 0))
-        ; (prn "camera.target=" (.-target camera))
-          ;; Note: do runtime vr camera rotation here
-          ;; svale backyard
-          ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0)))))
-          ;; svale living room
-          ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0)))))
-          ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) 0)))))
-        ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0))
+             ; (.setTarget camera (bjs/Vector3. 0 (.-y camera) 0))
+             ; (prn "camera.target=" (.-target camera))
+             ;; Note: do runtime vr camera rotation here
+             ;; svale backyard
+             ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))
+             ;; svale living room
+             ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0))
+             ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))
+             ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles (* -35 base/ONE-DEG) (* 135 base/ONE-DEG) (* 5 base/ONE-DEG)))
+        (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) (* 5 base/ONE-DEG))))))
+          ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0))
           ;; scruz
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -0 base/ONE-DEG) 0)))))
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 0 (* 75 base/ONE-DEG))))))
           ; BABYLON.Quaternion.RotationAxis(BABYLON.Axis.Y, -rot));
-        ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationAxis bjs/Axis.Y (* 45 base/ONE-DEG)))
-        ; (set! (-> (.-rotationQuaternion camera) (.-y)) 0.785)
-        ; (set! (.-rotationQuaternion camera) new-quat)
-        ; (-> (.-rotationQuaternion camera) (.multiplyInPlace (bjs/Quaternion.FromEulerAngles 0 (* 45 base/ONE-DEG) 0)))
-        ;; Note sleeping to do a rotation does make a difference.  Search in this file for "onInitialXRPoseSetObservable"
-        ;; as an attempt to achieve the same thing in a non-ad-hoc fashioin.
-        ; (cube-test.utils.sleep
-        ;   #(do
-        ;       (prn "hi from sleep")
-        ;       ; (.setTarget camera (bjs/Vector3. 0 (.-y camera) 0))
-        ;       (prn "camera.target=" (.-target camera))
-        ;       (-> (.-rotationQuaternion camera)
-        ;           (.multiplyInPlace (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0))))
-        ;   6000)
-        (prn "new-angles=" (.toEulerAngles (.-rotationQuaternion camera))))))
+          ; (set! (.-rotationQuaternion camera) (bjs/Quaternion.RotationAxis bjs/Axis.Y (* 45 base/ONE-DEG)))
+          ; (set! (-> (.-rotationQuaternion camera) (.-y)) 0.785)
+          ; (set! (.-rotationQuaternion camera) new-quat)
+          ; (-> (.-rotationQuaternion camera) (.multiplyInPlace (bjs/Quaternion.FromEulerAngles 0 (* 45 base/ONE-DEG) 0)))
+          ;; Note sleeping to do a rotation does make a difference.  Search in this file for "onInitialXRPoseSetObservable"
+          ;; as an attempt to achieve the same thing in a non-ad-hoc fashioin.
+          ; (cube-test.utils.sleep
+          ;   #(do
+          ;       (prn "hi from sleep")
+          ;       ; (.setTarget camera (bjs/Vector3. 0 (.-y camera) 0))
+          ;       (prn "camera.target=" (.-target camera))
+          ;       (-> (.-rotationQuaternion camera)
+          ;           (.multiplyInPlace (bjs/Quaternion.FromEulerAngles 0 (* 90 base/ONE-DEG) 0))))
+          ;   6000)
+           ; (prn "new-angles=" (.toEulerAngles (.-rotationQuaternion camera)))))))
 
 (defn enter-vr []
   (prn "main-scene.enter-vr: entered")

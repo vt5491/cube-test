@@ -21,43 +21,26 @@
 ;; data (js->clj (.parse js/JSON (.-data e)) :keywordize-keys true)
 (defn handle-ff-worker-msg [e]
   (prn "main.handle-ff-worker-msg: e=" e)
-  ;; (js-debugger)
-  ;; (prn "main.handle-ff-worker-msg: .-data e=" (.-data e))
   (let [
-        ;; data (js->clj (.-data e) :keywordize-keys true)
         data (js->clj (.parse js/JSON (.-data e)) :keywordize-keys true)
-        ; msg (get data "msg")
         msg (get data :msg)]
-        ;; train (get data :train)]
     (prn "handler-ff-worker-msg: msg=" msg ",data=" data)
-    ;; (prn "handler-ff-worker-msg: train=" train)
-    ;; (prn "handler-ff-worker-msg: json.parse train=" (.parse js/JSON train))
-    ;; (prn "handler-ff-worker-msg: json.parse js->clj=" (js->clj (.parse js/JSON train) :keywordize-keys true))
     (case msg
       "worker-add-train-mesh"
       (do
-        (prn "main.handle-ff-worker-msg: now adding mesh")
-        (let [train (get data :train)
-              ;; trn (js->clj (.parse js/JSON train) :keywordize-keys true)
-              ;; length (get-in trn [:length])
-              ;; tmp (prn "length=" length)
-              ;; train trn
-              tmp-2 (prn "train=" train)]
-          ; (rf/dispatch [:cube-test.frig-frog.events/add-train-mesh train])
+        (let [train (get data :train)]
           (ff.train/add-train-mesh train)))
       "worker-add-train-mesh-min"
       (do
-        (prn "main.handle-ff-worker-msg: now adding mesh-min")
         (let [train {:id-stem "tr-1", :length 3,
                      :init-col 7, :init-row 2,
                      :vx -0.5, :vy 0}]
-          ; (rf/dispatch [:cube-test.frig-frog.events/add-train-mesh train])))
           (cube-test.frig-frog.train/add-train-mesh train)))
       "pong"
       (do
         (prn "main: pong received"))
       "draw-frog-2"
-      (do 
+      (do
         (let [frog-2 (get data :frog-2)]
           (prn "main: draw-frog-2 received, frog-2=" frog-2)
           (ff.frog2/draw-frog-2 frog-2)))
@@ -89,32 +72,23 @@
 (defn print-db []
   (prn "main: about to postMessage print-db")
   (.postMessage ff-worker (.stringify js/JSON (clj->js {:msg "print-db"}))))
-  ; (.postMessage ff-worker (clj->js {:msg :print-db})))
 
 ;;
 ;; train
 ;;
 (defn post-add-train [train]
   (prn "main: about to postMessage add-train, train=" train)
-  ; (.postMessage ff-worker (js-obj "msg" "add-train", "train" (js-obj "id-stem" "tr-1" "length" 5)))
-  ; (.postMessage ff-worker (js-obj "msg" "add-train", "train" (.stringify js/JSON (clj->js train))))
-  ; (.postMessage ff-worker (js-obj "msg" "add-train", "train" (.stringify js/JSON (clj->js train))))
   ;; following 2 work
   ; (.postMessage ff-worker (.stringify js/JSON (js-obj "msg" "add-train", "train" (clj->js train))))
   (.postMessage ff-worker (.stringify js/JSON (clj->js {:msg "add-train" :train train}))))
   ;; (.postMessage ff-worker (js-obj "msg" "add-train", "train" (js-obj "id-stem" "tr-1"))))
 
-  ;; no work
-  ; (.postMessage ff-worker (clj->js {:msg "add-train" :train train})))
-
 (defn train-stream [train-opts length]
-  (prn "ff-worker: about to postMessage train-stream")
-  ; (.postMessage ff-worker (js-obj "msg" "add-train" "train-opts" train-opts "length" length))
-  ; (.postMessage ff-worker (clj->js {:msg "add-train" :train (clj->js train-opts)}))
+  ; (prn "ff-worker: about to postMessage train-stream")
   (post (clj->js {:msg "add-train" :train (clj->js train-opts)})))
 
 (defn drop-train [id]
-  (prn "main: about to postMessage drop-train, id=" id)
+  ; (prn "main: about to postMessage drop-train, id=" id)
   (.postMessage ff-worker (.stringify js/JSON (clj->js {:msg "drop-train" :id id}))))
 
 ;;

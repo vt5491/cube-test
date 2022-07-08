@@ -199,13 +199,11 @@
 
 
 (defn init-session []
-  (prn "rules.init-session: entered")
   (set! *session (atom (reduce o/add-rule (o/->session) rules))))
 ;;
 ;; commands
 ;;
 (defn swap-session [f]
-  (prn "rules.swap-session, f=" f)
   (swap! *session f))
 ;;
 ;; ball
@@ -228,8 +226,7 @@
 ; (defn blah [& {:keys [key1 key2 key3]}])
 ; (defn init-ball-pos [id x y vx vy anim])
 (defn init-ball-pos [& {:keys [id sub-id x y vx vy anim] :as opts}]
-  (prn "rules.init-ball-pos: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",anim=" anim)
-  ; (prn "query-all pre" (query-all-rules))
+  ; (prn "rules.init-ball-pos: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",anim=" anim)
   (swap! *session
     (fn [session]
       (-> session
@@ -239,14 +236,8 @@
           (o/insert id ::vx vx)
           (o/insert id ::vy vy)
           (o/insert id ::anim true)))))
-          ; (o/insert id ::abc 7))))
-  ; (prn "query-all post" (query-all-rules)))
-  ; (js-debugger))
-          ; o/fire-rules))))
 
-; (defn game-piece-move-to [id x y])
 (defn ball-move-to [id x y]
-  ; (prn "rules: ball-move-to: x=" x ",y=" y ",id=" id)
   (swap! *session
     (fn [session]
       (-> session

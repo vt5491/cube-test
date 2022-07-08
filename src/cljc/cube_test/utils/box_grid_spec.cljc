@@ -11,7 +11,6 @@
   (:require [clojure.spec.alpha :as s]))
             ; [cube-test.utils.box-grid :as box-grid]))
 
-(println "box-grid-spec: now being driven")
 ;; my first real fn spec
 ; (s/def)
 ; (s/def ::rand-args (s/cat :n (s/? number?)))

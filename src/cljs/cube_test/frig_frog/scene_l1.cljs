@@ -2,7 +2,6 @@
   (:require
    [re-frame.core :as rf]
    [babylonjs :as bjs]
-   ; [odoyle.rules :as o]
    [cube-test.main-scene :as main-scene]
    [babylonjs-gui :as bjs-gui]
    [babylonjs-materials :as bjs-m]
@@ -24,7 +23,8 @@
 (def quanta-width 1.2)
 (def scene-initialized false)
 (def reflector)
-(def gui-adv-text)
+(def cmd-gui-adv-text)
+(def cam-gui-adv-text)
 (def ball-moving false)
 
 (defn init-non-vr-view
@@ -37,7 +37,6 @@
          pos-delta (bjs/Vector3. 0 0 (if (neg? delta-rot)
                                        -1
                                        1))]
-      ; (prn "init-non-vr-view: non-vr-cam=" non-vr-cam)
       (set! (.-position vrHelper) (.add (.-position vrHelper) pos-delta)))))
 
 (defn init-vr-view
@@ -71,16 +70,7 @@
          delta-rot-rads (-> (bjs/Angle.FromDegrees delta-rot) (.radians))
          unit-circ (bjs/Vector3. (js/Math.sin (+ y-rot delta-rot-rads)) 0 (js/Math.cos (+ y-rot delta-rot-rads)))
          new-tgt (.add (.-position current-cam) unit-circ)]
-      ; (prn "init-view: current-cam=" current-cam)
-      ; (prn "init-view: current-cam.pos=" (.-position current-cam))
-      ; (prn "init-view: current-cam.y-rot=" y-rot)
-      ; (prn "init-view: delta-rot-rads=" delta-rot-rads)
-      ; (prn "init-view: unit-circ" unit-circ)
-      ; (prn "init-view: old-tgt" (.-target current-cam))
-      ; (prn "init-view: new-tgt" new-tgt)
-      ; (prn "oldTarget=" (.-target current-cam))
       (.setTarget current-cam new-tgt))))
-      ; (prn "newTarget=" (.-target current-cam)))))
 
 (defn create-tiled-box []
   (let [scene main-scene/scene
@@ -143,7 +133,6 @@
     (when ground (set! (.-visibility ground) 1))))
 
 (defn remove-walls []
-  (prn "scene-l1.remove-walls entered")
   (let [scene main-scene/scene
         rear-wall (.getMeshByID scene "rear-wall")
         front-wall (.getMeshByID scene "front-wall")
@@ -163,12 +152,10 @@
     (set! (.-position vr-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))))
 
 (defn secondary-btn-handler [stateObject]
-  (prn "scene-l1: secondary-btn-handler: stateObject=" stateObject)
   (when (.-pressed stateObject)
     (rf/dispatch [:cube-test.frig-frog.events/toggle-dev-mode])))
 
 (defn init-vr-hooks [webVRController]
-  (prn "scene-l1: init-vr-hooks: webVRController=" webVRController)
   (-> webVRController (.-onBButtonStateChangedObservable) (.add secondary-btn-handler)))
 
 (defn init-start-gui-2 []
@@ -245,95 +232,91 @@
 (defn init-gui []
   (init-start-gui-2))
 
-  ; // Load a GUI from a URL JSON.
-  ; let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("GUI", true, scene);
-  ; let loadedGUI = await advancedTexture.parseFromURLAsync("https://doc.babylonjs.com/examples/ColorPickerGui.json"));
-
-  ; let screenUI = BABYLON.GUI.AdvancedDynamicTexture.CreateForMeshTexture(device.screen, 2048, 2048, true, false));
-  ; var advancedTexture2 = BABYLON.GUI.AdvancedDynamicTexture.CreateForMesh()
-  ;   myPlane,
-  ;   1024,
-  ;   1024)
-  ; ;
-;   let colorPickerButton = advancedTexture.getControlByName("ColorPickerButton"));
-; colorPickerButton.onPointerClickObservable.add( () => {})
-;     backgroundBox.isVisible = true;
-;     colorPickerButton.isVisible = false;
-;
-; (defn gui-loaded []
-;   (prn "player.gui-loaded: gui-adv-text=" gui-adv-text)
-;   (let [bye-btn (.getControlByName gui-adv-text "say_bye_btn")
-;         ; hi-btn (.getControlByName gui-adv-text "Button")
-;         hi-btn (.getControlByName gui-adv-text "say_hi_btn")]
-;     (prn "player.gui-loaded: bye-btn=" bye-btn)
-;     (-> bye-btn (.-onPointerClickObservable) (.add #(prn "player: you clicked bye")))
-;     (-> hi-btn (.-onPointerClickObservable) (.add #(prn "player: you clicked hi")))))
-;
-; (defn load-gui []
-;   (let [scene main-scene/scene
-;         plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 2, "height" 2) scene)
-;         _ (set! (.-position plane) (bjs/Vector3. 3 4 7))
-;         _ (.enableEdgesRendering plane)
-;         _ (set! (.-edgesWidth plane) 2.0)
-;         ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMeshTexture plane 2048 2048)
-;         ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 2048 2048)
-;         adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 512 512)
-;         _ (set! gui-adv-text adv-text)]
-;     ; (set!)
-;     (-> adv-text
-;      (.parseFromURLAsync "models/frig_frog/guiTexture.json")
-;      ; (p/then #(prn "scene-l1.load-gui: loaded %=" %))
-;      (p/then #(gui-loaded)))))
-
-(defn gui-loaded []
-  (prn "player.gui-loaded: gui-adv-text=" gui-adv-text)
-  (let [add-train-btn (.getControlByName gui-adv-text "add_train_btn")
-        init-ball-btn (.getControlByName gui-adv-text "init_ball_btn")
-        toggle-ball-btn (.getControlByName gui-adv-text "toggle_ball_btn")]
+(defn cmd-gui-loaded []
+  (let [add-train-btn (.getControlByName cmd-gui-adv-text "add_train_btn")
+        init-ball-btn (.getControlByName cmd-gui-adv-text "init_ball_btn")
+        toggle-ball-btn (.getControlByName cmd-gui-adv-text "toggle_ball_btn")
+        rot-cam-btn (.getControlByName cmd-gui-adv-text "rot_cam_btn")]
     (-> add-train-btn (.-onPointerClickObservable)
         (.add #(rf/dispatch [:cube-test.frig-frog.events/post-add-train
                               {:id-stem :tr-1 :vx -1 :vy 0 :length 5 :init-row 2 :init-col 4}])))
     (-> init-ball-btn (.-onPointerClickObservable)
         (.add #(do
                  (set! ball-moving true)
-                 ; (ff.rules/init-ball-pos "ball-1" 8 5 -1 0 true)
-                 ; (ff.rules/init-ball-pos :cube-test.frig-frog.rules/ball  8 5 -1 0 true)
                  (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/ball
                                           :sub-id 1
                                           :x 8 :y 5
                                           :vx -1 :vy 0
                                           :anim true))))
-                 ; (ff.rules/init-ball-pos {:id :cube-test.frig-frog.rules/ball
-                 ;                          :sub-id 1
-                 ;                          :x 8 :y 5
-                 ;                          :vx -1 :vy 0
-                 ;                          :anim true}))))
     (-> toggle-ball-btn (.-onPointerClickObservable)
         (.add #(do
-                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/ball 1))))))
-                 ; (let [balls (ff.rules/query-all :cube-test.frig-frog.rules/ball)
-                 ;       ball (first balls)
-                 ;       anim (:anim ball)]
-                 ; ; (let [ball (ff.rules/query-all :ff.rules/ball)]
-                 ;   (prn "toggle: ball=" ball ", anim=" anim ",balls=" balls)))))))
-                 ; (ff.rules))))))
-                 ; (set! ball-moving (not ball-moving))
-                 ; (if ball-moving
-                 ;   (ff.rules/update-ball-vel "ball-1" -1 0)
-                 ;   (ff.rules/update-ball-vel "ball-1" 0 0)))))))
+                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/ball 1))))
+    (-> rot-cam-btn (.-onPointerClickObservable)
+        (.add (fn [value]
+                (let [cam main-scene/camera]
+                  (-> (.-rotationQuaternion cam) (.multiplyInPlace (bjs/Quaternion.FromEulerAngles (* -10 base/ONE-DEG) 0 0)))))))))
 
-(defn load-gui []
+(defn load-cmd-gui []
   (let [scene main-scene/scene
-        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 3, "height" 3) scene)
-        ; _ (set! (.-position plane) (bjs/Vector3. 3 4 7))
+        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 4, "height" 4) scene)
         _ (set! (.-position plane) (bjs/Vector3. 0 5 10))
         _ (.enableEdgesRendering plane)
         _ (set! (.-edgesWidth plane) 1.0)
         adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 768 768)
-        _ (set! gui-adv-text adv-text)]
+        _ (set! cmd-gui-adv-text adv-text)]
     (-> adv-text
      (.parseFromURLAsync "models/frig_frog/scene_l1_cmd_pnl.json")
-     (p/then #(gui-loaded)))))
+     (p/then #(cmd-gui-loaded)))))
+
+(defn cam-gui-loaded []
+  (let [x-radio-up-btn (.getControlByName cam-gui-adv-text "x_radio_up_btn")
+        x-radio-down-btn (.getControlByName cam-gui-adv-text "x_radio_down_btn")
+        y-radio-up-btn (.getControlByName cam-gui-adv-text "y_radio_up_btn")
+        y-radio-down-btn (.getControlByName cam-gui-adv-text "y_radio_down_btn")
+        z-radio-up-btn (.getControlByName cam-gui-adv-text "z_radio_up_btn")
+        z-radio-down-btn (.getControlByName cam-gui-adv-text "z_radio_down_btn")
+        ; cam-rot-axis-group (bjs/RadioGroup. "cam_rot_axis")
+        ; _ (.addRadio cam-rot-axis-group)
+        rot-cam-btn (.getControlByName cam-gui-adv-text "rot_cam_btn")]
+    (-> x-radio-up-btn (.-onPointerClickObservable)
+        (.add #(do
+                 (prn "x-radio-up-btn pressed"))))
+    (-> x-radio-down-btn (.-onPointerClickObservable)
+        (.add #(do
+                 (prn "x-radio-down-btn pressed"))))
+    (-> rot-cam-btn (.-onPointerClickObservable)
+        ; (.add #(do))
+        (.add (fn [value]
+                (let [cam main-scene/camera
+                      quat (.-rotationQuaternion cam)
+                      inc (* 10 base/ONE-DEG)]
+                  (when (.-isChecked x-radio-up-btn)
+                    (prn "rot x axis up")
+                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  (* -1 inc) 0 0)))
+                  (when (.-isChecked x-radio-down-btn)
+                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles inc 0 0))
+                    (prn "rot x axis down"))
+                  (when (.-isChecked y-radio-up-btn)
+                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  0 (* -1 inc) 0)))
+                  (when (.-isChecked y-radio-down-btn)
+                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 inc 0)))
+                  (when (.-isChecked z-radio-up-btn)
+                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  0 0 (* -1 inc))))
+                  (when (.-isChecked z-radio-down-btn)
+                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 0 inc)))))))))
+
+
+(defn load-cam-gui []
+  (let [scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "cam-plane" (js-obj "width" 6, "height" 6) scene)
+        _ (set! (.-position plane) (bjs/Vector3. 9 5 10))
+        _ (.enableEdgesRendering plane)
+        _ (set! (.-edgesWidth plane) 1.0)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 1024 1024)
+        _ (set! cam-gui-adv-text adv-text)]
+    (-> adv-text
+     (.parseFromURLAsync "models/frig_frog/scene_l1_cam_pnl.json")
+     (p/then #(cam-gui-loaded)))))
 
 (defn start-btn-handler [])
 
@@ -353,7 +336,8 @@
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     ; (init-gui)
-    (load-gui)
+    (load-cmd-gui)
+    (load-cam-gui)
     (set! (.-position spin-cube) (bjs/Vector3. 4 6 10))
     ;; seed the initial train id
     (ff.rules/update-train-id-cnt 1)

@@ -7,18 +7,14 @@
    ; [cube-test.base :as base]))
    [re-frame.loggers :as loggers]
    [clojure.spec.alpha :as s]
-   [cube-test.main-scene :as main-scene]))
+   [cube-test.main-scene :as main-scene]
+   [babylonjs :as bjs]))
 
 
-; (defn create-fps-panel [])
 ;; Convert ":17" to 17, for example
 (defn kw-to-int [kw]
   (-> (re-find #"^:(\d{1,3})" (str kw)) (nth 1) (js/parseInt)))
 
-; (reduce #(do
-;            (println "%1=" %1 ", %2=" %2)
-;            (assoc %1 (first %2) (second %2)))
-;          ddb g-db)
 (defn merge-dbs [db1 db2]
   "Merge two maps into one"
   (reduce #(do
@@ -29,21 +25,16 @@
 (defn check-and-throw
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
-  (println "check-and-throw: a-spec=" a-spec ", db=" db)
   (when-not (s/valid? a-spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
 
 (defn rf-override-logger [& args]
   (let [text (apply str args)]
-    (prn "utils.rf-override-logger: text=" text)
     (when (not (re-matches #".*twizzlers.*" text))
-      (println "redirecting twizzlers msg")
       (js/console.warn text))))
-      ; (loggers/console :error text))))
 
 (defn rf-odoyle-warn-override-logger [& args]
   (let [text (apply str args)]
-    ; (prn "utils.rf-odoyle-warn-override-logger: text=" text)
     (if (re-matches #".*no handler registered for effect:.*Ignoring.*" text)
       (js/console.log "probable rf-odoyle interceptor no handler msg warning detected")
       (js/console.warn text))))
@@ -62,17 +53,12 @@
   (let [scene main-scene/scene
         mesh (.getMeshByID scene mesh-id)
         current-visibility (.-isVisble mesh)]
-    ; (js-debugger)
-    ; (set! (.-isVisible mesh) (not current-visibility))
     (.setEnabled mesh (not current-visibility))))
 
 (defn toggle-enabled [mesh-id]
   (let [scene main-scene/scene
         mesh (.getMeshByID scene mesh-id)
         current-enabled (.isEnabled mesh)]
-    (prn "utils.toggle-enabled: mesh-id=" mesh-id ", current-enabled=" current-enabled)
-    ; (js-debugger)
-    ; (set! (.-isVisible mesh) (not current-visibility))
     (.setEnabled mesh (not current-enabled))))
 
 ;; Note: "visibility" is better controlled by setting the 'enabled'
@@ -82,20 +68,12 @@
 (defn set-enabled [mesh-id value]
   (let [scene main-scene/scene
         mesh (.getMeshByID scene mesh-id)]
-        ; current-visibility (.-isVisble mesh)]
-    ; (set! (.-isVisible mesh) value)
-    ; (js-debugger)
-    ; (.isEnabled mesh value)
     (.setEnabled mesh value)))
 
 (defn start-animation [anim-name speed-ratio from to]
- (prn "utils.start-animation: anim-name=" anim-name ", speed-ratio=" speed-ratio
-      ",from=" from ", to=" to)
  (let [scene main-scene/scene
-       ; anim-name-fq (str (name anim-name) "-anim")
        ag (.getAnimationGroupByName scene anim-name)]
    (.start ag true speed-ratio from to)))
-   ; (-> (.-onAnimationGroupLoopObservable ag) (.add twitch-stream/animGroupLoopHandler))))
 
 (defn stop-animation [anim-name]
   (prn "utils.stop-animation: anim-name=" anim-name)
@@ -110,5 +88,16 @@
 ;; example call:
 ;; (sleep #(prn "hi") 5000)
 (defn sleep [f ms]
-  (prn "utils/sleep: f=" f ", ms=" ms)
   (js/setTimeout f ms))
+
+(defn disable-default-joystick-ctrl []
+  "disable the default teleoporation features of the bjs xr experience"
+  ; (prn "utils.ddjc a")
+  (when (= main-scene/xr-mode "xr")
+    (let [xr-helper main-scene/xr-helper
+          fm (-> xr-helper (.-baseExperience) (.-featuresManager))
+          tf (.getEnabledFeature fm bjs/WebXRFeatureName.TELEPORTATION)]
+        ;; basically turn off the default rotation, so we can override at the scene/game level
+        ; (prn "utils.ddjc b")
+        (.detach tf) 
+        (set! (.-rotationAngle tf) 0))))
