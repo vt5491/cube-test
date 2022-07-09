@@ -33,7 +33,7 @@
      [:br]
      [:button.user-action {:on-click #(ff-rules/query-all-rules)} "query all rules"]
      [:button.user-action {:on-click #(ff-rules/query-train-id-cnt)} "query train-id-cnt"]
-     [:button.user-action {:on-click #(ff-rules/query-frog)} "query frog"]
+     [:button.user-action {:on-click #(ff-rules/query-player)} "query player"]
      [:br]
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/init-frog-2 0 5])} "init frog-2"]
@@ -42,6 +42,7 @@
      [:br]
      [:label "rules: "]
      [:button.user-action {:on-click #(ff-rules/init-frog)} "init frog rule"]
-     [:button.user-action {:on-click #(ff-rules/init-ball-pos "ball-1" 8 5 -1 0 true)} "init ball"]
-     [:button.user-action {:on-click #(ff-rules/player-move-to ::ff-rules/player 5 1)} "move player"]
+     ; [:button.user-action {:on-click #(ff-rules/init-ball-pos "ball-1" 8 5 -1 0 true)} "init ball"]
+     ; [:button.user-action {:on-click #(ff-rules/player-move-to ::ff-rules/player 5 1)} "move player"]
+     [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/player 0 1)} "move player"]
      [:button.user-action {:on-click #(set! cube-test.frig-frog.player.jumped false )} "set jumped to false"]]))

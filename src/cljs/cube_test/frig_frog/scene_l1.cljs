@@ -245,7 +245,7 @@
                  (set! ball-moving true)
                  (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/ball
                                           :sub-id 1
-                                          :x 8 :y 5
+                                          :x 8 :y 3
                                           :vx -1 :vy 0
                                           :anim true))))
     (-> toggle-ball-btn (.-onPointerClickObservable)
