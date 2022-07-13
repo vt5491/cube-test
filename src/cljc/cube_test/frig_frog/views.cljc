@@ -12,7 +12,9 @@
 
 (defn init-panel []
   (let [
-        board                 @(subscribe [:board-changed])
+        ; board                 @(subscribe [:board-changed])
+        btm-board             @(subscribe [:btm-board-changed {:prfx :btm}])
+        top-board             @(subscribe [:top-board-changed {:prfx :top}])
         frog-row-col          @(subscribe [:frog-row-col-changed])
         dev-mode              @(subscribe [:dev-mode-changed])
         trains                @(subscribe [:trains-changed])

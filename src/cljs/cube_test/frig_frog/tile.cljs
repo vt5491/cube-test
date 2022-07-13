@@ -3,6 +3,7 @@
    [re-frame.core :as re-frame]
    [babylonjs :as bjs]
    [cube-test.main-scene :as main-scene]
+   [cube-test.frig-frog.board :as ff.board]
    [cube-test.base :as base]))
 
 ; still used but basically defunct since we don't have a state keyword
@@ -20,33 +21,27 @@
       ; (prn "state-update-fn: abc=" abc)
       (conj state abc)))
 
-(defn draw [row col]
+(defn draw [prfx row col]
   ; (prn "tile.draw: row=" row ", col=" col)
-  (let [scene main-scene/scene]
+  (let [scene main-scene/scene
+        tile-prfx (str (name prfx) "-" "tile-")
+        board-height (prfx ff.board/board-heights)]
+        ; _ (prn "tile.draw: board-height=" board-height)]
     (when scene
       ;; delete any prior tile
-      ; (prn "prior tile unique=" (.getMeshByUniqueId scene (str "tile-" row "-" col)))
-      ; (prn "prior tile=" (.getMeshByID scene (str "tile-" row "-" col)))
-      (when-let [prior-tile (.getMeshByID scene (str "tile-" row "-" col))]
+      ; (when-let [prior-tile (.getMeshByID scene (str "tile-" row "-" col))])
+      (when-let [prior-tile (.getMeshByID scene (str tile-prfx row "-" col))]
         (.dispose prior-tile))
-      (let [ ;tmp-2 (prn "scene=" scene)
-            ; board {}
-            ; tmp (js-debugger)
-            tile (bjs/MeshBuilder.CreatePlane
-                  (str "tile-" row "-" col)
-                  (js-obj "width" 1.0 "height" 1.0 "sideOrientation" bjs/Mesh.DOUBLESIDE)
-                  scene)]
-            ; tmp-db db
-            ; board (:board db)]
-        ; (set! (.-position tile) (bjs/Vector3. 0 0.5 7))
-        (set! (.-position tile) (bjs/Vector3. (* col 1.2) 1 (* row 1.2)))
+      (let [ tile (bjs/MeshBuilder.CreatePlane
+                    ; (str "tile-" row "-" col)
+                    (str tile-prfx row "-" col)
+                    (js-obj "width" 1.0 "height" 1.0 "sideOrientation" bjs/Mesh.DOUBLESIDE)
+                    scene)]
+        ; (set! (.-position tile) (bjs/Vector3. (* col 1.2) 1 (* row 1.2)))
+        (set! (.-position tile) (bjs/Vector3. (* col ff.board/tile-width) board-height (* row ff.board/tile-height)))
         (set! (.-rotationQuaternion tile) base/X-QUAT-NEG-90)
-        ; BABYLON.Tags.AddTagsTo(o, "tile"))))
         ;note: use something like "cube_test.main_scene.scene.getMeshesByID('tile')" to access.
         (bjs/Tags.AddTagsTo tile "tile")))))
-
-                ; (assoc board :tile-1 {})))
-  ; {:abc 2})
 
 (defn update-tile [row-num col-num update-fn db]
   (let [b (:board db)

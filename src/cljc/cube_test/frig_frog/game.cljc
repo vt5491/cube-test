@@ -18,7 +18,8 @@
 (def default-game-db
   {:game-abc 7
    :n-cols 8 :n-rows 8
-   :board {}
+   :btm-board {}
+   :top-board {}
    :active-scene :ff-l1
    :dev-mode false
    :quanta-width 1.2})
@@ -77,7 +78,8 @@
     (-> vrHelper .-onControllerMeshLoadedObservable (.add ctrl-mesh-loaded-handler)))
   (re-frame/dispatch [:cube-test.frig-frog.events/init-worker]) ;; necessary?
   (re-frame/dispatch [:cube-test.frig-frog.events/ff-worker-start])
-  (re-frame/dispatch [:cube-test.frig-frog.events/init-board])
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-btm-board])
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-top-board])
   (re-frame/dispatch [:cube-test.frig-frog.events/init-player]))
 
 ;; This is the top-level tick for the (sub) game

@@ -7,10 +7,11 @@
    ; [cube-test.frig-frog.game :as ff.game]
    [cube-test.frig-frog.scene-l1 :as scene-l1]
    [cube-test.utils :as utils]
+   [cube-test.utils.common :as common]
    [clojure.data :as clj-data]
    [cube-test.macros :as macros]))
 
-(def ^:dynamic *last-board* (atom nil))
+; (def ^:dynamic *last-board* (atom nil))
 (def ^:dynamic *last-frog-row-col* (atom nil))
 (def ^:dynamic *last-trains* (atom nil))
 
@@ -18,9 +19,14 @@
 ;; extractors
 ;;
 (reg-sub
- :get-board
+ :get-btm-board
  (fn [db _]
-   (:board db)))
+   (:btm-board db)))
+
+(reg-sub
+ :get-top-board
+ (fn [db _]
+   (:top-board db)))
 
 (reg-sub
  :get-frog
@@ -70,25 +76,53 @@
 ;;
 ;; computations
 ;;
-(reg-sub
- :board-changed-0
- :<- [:get-board]
- (fn [db query-v]))
+; (reg-sub
+;  :board-changed-0
+;  :<- [:get-board]
+;  (fn [db query-v]))
+
+(defn board-changed [board query-v prfx]
+  (prn "subs.board-changed: query-v=" query-v)
+  (prn "subs.board-changed: board=" board)
+  ;(js-debugger)
+  (when (and board (not (empty? board)))
+    (let [prfx (-> query-v second (:prfx))
+          last-board (ff-board/get-last-board prfx)
+          ; diff-full (clj-data/diff board @*last-board*)
+          diff-full (clj-data/diff board @last-board)
+          diff-a (first diff-full)
+          diff-b (second diff-full)
+          diff-c (nth diff-full 2)]
+      (prn "prfx=" prfx)
+      ; (let [[row0 row1 row2 ] diff-a
+      ;             (let [changed-tiles (filter some? diff-a)])])
+      (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
+        (doseq [{:keys [row col abc state]} tile-deltas]
+          (rf/dispatch [::ff-events/draw-tile row col prfx])))
+      ;;TODO: have a last-btm-board, last-top-board?
+      ; (swap! *last-board* (fn [x] board))
+      (swap! last-board (fn [x] board)))))
 
 (reg-sub
- :board-changed
- :<- [:get-board]
- (fn [board query-v]
-   (let [diff-full (clj-data/diff board @*last-board*)
-         diff-a (first diff-full)
-         diff-b (second diff-full)
-         diff-c (nth diff-full 2)]
-     (let [[row0 row1 row2 ] diff-a]
-          (let [changed-tiles (filter some? diff-a)]))
-     (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
-       (doseq [{:keys [row col abc state]} tile-deltas]
-         (rf/dispatch [::ff-events/draw-tile row col]))))
-   (swap! *last-board* (fn [x] board))))
+ :btm-board-changed
+ :<- [:get-btm-board]
+ board-changed)
+
+(reg-sub
+ :top-board-changed
+ :<- [:get-top-board]
+ board-changed)
+ ; (fn [board query-v]
+ ;   (let [diff-full (clj-data/diff board @*last-board*)
+ ;         diff-a (first diff-full)
+ ;         diff-b (second diff-full)
+ ;         diff-c (nth diff-full 2)]
+ ;     (let [[row0 row1 row2 ] diff-a]
+ ;          (let [changed-tiles (filter some? diff-a)]))
+ ;     (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
+ ;       (doseq [{:keys [row col abc state]} tile-deltas]
+ ;         (rf/dispatch [::ff-events/draw-tile row col]))))
+ ;   (swap! *last-board* (fn [x] board))))
 
 (reg-sub
  :frog-changed

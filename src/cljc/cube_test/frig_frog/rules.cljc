@@ -17,6 +17,7 @@
 (declare query-all-rules)
 (declare query-all)
 (declare player-move-to)
+(declare player-move-tile-delta)
 (declare init-ball)
 (declare ball-move-to-2)
 (declare player-to-ball-dist)
@@ -37,23 +38,30 @@
       ::time-dt-ball
       [:what
         [::time ::delta dt]
-        [id ::x x]
-        [id ::y y]
-        [id ::sub-id sub-id]
-        :when
-        (= id ::ball)
+        ; [id ::x x]
+        ; [id ::y y]
+        ; [id ::sub-id sub-id]
+        [::ball ::x x]
+        [::ball ::y y]
+        [::ball ::sub-id sub-id]
+        ; :when
+        ; (= id ::ball)
         :then
         (do
           (let [dist (player-to-ball-dist (str "ball-" sub-id))]
             (when (and dist (< dist 1.0))
               (prn "time-dt: player-ball collision. dist=" dist)
+              (player-move-tile-delta ::player 0 -2 true)
+              ; (o/insert! ::player ::x 5)
+              ; (o/insert! ::player ::y 1)
               ;;TODO consider doing a derived fact on p-mesh so we don't
               ;; have to pull it twice.
               (let [p (o/query-all @*session ::player-q)
                     p-id (-> p (first) (:sub-id))
                     p-mesh (.getMeshByID main-scene/scene p-id)
                     p-mesh-pos (.-position p-mesh)]
-                (set! (.-position p-mesh) (bjs/Vector3. (.-x p-mesh-pos)(.-y p-mesh-pos)(- (.-z p-mesh-pos) 2)))))))]
+                (set! (.-position p-mesh) (bjs/Vector3. (.-x p-mesh-pos)(.-y p-mesh-pos)(- (.-z p-mesh-pos) (* 2 ff.board/tile-height))))))))]
+
 
       ::train-id-cnt
       [:what
@@ -262,18 +270,27 @@
           ; o/reset!))))
           ; o/fire-rules))))
 
+(defn player-move-to! [id x y]
+  (prn "rules.player-move-to!: x=" x ",y=" y ",id=" id)
+  (o/insert! ::player ::x x)
+  (o/insert! ::player ::y y))
+
 ;; the dx,dy is in integral values of rows and cols.  We will scale
 ;; up to tile-width inside the function.
-(defn player-move-tile-delta [id dx dy]
-  (prn "rule: player-move-tile-delta: dx=" dx ",dy=" dy ",id=" id)
-  (let [player-pos (o/query-all @*session :cube-test.frig-frog.rules/player)
-        x (-> (first player-pos) (:x))
-        y (-> (first player-pos) (:y))
-        tile-width ff.board/tile-width
-        tile-height ff.board/tile-height]
-    (prn "rule: player-move-tile-delta: x=" x ",y=" y ",dy=" dy ",tile-width=" tile-width ",tile-height=" tile-height)
-    ; (game-piece-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))
-    (player-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))))
+(defn player-move-tile-delta
+  ([id dx dy] (player-move-tile-delta id dx dy false))
+  ([id dx dy hard-update?]
+   (prn "rule: player-move-tile-delta: dx=" dx ",dy=" dy ",id=" id)
+   (let [player-pos (o/query-all @*session :cube-test.frig-frog.rules/player)
+         x (-> (first player-pos) (:x))
+         y (-> (first player-pos) (:y))
+         tile-width ff.board/tile-width
+         tile-height ff.board/tile-height]
+     (prn "rule: player-move-tile-delta: x=" x ",y=" y ",dy=" dy ",tile-width=" tile-width ",tile-height=" tile-height)
+     ; (game-piece-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))
+     (if hard-update?
+       (player-move-to! id (+ x (* dx tile-width)) (+ y (* dy tile-height)))
+       (player-move-to id (+ x (* dx tile-width)) (+ y (* dy tile-height)))))))
 
 (defn player-to-ball-dist [b-id]
   (let [player (o/query-all @*session ::player-q)

@@ -58,3 +58,8 @@
 (defn gen-mesh-id-from-rule-id [id sub-id]
   (let [kind (second (re-matches #"^.*/(.*)" (str :cube-test.frig-frog.rules/ball)))]
     (str kind "-" sub-id)))
+
+(defn in? 
+  "true if coll contains elm"
+  [coll elm]
+  (some #(= elm %) coll))

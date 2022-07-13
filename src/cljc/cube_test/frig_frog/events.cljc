@@ -194,9 +194,10 @@
 (reg-event-db
  ::init-game-db
  (fn [db [_ game-db]]
-   (let [default-db ff.game/default-game-db
-         board (ff.board/init-board default-db)]
-     (assoc default-db :board board))))
+   (let [default-db ff.game/default-game-db]
+         ; board (ff.board/init-board default-db)]
+     ; (assoc default-db :board board)
+     default-db)))
 
 (rf/reg-event-fx
  ::init-game
@@ -326,8 +327,9 @@
 ;; Nope: active once again
 (rf/reg-event-fx
  ::draw-tile
- (fn [cofx [_ pos-x pos-y]]
-   (ff.tile/draw pos-x pos-y)
+ (fn [cofx [_ pos-x pos-y prfx]]
+   (prn "events.draw-tile. prfx=" prfx)
+   (ff.tile/draw prfx pos-x pos-y)
    {
     :db (:db cofx)}))
 
@@ -337,12 +339,17 @@
     (ff.tile/update-tile row-num col-num update-fn db)))
 
 ;;
-;; board
+;; board(s)
 ;;
 (reg-event-db
-  ::init-board
+  ::init-btm-board
   (fn [db [_ val]]
-    (assoc db :board (ff.board/init-board db))))
+    (assoc db :btm-board (ff.board/init-board db))))
+
+(reg-event-db
+  ::init-top-board
+  (fn [db [_ val]]
+    (assoc db :top-board (ff.board/init-board db))))
 
 (reg-event-db
   ::init-board-2

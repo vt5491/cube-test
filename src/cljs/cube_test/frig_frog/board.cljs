@@ -1,9 +1,9 @@
 ;; TODO: make a .cljc ?
 (ns cube-test.frig-frog.board
   (:require
-   [re-frame.core :as re-frame]
+   [re-frame.core :as re-frame]))
    ; [babylonjs :as bjs]
-   [cube-test.frig-frog.tile :as ff-tile]))
+   ; [cube-test.frig-frog.tile :as ff-tile]))
    ;; Note: no longer nec.
    ; [clojure.walk :as clj-walk]))
    ;; note can't refernce events directly due to "circular dependencies"
@@ -15,8 +15,12 @@
 (def board-width nil)
 (def board-length nil)
 (def board-height 1.5)
+(def board-heights {:btm 0.0 :top 5.0})
 (def tile-width 1.2)
 (def tile-height 1.2)
+
+(def ^:dynamic *last-btm-board* (atom nil))
+(def ^:dynamic *last-top-board* (atom nil))
 
 (defn create-row [row-num n-cols]
   (let [
@@ -127,3 +131,8 @@
         (conj accum tmp)))
    []
    col-info))
+
+(defn get-last-board [prfx]
+  (case prfx
+    :btm *last-btm-board*
+    :top *last-top-board*))
