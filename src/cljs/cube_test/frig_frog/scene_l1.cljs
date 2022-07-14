@@ -149,6 +149,7 @@
   (let [vrHelper main-scene/vrHelper
         vr-cam (.-currentVRCamera vrHelper)
         ip @main-scene/*camera-init-pos*]
+        ; ip (bjs/Vector3. 2.2 2.2 -3.6)]
     (set! (.-position vr-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))))
 
 (defn secondary-btn-handler [stateObject]
@@ -259,7 +260,8 @@
 (defn load-cmd-gui []
   (let [scene main-scene/scene
         plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 4, "height" 4) scene)
-        _ (set! (.-position plane) (bjs/Vector3. 0 5 10))
+        ; _ (set! (.-position plane) (bjs/Vector3. 0 5 10))
+        _ (set! (.-position plane) (bjs/Vector3. 0 3 10))
         _ (.enableEdgesRendering plane)
         _ (set! (.-edgesWidth plane) 1.0)
         adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 768 768)
@@ -328,10 +330,19 @@
 
 (defn init [db]
   (let [scene main-scene/scene
-        light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
+        ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
+        light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
+        light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 2 5) scene)
         camera main-scene/camera
+        ; cam-quat (bjs/Quaternion.FromEulerAngles (* -90 base/ONE-DEG) 0 0)
+        cam-rot (bjs/Vector3. (* -15 base/ONE-DEG) 0 0)
         spin-cube (bjs/MeshBuilder.CreateBox. "spin_cube" (js-obj "height" 1 "width" 1 "depth" 1) scene)]
-    (set! (.-position camera) (bjs/Vector3. 1.54 4.77 -7.82))
+    ; (set! (.-position camera) (bjs/Vector3. 1.54 4.77 -7.82))
+    (set! (.-position camera) (bjs/Vector3. 2.2 2.2 -7.82))
+    (set! (.-rotation camera) (.add (.-rotation camera) cam-rot))
+    ; (prn "cam quat=" (.-rotationQuaternion camera))
+    ; (js-debugger)
+    ; (.multiplyInPlace (.-rotationQuaternion camera) cam-quat)
 
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
@@ -345,7 +356,8 @@
     ; (ff.rules/init-game-piece "player" 0 5 0 0)
     ; (ff.rules/init-game-piece ff.rules/player 0 5 0 0)
     ; (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)
-    (ff.rules/init-player :cube-test.frig-frog.rules/player 0 5)))
+    (ff.rules/init-player :cube-test.frig-frog.rules/player 0 5)
+    (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)))
 
 (defn tick []
   (ff.train/tick)

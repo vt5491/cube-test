@@ -82,8 +82,8 @@
 ;  (fn [db query-v]))
 
 (defn board-changed [board query-v prfx]
-  (prn "subs.board-changed: query-v=" query-v)
-  (prn "subs.board-changed: board=" board)
+  ; (prn "subs.board-changed: query-v=" query-v)
+  ; (prn "subs.board-changed: board=" board)
   ;(js-debugger)
   (when (and board (not (empty? board)))
     (let [prfx (-> query-v second (:prfx))
@@ -93,7 +93,7 @@
           diff-a (first diff-full)
           diff-b (second diff-full)
           diff-c (nth diff-full 2)]
-      (prn "prfx=" prfx)
+      ; (prn "prfx=" prfx)
       ; (let [[row0 row1 row2 ] diff-a
       ;             (let [changed-tiles (filter some? diff-a)])])
       (let [tile-deltas (ff-board/parse-delta-2 diff-a)]

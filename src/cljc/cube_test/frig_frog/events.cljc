@@ -328,7 +328,7 @@
 (rf/reg-event-fx
  ::draw-tile
  (fn [cofx [_ pos-x pos-y prfx]]
-   (prn "events.draw-tile. prfx=" prfx)
+   ; (prn "events.draw-tile. prfx=" prfx)
    (ff.tile/draw prfx pos-x pos-y)
    {
     :db (:db cofx)}))

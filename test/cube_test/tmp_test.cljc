@@ -1010,3 +1010,27 @@
 
 (= :prfx :prfx)
 (keep-indexed #(if (odd? %1) %2) [:a :b :c :d :e])
+
+(name :abc)
+
+(nil? {})
+(empty? {:a 7}
+
+ (fn [board query-v]
+   (let [diff-full (clj-data/diff board @*last-board*)
+         diff-a (first diff-full)
+         diff-b (second diff-full)
+         diff-c (nth diff-full 2)]
+     (let [[row0 row1 row2 ] diff-a]
+          (let [changed-tiles (filter some? diff-a)]))
+     (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
+       (doseq [{:keys [row col abc state]} tile-deltas]
+         (rf/dispatch [::ff-events/draw-tile row col]))))
+   (swap! *last-board* (fn [x] board))))
+
+(let [a (-> (re-matches #"^(.*)-.*" "player") second)]
+  (case a
+    "btm" (prn "bottom")
+    nil (prn "catch-all")))
+
+(-> (re-matches #"^(.*)-.*" "player") second)

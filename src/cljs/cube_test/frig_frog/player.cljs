@@ -11,11 +11,18 @@
 (def player-left-thumbstick)
 ;; absolute move.
 (defn move-player-to
-  ([mesh-id x y]  (move-player-to mesh-id x cube-test.frig-frog.board/board-height y))
+  ; ([mesh-id x y]  (move-player-to mesh-id x cube-test.frig-frog.board/board-height y))
+  ([mesh-id x y]  (let [prfx (-> (re-matches #"^(.*)-.*" mesh-id) second)]
+                    (prn "player.move-player-to: prfx=" prfx)
+                    (case prfx
+                      "top" (move-player-to mesh-id x (:top cube-test.frig-frog.board/board-heights) y)
+                      ; nil   (move-player-to mesh-id x cube-test.frig-frog.board/board-height y)
+                      nil   (move-player-to mesh-id x 0 y))))
   ;; note: with 3-d we use the bjs actual x,y,z not pretend "y" coordinates when only using 2
   ([mesh-id x y z]
    (let [scene main-scene/scene
-         mesh (or (.getMeshByID scene "player") (bjs/MeshBuilder.CreateCylinder. "player" (js-obj "tessellation" 6 "height" 0.7) scene))]
+         ; mesh (or (.getMeshByID scene "player") (bjs/MeshBuilder.CreateCylinder. "player" (js-obj "tessellation" 6 "height" 0.7) scene))
+         mesh (or (.getMeshByID scene mesh-id) (bjs/MeshBuilder.CreateCylinder. mesh-id (js-obj "tessellation" 6 "height" 0.7) scene))]
      (set! (.-position mesh) (bjs/Vector3. x y z)))))
 
 ;; relative move.
@@ -51,7 +58,8 @@
     (cond
       (or (> (Math/abs x) 0.5) (> (Math/abs y) 0.5))
       (do
-        (jump-player-ctrl "player" x y))
+        (jump-player-ctrl "player" x y)
+        (jump-player-ctrl "top-player" x y))
       :else
       (set! jumped false))))
 

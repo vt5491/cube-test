@@ -38,14 +38,9 @@
       ::time-dt-ball
       [:what
         [::time ::delta dt]
-        ; [id ::x x]
-        ; [id ::y y]
-        ; [id ::sub-id sub-id]
         [::ball ::x x]
         [::ball ::y y]
         [::ball ::sub-id sub-id]
-        ; :when
-        ; (= id ::ball)
         :then
         (do
           (let [dist (player-to-ball-dist (str "ball-" sub-id))]
@@ -140,25 +135,17 @@
         :then
         (do
           (prn "pb-collision: id=" id ",sub-id" sub-id)
-          (prn "pb-collision: dist=" (player-to-ball-dist (str "ball-" sub-id))))]}))
+          (prn "pb-collision: dist=" (player-to-ball-dist (str "ball-" sub-id))))]
 
-      ; ::player-ball-collision
-      ; [:what
-      ;   ; [id]
-      ;   ; [::player ::x p-x]
-      ;   ; [::player ::y p-y]
-      ;   ; [id ::sub-id p-sub-id]
-      ;   [::ball ::x b-x]
-      ;   [::ball ::y b-y]
-      ;   [id ::sub-id b-sub-id]
-      ;   ; :when
-      ;   ; (-> (and (> b-x (+ p-x 0.5)) (< b-x (- p-x 0.5))
-      ;   ;      (and (> b-y (+ p-y 0.5)) (< b-y (- p-y 0.5)))))
-      ;   :then
-      ;   (prn "rules: player ball collision detected")
-      ;   ; (prn "rules: ball collision: p-sub-id=" p-sub-id)
-      ;   (prn "rules: ball collision: id=" id)
-      ;   (prn "rules: ball collision: b-sub-id=" b-sub-id)]}))
+      ::top-player
+      [:what
+        [::top-player ::x x]
+        [::top-player ::y y]
+        :then
+        (prn "rules: top-player match, x=" x ",y=" y)
+        ; (ff.player/move-player-to "top-player" x y (:top ff.board/board-heights))
+        (ff.player/move-player-to "top-player" x y)]}))
+
 (defn init-session []
   (set! *session (atom (reduce o/add-rule (o/->session) rules))))
 ;;
@@ -306,6 +293,19 @@
       (when (and b-pos p-pos)
             ; (prn "pb-collision: dist=" (bjs/Vector3.Distance b-pos p-pos))
         (bjs/Vector3.Distance b-pos p-pos))))
+
+;;
+;; top-player
+;;
+(defn init-top-player [id row col]
+  (swap! *session
+    (fn [session]
+      (-> session
+          (o/insert ::top-player ::x col)
+          (o/insert ::top-player ::y row)
+          ; (o/insert ::top-player ::sub-id "player")
+          o/fire-rules))))
+
 ;;
 ;; left-ctrl
 ;;
