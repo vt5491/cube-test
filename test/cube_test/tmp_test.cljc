@@ -6,6 +6,7 @@
    [babylonjs :as bjs]
    [babylonjs-gui :as bjs-gui]
    [promesa.core :as p]))
+   ; [cube-test.frig-frog.utils.common :as common]))
 
 (comment
   ;; Don't forget to ctrl-alt-shift-e these lines not ctrl-alt-shift-b
@@ -20,6 +21,7 @@
          :ybot-head-bang {:is-loaded true, :is-enabled false, :is-playing false}}})
 
 (prn "hi h=" h)
+(print h)
 
 (let [ {{{:keys [:is-enabled]} {:keys :ybot-rumba}} :models} h]
   (prn "val=" models))
@@ -1034,3 +1036,38 @@
     nil (prn "catch-all")))
 
 (-> (re-matches #"^(.*)-.*" "player") second)
+:cube-test.frig-frog.rules/player
+
+(let [a :cube-test.frig-frog.rules/player]
+  (prn (name a)))
+  ; (prn (str (symbol a)))
+  ; (prn (namespace a))
+  ; (re-matches #".*/player$" (str (symbol a))))
+
+(name :def/abc)
+(name :cube-test.frig-frog.rules/player)
+
+(case "def"
+     "abc" (prn "hi")
+     "def" (prn "bye"))
+
+(let [mesh-id "btm-ball-1"]
+  (re-matches #"^([^-]*)-.*" mesh-id))
+
+(let [id :cube-test.frig-frog.rules/btm-player]
+  (prn (name id))
+  (re-matches #"^([^-]*)-.*" (str (symbol id))))
+
+(defn gen-mesh-id-from-rule-id
+  ([id] (gen-mesh-id-from-rule-id id nil))
+  ([id sub-id]
+   (let [kind (second (re-matches #"^.*/(.*)" (str id)))]
+     (if sub-id
+       (str kind "-" sub-id)
+       kind))))
+
+(def a 7)
+(ns fuck-it)
+(defn abc [])
+
+(gen-mesh-id-from-rule-id :cube-test.frig-frog.rules/btm-player 1)

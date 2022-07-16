@@ -47,4 +47,6 @@
      ; [:button.user-action {:on-click #(ff-rules/init-ball-pos "ball-1" 8 5 -1 0 true)} "init ball"]
      ; [:button.user-action {:on-click #(ff-rules/player-move-to ::ff-rules/player 5 1)} "move player"]
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/player 0 1)} "move player"]
+     [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/btm-player 0 1)} "move btm-player"]
+     [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/top-player 0 1)} "move top-player"]
      [:button.user-action {:on-click #(set! cube-test.frig-frog.player.jumped false )} "set jumped to false"]]))

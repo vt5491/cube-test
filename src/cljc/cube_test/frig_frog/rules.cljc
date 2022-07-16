@@ -21,6 +21,8 @@
 (declare init-ball)
 (declare ball-move-to-2)
 (declare player-to-ball-dist)
+(declare ball-to-player-dist)
+(declare ball-player-collision-test)
 
 ;;
 ;; session
@@ -35,6 +37,7 @@
 (def rules
   (o/ruleset
     {
+      ;; Note:defunct
       ::time-dt-ball
       [:what
         [::time ::delta dt]
@@ -47,16 +50,32 @@
             (when (and dist (< dist 1.0))
               (prn "time-dt: player-ball collision. dist=" dist)
               (player-move-tile-delta ::player 0 -2 true)
-              ; (o/insert! ::player ::x 5)
-              ; (o/insert! ::player ::y 1)
-              ;;TODO consider doing a derived fact on p-mesh so we don't
-              ;; have to pull it twice.
               (let [p (o/query-all @*session ::player-q)
                     p-id (-> p (first) (:sub-id))
                     p-mesh (.getMeshByID main-scene/scene p-id)
                     p-mesh-pos (.-position p-mesh)]
                 (set! (.-position p-mesh) (bjs/Vector3. (.-x p-mesh-pos)(.-y p-mesh-pos)(- (.-z p-mesh-pos) (* 2 ff.board/tile-height))))))))]
 
+
+      ::time-dt-btm-ball
+      [:what
+        [::time ::delta dt]
+        [::btm-ball ::x x]
+        [::btm-ball ::y y]
+        [::btm-ball ::sub-id sub-id]
+        :then
+        (ball-player-collision-test ::btm-ball sub-id ::btm-player)]
+        ; (let [dist (ball-player-collision ::btm-ball sub-id ::btm-player)]
+        ;   (when (and dist (< dist 1.0))
+        ;     (prn "time-dt: btm-ball collision. dist=" dist)))]
+      ::time-dt-top-ball
+      [:what
+        [::time ::delta dt]
+        [::top-ball ::x x]
+        [::top-ball ::y y]
+        [::top-ball ::sub-id sub-id]
+        :then
+        (ball-player-collision-test ::top-ball sub-id ::top-player)]
 
       ::train-id-cnt
       [:what
@@ -75,13 +94,30 @@
         (prn "rules.ball matched: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",vx=" vx ",vy=" vy)
         (ff.ball/draw-ball id sub-id x y)]
 
+      ; ::ball-q
+      ::btm-ball
+      [:what
+        [id ::sub-id sub-id]
+        [id ::x x]
+        [id ::y y]
+        [id ::vx vx]
+        [id ::vy vy]
+        [id ::anim anim]]
+
+      ::top-ball
+      [:what
+        [id ::sub-id sub-id]
+        [id ::x x]
+        [id ::y y]
+        [id ::vx vx]
+        [id ::vy vy]
+        [id ::anim anim]]
+
       ::ball-glide
       [:what
         [::time ::delta dt]
-        ; [id ::x x {:then false}]
         [id ::sub-id sub-id]
         [id ::x x]
-        ; [id ::y y {:then false}]
         [id ::y y]
         [id ::vx vx]
         [id ::vy vy]
@@ -89,21 +125,24 @@
         :then
         (let [
               mesh-id (common/gen-mesh-id-from-rule-id id sub-id)
-              ; _ (prn "ball-glide: mesh-id" mesh-id)
               mesh-pos (ff.ball/get-mesh-pos mesh-id)
-              x (.-x mesh-pos)
-              ;; note how mesh z equals out logical y.
-              y (.-z mesh-pos)
+              ; x (.-x mesh-pos)
+              ; ;; note how mesh z equals out logical y.
+              ; y (.-z mesh-pos)
               dx (* vx dt 0.001)
-              dy (* vy dt 0.001)
-              new-x (+ x dx)
-              new-y (+ y dy)]
-          ;;TODO try to restict in the rule before doing all the let calcs
-          (when anim
-            (if (< new-x 0)
-              (do
-                (ball-move-to-2 id 8 3))
-              (ff.ball/move-ball id sub-id (* vx dt 0.001) (* vy dt 0.001)))))]
+              dy (* vy dt 0.001)]
+              ; new-x (+ x dx)
+              ; new-y (+ y dy)]
+          (when (and anim mesh-pos)
+            (let [x (.-x mesh-pos)
+                  y (.-z mesh-pos)
+                  new-x (+ x dx)
+                  new-y (+ y dy)]
+              (if (< new-x 0)
+                (do
+                  (ball-move-to-2 id 8 3))
+                (ff.ball/move-ball id sub-id (* vx dt 0.001) (* vy dt 0.001))))))]
+
       ::frog
       [:what
         [::frog ::x x]
@@ -114,6 +153,16 @@
         [::player ::x x]
         [::player ::y y]
         [::player ::sub-id sub-id]]
+      ::btm-player-q
+      [:what
+        [::btm-player ::x x]
+        [::btm-player ::y y]
+        [::btm-player ::sub-id sub-id]]
+      ::top-player-q
+      [:what
+        [::top-player ::x x]
+        [::top-player ::y y]
+        [::top-player ::sub-id sub-id]]
       ::player
       ; ::player-move
       [:what
@@ -125,17 +174,18 @@
         (prn "rules: player match, x=" x ",y=" y)
         (ff.player/move-player-to "player" x y)]
         ; (set! cube-test.frig-frog.player.jumped false)]
-      ::player-ball-collision
-      [:what
-        [id ::x x]
-        [id ::y y]
-        [id ::sub-id sub-id]
-        :when
-        (= id ::ball)
-        :then
-        (do
-          (prn "pb-collision: id=" id ",sub-id" sub-id)
-          (prn "pb-collision: dist=" (player-to-ball-dist (str "ball-" sub-id))))]
+      ; ::player-ball-collision
+      ; [:what
+      ;   [id ::x x]
+      ;   [id ::y y]
+      ;   [id ::sub-id sub-id]
+      ;   :when
+      ;   ; (= id ::ball)
+      ;   (or (= id ::ball)(= id ::btm-ball)(= id ::top-ball))
+      ;   :then
+      ;   (do
+      ;     (prn "pb-collision: id=" id ",sub-id" sub-id)
+      ;     (prn "pb-collision: dist=" (player-to-ball-dist (str "ball-" sub-id))))]
 
       ::top-player
       [:what
@@ -143,8 +193,15 @@
         [::top-player ::y y]
         :then
         (prn "rules: top-player match, x=" x ",y=" y)
-        ; (ff.player/move-player-to "top-player" x y (:top ff.board/board-heights))
-        (ff.player/move-player-to "top-player" x y)]}))
+        (ff.player/move-player-to "top-player" x y)]
+
+      ::btm-player
+      [:what
+        [::btm-player ::x x]
+        [::btm-player ::y y]
+        :then
+        (prn "rules: btm-player match, x=" x ",y=" y)
+        (ff.player/move-player-to "btm-player" x y)]}))
 
 (defn init-session []
   (set! *session (atom (reduce o/add-rule (o/->session) rules))))
@@ -197,7 +254,13 @@
   (o/insert! id ::y y))
 
 (defn ball-toggle-anim [id sub-id]
-  (let [balls (query-all :cube-test.frig-frog.rules/ball)
+  (let [
+        ; balls (query-all :cube-test.frig-frog.rules/ball)
+        balls (o/query-all @*session id)
+        ; balls (o/query-all *session ::ball-q)
+        ; _ (js-debugger)
+        ; balls (o/query-all @*session :cube-test.frig-frog.rules/ball-q)
+        _ (prn "ball-toggle-anim: balls=" balls)
         ;; TODO: add more general way to filter for appropriate id
         ball (first balls)
         anim (:anim ball)
@@ -211,6 +274,12 @@
       (fn [session]
         (-> session
           (o/insert id {::sub-id sub-id ::x row ::y col ::anim toggled-anim}))))))
+
+(defn ball-player-collision-test [ball-id ball-sub-id player-id]
+  (let [dist (ball-to-player-dist ball-id ball-sub-id player-id)]
+    (when (and dist (< dist 1.0))
+      (prn "time-dt: btm-ball collision. dist=" dist))))
+    ; (prn "rules.ball-player-collision: dist=" dist)))
 
 ;;
 ;; frog
@@ -237,30 +306,64 @@
 ;;
 ;; player
 ;;
+; (defn init-player [id row col]
+;   (swap! *session
+;     (fn [session]
+;       (o/insert session ::player ::x 5)
+;       (o/insert session ::player ::y 1))))
+      ; (-> session
+      ;   ; (prn "rules.init-player: name=" (name id))
+      ;   ; (case "abc"
+      ;   ;   "abc" (o/insert ::player ::x 5))
+      ;   (condp = (name id)
+      ;     "btm-player" (o/insert ::player ::x 5))
+      ;   (o/insert ::player ::y 0)
+      ;   (o/insert ::player ::sub-id "player")
+      ;   o/fire-rules))))
 (defn init-player [id row col]
   (swap! *session
     (fn [session]
-      (-> session
-          (o/insert ::player ::x 5)
-          (o/insert ::player ::y 0)
-          (o/insert ::player ::sub-id "player")
-          o/fire-rules))))
+      ; (prn "rules.init-player: hi, name-id=" (name id))
+      ; (-> session
+      ;   (prn "rules.init-player: name=" (name id))
+      ;   (o/insert ::top-player ::x col)))))
+      (case (name id)
+        "top-player"
+        (do
+          (-> session
+              (o/insert  ::top-player ::x col)
+              (o/insert  ::top-player ::y row)))
+        "btm-player"
+        (do
+          (-> session
+              (o/insert  ::btm-player ::x col)
+              (o/insert  ::btm-player ::y row)))
+        ; "btm-player"
+        ; (do
+        ;   (o/insert session ::btm-player ::x col)
+        ;   (o/insert session ::btm-player ::y row))
+        ;;TODO: necessary?
+        o/fire-rules))))
 
 (defn player-move-to [id x y]
   (prn "rules.player-move-to: x=" x ",y=" y ",id=" id)
   (swap! *session
     (fn [session]
       (-> session
-          (o/insert ::player ::x x)
-          (o/insert ::player ::y y)))))
+          ; (o/insert ::player ::x x)
+          ; (o/insert ::player ::y y)
+          (o/insert id ::x x)
+          (o/insert id ::y y)))))
           ;; following is nec.
           ; o/reset!))))
           ; o/fire-rules))))
 
 (defn player-move-to! [id x y]
   (prn "rules.player-move-to!: x=" x ",y=" y ",id=" id)
-  (o/insert! ::player ::x x)
-  (o/insert! ::player ::y y))
+  ; (o/insert! ::player ::x x)
+  ; (o/insert! ::player ::y y)
+  (o/insert! id ::x x)
+  (o/insert! id ::y y))
 
 ;; the dx,dy is in integral values of rows and cols.  We will scale
 ;; up to tile-width inside the function.
@@ -268,7 +371,8 @@
   ([id dx dy] (player-move-tile-delta id dx dy false))
   ([id dx dy hard-update?]
    (prn "rule: player-move-tile-delta: dx=" dx ",dy=" dy ",id=" id)
-   (let [player-pos (o/query-all @*session :cube-test.frig-frog.rules/player)
+   ; (let [player-pos (o/query-all @*session :cube-test.frig-frog.rules/player)])
+   (let [player-pos (o/query-all @*session id)
          x (-> (first player-pos) (:x))
          y (-> (first player-pos) (:y))
          tile-width ff.board/tile-width
@@ -294,17 +398,31 @@
             ; (prn "pb-collision: dist=" (bjs/Vector3.Distance b-pos p-pos))
         (bjs/Vector3.Distance b-pos p-pos))))
 
+(defn ball-to-player-dist [ball-id ball-sub-id player-id]
+  (let [
+        ; ball-mesh-id (common/gen-mesh-id-from-rule-id ball-id ball-sub-id)
+        ball-mesh (ff.ball/get-mesh ball-id ball-sub-id)
+        ball-pos (if ball-mesh
+                   (.-position ball-mesh)
+                   nil)
+        player-mesh (ff.player/get-mesh player-id)
+        player-pos (if player-mesh
+                     (.-position player-mesh)
+                     nil)]
+        ; _ (prn "rules.ball-to-player-dist: ball-pos=" ball-pos ",player-pos=" player-pos)]
+      (when (and ball-pos player-pos)
+        (bjs/Vector3.Distance ball-pos player-pos))))
 ;;
 ;; top-player
 ;;
-(defn init-top-player [id row col]
-  (swap! *session
-    (fn [session]
-      (-> session
-          (o/insert ::top-player ::x col)
-          (o/insert ::top-player ::y row)
-          ; (o/insert ::top-player ::sub-id "player")
-          o/fire-rules))))
+; (defn init-top-player [id row col]
+;   (swap! *session
+;     (fn [session]
+;       (-> session
+;           (o/insert ::top-player ::x col)
+;           (o/insert ::top-player ::y row)
+;           ; (o/insert ::top-player ::sub-id "player")
+;           o/fire-rules))))
 
 ;;
 ;; left-ctrl

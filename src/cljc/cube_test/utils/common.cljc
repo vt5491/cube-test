@@ -55,11 +55,15 @@
 ;; e.g. return [(mesh tr-1-0) (mesh tr-1-1)] for stem-id "tr-1"
 (defn get-meshes-by-stem [stem-id])
 
-(defn gen-mesh-id-from-rule-id [id sub-id]
-  (let [kind (second (re-matches #"^.*/(.*)" (str :cube-test.frig-frog.rules/ball)))]
-    (str kind "-" sub-id)))
+(defn gen-mesh-id-from-rule-id
+  ([id] (gen-mesh-id-from-rule-id id nil))
+  ([id sub-id]
+   (let [kind (second (re-matches #"^.*/(.*)" (str id)))]
+     (if sub-id
+       (str kind "-" sub-id)
+       kind))))
 
-(defn in? 
+(defn in?
   "true if coll contains elm"
   [coll elm]
   (some #(= elm %) coll))

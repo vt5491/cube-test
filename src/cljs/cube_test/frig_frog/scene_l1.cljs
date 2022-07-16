@@ -235,27 +235,35 @@
 
 (defn cmd-gui-loaded []
   (let [add-train-btn (.getControlByName cmd-gui-adv-text "add_train_btn")
-        init-ball-btn (.getControlByName cmd-gui-adv-text "init_ball_btn")
-        toggle-ball-btn (.getControlByName cmd-gui-adv-text "toggle_ball_btn")
-        rot-cam-btn (.getControlByName cmd-gui-adv-text "rot_cam_btn")]
+        init-top-ball-btn (.getControlByName cmd-gui-adv-text "init_top_ball_btn")
+        init-btm-ball-btn (.getControlByName cmd-gui-adv-text "init_btm_ball_btn")
+        toggle-btm-ball-btn (.getControlByName cmd-gui-adv-text "toggle_btm_ball_btn")
+        toggle-top-ball-btn (.getControlByName cmd-gui-adv-text "toggle_top_ball_btn")]
     (-> add-train-btn (.-onPointerClickObservable)
         (.add #(rf/dispatch [:cube-test.frig-frog.events/post-add-train
                               {:id-stem :tr-1 :vx -1 :vy 0 :length 5 :init-row 2 :init-col 4}])))
-    (-> init-ball-btn (.-onPointerClickObservable)
+    (-> init-top-ball-btn (.-onPointerClickObservable)
         (.add #(do
                  (set! ball-moving true)
-                 (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/ball
+                 (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/top-ball
                                           :sub-id 1
                                           :x 8 :y 3
                                           :vx -1 :vy 0
                                           :anim true))))
-    (-> toggle-ball-btn (.-onPointerClickObservable)
+    (-> init-btm-ball-btn (.-onPointerClickObservable)
         (.add #(do
-                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/ball 1))))
-    (-> rot-cam-btn (.-onPointerClickObservable)
-        (.add (fn [value]
-                (let [cam main-scene/camera]
-                  (-> (.-rotationQuaternion cam) (.multiplyInPlace (bjs/Quaternion.FromEulerAngles (* -10 base/ONE-DEG) 0 0)))))))))
+                 (set! ball-moving true)
+                 (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/btm-ball
+                                          :sub-id 1
+                                          :x 8 :y 3
+                                          :vx -1 :vy 0
+                                          :anim true))))
+    (-> toggle-btm-ball-btn (.-onPointerClickObservable)
+        (.add #(do
+                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/btm-ball 1))))
+    (-> toggle-top-ball-btn (.-onPointerClickObservable)
+        (.add #(do
+                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/top-ball 1))))))
 
 (defn load-cmd-gui []
   (let [scene main-scene/scene
@@ -356,8 +364,9 @@
     ; (ff.rules/init-game-piece "player" 0 5 0 0)
     ; (ff.rules/init-game-piece ff.rules/player 0 5 0 0)
     ; (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)
-    (ff.rules/init-player :cube-test.frig-frog.rules/player 0 5)
-    (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)))
+    (ff.rules/init-player :cube-test.frig-frog.rules/btm-player 0 5)
+    ; (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)
+    (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)))
 
 (defn tick []
   (ff.train/tick)
