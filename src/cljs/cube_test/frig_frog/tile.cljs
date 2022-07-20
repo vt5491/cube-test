@@ -6,6 +6,26 @@
    [cube-test.frig-frog.board :as ff.board]
    [cube-test.base :as base]))
 
+; (def hot-tile-color (bjs/Color3. 101 147 245))
+(def hot-tile-color (bjs/Color3. 0.396 0.576 0.961))
+; (def std-tile-color (bjs/Color3. 0xf5 0xf5 0xf5))
+(def std-tile-color (bjs/Color3. 0.961 0.961 0.961))
+(def hot-tile-mat)
+(def std-tile-mat)
+
+  ; (set! blue-mat (bjs/StandardMaterial. "blue-mat" scene))
+  ; (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1)))
+(defn x-y-to-row-col
+  "Convert pixel-based x-y coords to row-col based coords"
+  [x y]
+  (prn "x-y-to-row-col: x=" x ",y=" y)
+  (let [row (int (/ y ff.board/tile-width))
+        col (int (/ x ff.board/tile-height))]
+    ; (js-debugger)
+    (prn "x-y-to-row-col: row=" row ",col=" col)
+    {:row row :col col}))
+;; re-frame based methods
+
 ; still used but basically defunct since we don't have a state keyword
 ; in a tile anymore, using a flattened structure instead.
 (defn state-update-fn [tile]
@@ -58,3 +78,33 @@
       ; (assoc db :board [])))
       ; (assoc db (-> :board :row-1 ) 7)
       ; (assoc-in db [:board 1 :row-1] 7)))
+;; rules-based methods
+;btm-tile-1-3
+(defn get-mesh [prfx x y]
+  (let [scene main-scene/scene
+        tile-pos (x-y-to-row-col x y)
+        ; _ (prn "tile-pos=" tile-pos)
+        x (:row tile-pos)
+        y (:col tile-pos)
+        mesh-id (str prfx "-tile-" x "-" y)]
+        ; mesh-id (format "%s-tile-%s-%s" prfx x y)]
+    (prn "tile: mesh-id=" mesh-id)
+    (.getMeshByID scene mesh-id)))
+
+(defn update-tile-mesh
+  "Update the mesh associated with the tile"
+  [prfx x y mat]
+  (let [mesh (get-mesh prfx x y)]
+    (when mesh
+      (prn "update-tile-mesh: mesh=" mesh)
+      ; (set! (.-material mesh) main-scene/green-mat)
+      (set! (.-material mesh) hot-tile-mat))))
+
+(defn init []
+  (let [scene main-scene/scene]
+    (set! std-tile-mat (bjs/StandardMaterial. "std-tile-mat" scene))
+    (set! hot-tile-mat (bjs/StandardMaterial. "hot-tile-mat" scene))
+    (set! (.-diffuseColor std-tile-mat) std-tile-color)
+    ; (set! (.-diffuseColor hot-tile-mat) hot-tile-color)
+    (set! (.-diffuseColor hot-tile-mat) hot-tile-color)))
+    ; (set! (.-diffuseColor hot-tile-mat) (bjs/Color3. 1 0 0))))

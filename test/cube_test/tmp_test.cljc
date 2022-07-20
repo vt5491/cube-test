@@ -1071,3 +1071,7 @@
 (defn abc [])
 
 (gen-mesh-id-from-rule-id :cube-test.frig-frog.rules/btm-player 1)
+clj꞉cube-test.tmp-test꞉> 
+(+ (let [f #(if (string? %) (str "\"" % "\"") %)] (js/console.clear) #?(:cljs (apply js/console.log["\n" (f  (quote 1)) "\n" "\n" "=>" (f 1) "\n "])) 1) #_"AYCl3RM590NZaiJ" 1)
+(+ 1 1)
+(int 1.2)

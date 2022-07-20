@@ -8,6 +8,7 @@
   [cube-test.frig-frog.board :as ff.board]
   [cube-test.frig-frog.ball :as ff.ball]
   [cube-test.frig-frog.player :as ff.player]
+  [cube-test.frig-frog.tile :as ff.tile]
   [cube-test.main-scene :as main-scene]
   [cube-test.utils.common :as common]))
 
@@ -91,7 +92,7 @@
         [id ::anim anim]
         ; [id ::abc abc]
         :then
-        (prn "rules.ball matched: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",vx=" vx ",vy=" vy)
+        ; (prn "rules.ball matched: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",vx=" vx ",vy=" vy)
         (ff.ball/draw-ball id sub-id x y)]
 
       ; ::ball-q
@@ -201,7 +202,21 @@
         [::btm-player ::y y]
         :then
         (prn "rules: btm-player match, x=" x ",y=" y)
-        (ff.player/move-player-to "btm-player" x y)]}))
+        (ff.player/move-player-to "btm-player" x y)
+        ; (ff.tile/update-tile-mesh "btm" x y ff.tile/active-tile-color)]
+        ; {:todo/text "Wash the car", :todo/done false}
+        ; (o/insert ::time {::total 100 ::delta 0.1})
+        (o/insert! ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat})]
+
+      ::tile
+      [:what
+        [::tile ::x x]
+        [::tile ::y y]
+        [::tile ::prfx prfx]
+        [::tile ::mat mat]
+        :then
+        (prn "rules: tile match")
+        (ff.tile/update-tile-mesh prfx x y mat)]}))
 
 (defn init-session []
   (set! *session (atom (reduce o/add-rule (o/->session) rules))))
@@ -278,7 +293,10 @@
 (defn ball-player-collision-test [ball-id ball-sub-id player-id]
   (let [dist (ball-to-player-dist ball-id ball-sub-id player-id)]
     (when (and dist (< dist 1.0))
-      (prn "time-dt: btm-ball collision. dist=" dist))))
+      (prn "time-dt: btm-ball collision. dist=" dist)
+      ; (player-move-tile-delta player-id 0 -2 true)
+      (player-move-tile-delta ::top-player 0 -2 true)
+      (player-move-tile-delta ::btm-player 0 -2 true))))
     ; (prn "rules.ball-player-collision: dist=" dist)))
 
 ;;

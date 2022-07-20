@@ -14,6 +14,7 @@
    [cube-test.frig-frog.train :as ff.train]
    [cube-test.frig-frog.ff-worker :as ff.worker]
    [cube-test.frig-frog.rules :as ff.rules]
+   [cube-test.frig-frog.tile :as ff.tile]
    [promesa.core :as p]))
 
 ;; constants
@@ -59,18 +60,21 @@
   ([delta-rot]
    (let [
          ; camera main-scene/camera
-         vrHelper main-scene/vrHelper
+         ; vrHelper main-scene/vrHelper
+         ; xrHelper main-scene/xr-helper
          ;; this is a floating value that covers both vr and non-vr cameras
          current-cam (.-activeCamera main-scene/scene)
          quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 0)
          pos-delta (bjs/Vector3. 0 0 (if (neg? delta-rot)
                                       -1
                                       1))
+         x-rot (-> current-cam (.-rotation) (.-x))
          y-rot (-> current-cam (.-rotation) (.-y))
          delta-rot-rads (-> (bjs/Angle.FromDegrees delta-rot) (.radians))
          unit-circ (bjs/Vector3. (js/Math.sin (+ y-rot delta-rot-rads)) 0 (js/Math.cos (+ y-rot delta-rot-rads)))
          new-tgt (.add (.-position current-cam) unit-circ)]
-      (.setTarget current-cam new-tgt))))
+      (.setTarget current-cam new-tgt)
+      (set! (.-rotation current-cam) (bjs/Vector3. (* 20 base/ONE-DEG) 0 0)))))
 
 (defn create-tiled-box []
   (let [scene main-scene/scene
@@ -336,6 +340,20 @@
 (defn init-reflector []
   (set! reflector (bjs/Reflector. main-scene/scene "localhost" 1234)))
 
+(defn init-balls []
+  (ff.rules/init-ball-pos
+    :id :cube-test.frig-frog.rules/top-ball
+    :sub-id 2
+    :x 8 :y 4
+    :vx -1.5 :vy 0
+    :anim true)
+  (ff.rules/init-ball-pos
+    :id :cube-test.frig-frog.rules/btm-ball
+    :sub-id 2
+    :x 8 :y 4
+    :vx -1.2 :vy 0
+    :anim true))
+
 (defn init [db]
   (let [scene main-scene/scene
         ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
@@ -366,7 +384,9 @@
     ; (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)
     (ff.rules/init-player :cube-test.frig-frog.rules/btm-player 0 5)
     ; (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)
-    (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)))
+    (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)
+    (init-balls)
+    (ff.tile/init)))
 
 (defn tick []
   (ff.train/tick)
