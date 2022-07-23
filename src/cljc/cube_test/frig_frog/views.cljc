@@ -34,7 +34,9 @@
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/post-ping ])} "worker post-ping"]
      [:br]
      [:button.user-action {:on-click #(ff-rules/query-all-rules)} "query all rules"]
-     [:button.user-action {:on-click #(ff-rules/query-train-id-cnt)} "query train-id-cnt"]
+     [:button.user-action {:on-click #(do
+                                        (ff-rules/query-top-player-last-pos)
+                                        (ff-rules/query-btm-player-last-pos))} "query btm-top-player-last-pos"]
      [:button.user-action {:on-click #(ff-rules/query-player)} "query player"]
      [:br]
      [:br]
@@ -49,4 +51,4 @@
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/player 0 1)} "move player"]
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/btm-player 0 1)} "move btm-player"]
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/top-player 0 1)} "move top-player"]
-     [:button.user-action {:on-click #(set! cube-test.frig-frog.player.jumped false )} "set jumped to false"]]))
+     [:button.user-action {:on-click #(ff-rules/reset-last-tile :cube-test.frig-frog.rules/btm-player 1 1)} "reset last tile"]]))

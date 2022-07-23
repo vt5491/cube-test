@@ -10,7 +10,8 @@
   [cube-test.frig-frog.player :as ff.player]
   [cube-test.frig-frog.tile :as ff.tile]
   [cube-test.main-scene :as main-scene]
-  [cube-test.utils.common :as common]))
+  [cube-test.utils.common :as common]
+  [cube-test.utils :as utils]))
 
 (declare rules)
 (declare session)
@@ -24,6 +25,7 @@
 (declare player-to-ball-dist)
 (declare ball-to-player-dist)
 (declare ball-player-collision-test)
+(declare reset-last-tile)
 
 ;;
 ;; session
@@ -194,7 +196,9 @@
         [::top-player ::y y]
         :then
         (prn "rules: top-player match, x=" x ",y=" y)
-        (ff.player/move-player-to "top-player" x y)]
+        (ff.player/move-player-to "top-player" x y)
+        (o/insert! ::tile {::x x ::y y ::prfx "top" ::mat ff.tile/hot-tile-mat})
+        (utils/sleep #(reset-last-tile ::top-player-last-pos x y) 10)]
 
       ::btm-player
       [:what
@@ -203,10 +207,52 @@
         :then
         (prn "rules: btm-player match, x=" x ",y=" y)
         (ff.player/move-player-to "btm-player" x y)
-        ; (ff.tile/update-tile-mesh "btm" x y ff.tile/active-tile-color)]
-        ; {:todo/text "Wash the car", :todo/done false}
-        ; (o/insert ::time {::total 100 ::delta 0.1})
-        (o/insert! ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat})]
+        ; (reset-last-tile ::btm-player-last-pos x y)
+        ; (o/insert! ::btm-player-last-pos {::x 2 ::y 2})
+        (o/insert! ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat})
+        (utils/sleep #(reset-last-tile ::btm-player-last-pos x y) 10)
+        ; (o/insert! ::btm-player-last-pos ::x 3)
+        ; (o/insert! ::btm-player-last-pos ::y 3)
+        ; o/reset!
+        ; (-> o/*session*
+        ;       (o/insert ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat})
+        ;       ; (o/insert ::tile {::x 0 ::y 2 ::prfx "btm" ::mat ff.tile/dbg-tile-mat})
+        ;       o/reset!)
+        ; (reset-last-tile ::btm-player-last-pos x y)
+        o/fire-rules]
+        ; (o/insert! ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat})]
+        ; (let [last-pos (o/query-all @*session ::btm-player-last-pos)
+        ;       last-x (-> last-pos (first) (:x))
+        ;       last-y (-> last-pos (first) (:y))
+        ;       ; _ (prn "last-x=" last-x ",last-y=" last-y)
+        ;       last-row-col (ff.tile/x-y-to-row-col last-x last-y)]
+        ;       ; _ (prn "last-row-col=" last-row-col)
+        ;       ; _ (prn "last-row-col.x=" (:x last-row-col))]
+        ;   (prn "last-pos.x=" (:col last-row-col) ",y=" (:row last-row-col))
+
+          ;; reset last tile
+          ; (o/insert! ::tile {::x (- (:col last-row-col) 1) ::y (:row last-row-col) ::prfx "btm" ::mat ff.tile/dbg-tile-mat})
+          ; (-> o/*session*
+          ;     (o/insert ::tile {::x (- (:col last-row-col) 1) ::y (:row last-row-col) ::prfx "btm" ::mat ff.tile/dbg-tile-mat})
+          ;     o/reset!)
+              ; (o/insert ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat}))
+              ; o/reset!)
+          ; o/reset!
+          ;; and then update last pos with current pos
+        ; (o/insert! ::btm-player-last-pos ::x x)
+        ; (o/insert! ::btm-player-last-pos ::y y)]
+        ; :then-finally
+        ; (o/insert! ::tile {::x 0 ::y 2 ::prfx "btm" ::mat ff.tile/dbg-tile-mat})]
+      ::top-player-last-pos
+      [:what
+        [::top-player-last-pos ::x x]
+        [::top-player-last-pos ::y y]]
+
+
+      ::btm-player-last-pos
+      [:what
+        [::btm-player-last-pos ::x x]
+        [::btm-player-last-pos ::y y]]
 
       ::tile
       [:what
@@ -215,7 +261,7 @@
         [::tile ::prfx prfx]
         [::tile ::mat mat]
         :then
-        (prn "rules: tile match")
+        (prn "*rules: tile match, mat=" mat)
         (ff.tile/update-tile-mesh prfx x y mat)]}))
 
 (defn init-session []
@@ -371,7 +417,8 @@
           ; (o/insert ::player ::x x)
           ; (o/insert ::player ::y y)
           (o/insert id ::x x)
-          (o/insert id ::y y)))))
+          (o/insert id ::y y)
+          o/fire-rules))))
           ;; following is nec.
           ; o/reset!))))
           ; o/fire-rules))))
@@ -430,6 +477,17 @@
         ; _ (prn "rules.ball-to-player-dist: ball-pos=" ball-pos ",player-pos=" player-pos)]
       (when (and ball-pos player-pos)
         (bjs/Vector3.Distance ball-pos player-pos))))
+
+;; possible ids are:
+;; :cube-test.frig-frog.rules/btm-player-last-pos
+(defn set-player-last-pos [id x y]
+  (swap! *session
+    (fn [session]
+      (-> session
+          ; (o/insert ::btm-player-last-pos ::x x)
+          ; (o/insert ::btm-player-last-pos ::y y)
+          (o/insert id ::x x)
+          (o/insert id ::y y)))))
 ;;
 ;; top-player
 ;;
@@ -441,6 +499,39 @@
 ;           (o/insert ::top-player ::y row)
 ;           ; (o/insert ::top-player ::sub-id "player")
 ;           o/fire-rules))))
+
+;;
+;; tile
+;;
+(defn reset-last-tile [id x y]
+  (prn "*reset-last-tile: x=" x ",y=" y)
+  ; (let [last-pos (o/query-all @*session ::btm-player-last-pos)])
+  (let [last-pos (o/query-all @*session id)
+        _ (prn "last-pos=" last-pos)
+        last-x (-> last-pos (first) (:x))
+        last-y (-> last-pos (first) (:y))
+        ; _ (prn "last-x=" last-x ",last-y=" last-y)
+        last-row-col (ff.tile/x-y-to-row-col last-x last-y)]
+        ; _ (prn "last-row-col=" last-row-col)
+        ; _ (prn "last-row-col.x=" (:x last-row-col))]
+      (prn "last-pos.x=" (:row last-row-col) ",y=" (:col last-row-col))
+      ; (o/insert! ::tile {::x (- (:col last-row-col) 1) ::y (:row last-row-col) ::prfx "btm" ::mat ff.tile/dbg-tile-mat})
+      (swap! *session
+        (fn [session]
+          ; (prn "*hi")
+          (case id
+            ::top-player-last-pos
+             (-> session
+                  (o/insert ::tile {::x last-x ::y last-y ::prfx "top" ::mat ff.tile/std-tile-mat})
+                  (o/insert id ::x x)
+                  (o/insert id ::y y)
+                  o/fire-rules)
+            ::btm-player-last-pos
+             (-> session
+                 (o/insert ::tile {::x last-x ::y last-y ::prfx "btm" ::mat ff.tile/std-tile-mat})
+                 (o/insert id ::x x)
+                 (o/insert id ::y y)
+                 o/fire-rules))))))
 
 ;;
 ;; left-ctrl
@@ -506,6 +597,15 @@
     (prn "rules: train-id-cnt=" cnt)
     cnt))
 
+(defn query-top-player-last-pos []
+  (let [last-pos (o/query-all @*session ::top-player-last-pos)]
+    (prn "rules: top-player-last-pos=" last-pos)
+    last-pos))
+
+(defn query-btm-player-last-pos []
+  (let [last-pos (o/query-all @*session ::btm-player-last-pos)]
+    (prn "rules: btm-player-last-pos=" last-pos)
+    last-pos))
 ;;
 ;; admin
 ;;

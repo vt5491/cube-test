@@ -9,20 +9,30 @@
 ; (def hot-tile-color (bjs/Color3. 101 147 245))
 (def hot-tile-color (bjs/Color3. 0.396 0.576 0.961))
 ; (def std-tile-color (bjs/Color3. 0xf5 0xf5 0xf5))
-(def std-tile-color (bjs/Color3. 0.961 0.961 0.961))
+;; white
+; (def std-tile-color (bjs/Color3. 0.961 0.961 0.961))
+;; yellow (munsell)
+; (def std-tile-color (bjs/Color3. 0.937 0.8 0.0))
+;; orange (squash)
+(def orange-tile-color (bjs/Color3. 0.788 0.356 0.047))
+;; brown (wood)
+; (def std-tile-color (bjs/Color3. 0.788 0.356 0.047))
+;; brown (tortilla)
+(def std-tile-color (bjs/Color3. 0.569 0.482 0.310))
 (def hot-tile-mat)
 (def std-tile-mat)
+(def dbg-tile-mat)
 
   ; (set! blue-mat (bjs/StandardMaterial. "blue-mat" scene))
   ; (set! (.-diffuseColor blue-mat) (bjs/Color3. 0 0 1)))
 (defn x-y-to-row-col
   "Convert pixel-based x-y coords to row-col based coords"
   [x y]
-  (prn "x-y-to-row-col: x=" x ",y=" y)
-  (let [row (int (/ y ff.board/tile-width))
-        col (int (/ x ff.board/tile-height))]
+  ; (prn "x-y-to-row-col: x=" x ",y=" y)
+  (let [row (int (+ (/ y ff.board/tile-width) 0.6))
+        col (int (+ (/ x ff.board/tile-height) 0.6))]
     ; (js-debugger)
-    (prn "x-y-to-row-col: row=" row ",col=" col)
+    ; (prn "x-y-to-row-col: row=" row ",col=" col)
     {:row row :col col}))
 ;; re-frame based methods
 
@@ -60,6 +70,7 @@
         ; (set! (.-position tile) (bjs/Vector3. (* col 1.2) 1 (* row 1.2)))
         (set! (.-position tile) (bjs/Vector3. (* col ff.board/tile-width) board-height (* row ff.board/tile-height)))
         (set! (.-rotationQuaternion tile) base/X-QUAT-NEG-90)
+        (set! (.-material tile) std-tile-mat)
         ;note: use something like "cube_test.main_scene.scene.getMeshesByID('tile')" to access.
         (bjs/Tags.AddTagsTo tile "tile")))))
 
@@ -96,15 +107,18 @@
   [prfx x y mat]
   (let [mesh (get-mesh prfx x y)]
     (when mesh
-      (prn "update-tile-mesh: mesh=" mesh)
+      (prn "update-tile-mesh: mesh=" mesh ",mat=" mat)
       ; (set! (.-material mesh) main-scene/green-mat)
-      (set! (.-material mesh) hot-tile-mat))))
+      ; (set! (.-material mesh) hot-tile-mat)
+      (set! (.-material mesh) mat))))
 
 (defn init []
   (let [scene main-scene/scene]
     (set! std-tile-mat (bjs/StandardMaterial. "std-tile-mat" scene))
     (set! hot-tile-mat (bjs/StandardMaterial. "hot-tile-mat" scene))
+    (set! dbg-tile-mat (bjs/StandardMaterial. "dbg-tile-mat" scene))
     (set! (.-diffuseColor std-tile-mat) std-tile-color)
     ; (set! (.-diffuseColor hot-tile-mat) hot-tile-color)
-    (set! (.-diffuseColor hot-tile-mat) hot-tile-color)))
+    (set! (.-diffuseColor hot-tile-mat) hot-tile-color)
+    (set! (.-diffuseColor dbg-tile-mat) orange-tile-color)))
     ; (set! (.-diffuseColor hot-tile-mat) (bjs/Color3. 1 0 0))))

@@ -46,7 +46,7 @@
    (let [camera main-scene/camera
          vrHelper main-scene/vrHelper
          vr-cam (.-webVRCamera vrHelper)
-         quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 0)
+         quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 (* base/ONE-DEG -5))
          pos-delta (bjs/Vector3. 0 0 (if (neg? delta-rot)
                                       -1
                                       1))]
@@ -383,6 +383,7 @@
     ; (ff.rules/init-game-piece ff.rules/player 0 5 0 0)
     ; (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)
     (ff.rules/init-player :cube-test.frig-frog.rules/btm-player 0 5)
+    (ff.rules/set-player-last-pos :cube-test.frig-frog.rules/btm-player-last-pos 0 5)
     ; (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)
     (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)
     (init-balls)

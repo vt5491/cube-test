@@ -237,7 +237,7 @@
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles (* -35 base/ONE-DEG) (* 135 base/ONE-DEG) (* 5 base/ONE-DEG)))
         (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) (* 5 base/ONE-DEG)))
-        (cube-test.frig-frog.scene-l1.init-view 10))))
+        (cube-test.frig-frog.scene-l1.init-view 30))))
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0))
           ;; scruz
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))

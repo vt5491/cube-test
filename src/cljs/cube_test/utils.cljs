@@ -99,5 +99,5 @@
           tf (.getEnabledFeature fm bjs/WebXRFeatureName.TELEPORTATION)]
         ;; basically turn off the default rotation, so we can override at the scene/game level
         ; (prn "utils.ddjc b")
-        (.detach tf) 
+        (.detach tf)
         (set! (.-rotationAngle tf) 0))))

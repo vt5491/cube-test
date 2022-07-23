@@ -85,8 +85,8 @@
     (cond
       (or (> (Math/abs x) 0.5) (> (Math/abs y) 0.5))
       (do
-        (jump-player-ctrl :cube-test.frig-frog.rules/btm-player x y)
-        (jump-player-ctrl :cube-test.frig-frog.rules/top-player x y))
+        (jump-player-ctrl :cube-test.frig-frog.rules/top-player x y)
+        (jump-player-ctrl :cube-test.frig-frog.rules/btm-player x y))
       :else
       ; (set! jumped false)
       (do
