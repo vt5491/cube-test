@@ -1075,3 +1075,173 @@ clj꞉cube-test.tmp-test꞉> 
 (+ (let [f #(if (string? %) (str "\"" % "\"") %)] (js/console.clear) #?(:cljs (apply js/console.log["\n" (f  (quote 1)) "\n" "\n" "=>" (f 1) "\n "])) 1) #_"AYCl3RM590NZaiJ" 1)
 (+ 1 1)
 (int 1.2)
+(int (/ 5 1.2))
+
+
+(let [r (for [i (range (rand 8))] [i])
+      rots (reduce into [] r)]
+    (prn "r=" r)
+    (prn rots))
+
+(rand 8)
+(for)
+(range 8)
+(nth (range 8) 0)
+
+(rand 5 8)
+(let [a])
+(repeat 5 8)
+(range 7 0 -1)
+(range 0 8)
+(range 8)
+(int (rand 3))
+
+;; good-use
+(defn remove-from-vec [v idx]
+  ; (prn "remove-from-vec: idx=" idx)
+  (let [
+        ; rows (range 8)
+        ; rows-2 (map #(if (= %1 idx)))
+        rows-2 (map-indexed
+                (fn [i itm] (if (= i idx)
+                              nil
+                              itm))
+                v)
+        rows-3 (filter #(not (= %1 nil)) rows-2)]
+    ; (prn "remove-from-vec: rows-3=" rows-3)
+    rows-3))
+
+; (let [idx-2 (int (rand 8))]
+;   (prn "idx-2=" idx-2)
+;   (remove-from-vec (range 8) 2))
+;; good
+(let [idx (int (rand 7))
+      rows (range 8)
+      pick (nth rows idx)
+      rows-r (remove-from-vec rows idx)
+      idx-2 (int (rand 6))
+      pick-2 (nth rows-r idx-2)
+      rows-r-2 (remove-from-vec rows-r idx-2)]
+  (prn "pick=" pick "row-r=" rows-r)
+  (prn "pick-2=" pick-2 "row-r-2=" rows-r-2))
+
+; (let [picks []])
+(def picks [])
+
+;; good-use
+(let [a []]
+  (set! picks [])
+  (reduce (fn [acc v]
+            (prn "acc=" acc ",v=" v)
+            (do
+              (let [idx (int (rand v))
+                    pick (nth acc idx)]
+                (prn "pick=" pick)
+                (set! picks (conj picks pick))
+                (remove-from-vec acc idx))))
+          (range 8)
+          (range 8 4 -1))
+          ; [(int (rand 8)) (int (rand 7)) (int (rand 6))])
+  (prn "picks=" picks))
+
+(reduce (fn [acc v] (do
+                      (prn "acc=" acc ",val=" val)
+                      (conj acc v)))
+        []
+        (range 5))
+
+(conj [] 1)
+(range 7 0 -1)
+
+(reduce (fn [val accum] (prn "val=" val ",accum=" accum)) [0 1 2] (range 5))
+(reduce)
+(map #())
+(let [rows (range 8)]
+    rows-2 (map #(if (= %1 idx)
+                   nil
+                   %1)
+                rows)
+    rows-3 (filter #(not (= %1 nil)) rows-2)
+  (prn "result=" rows-3))
+
+(let [rows (range 8)
+      y-rnd (map #(-> (rand %1) (int)) (repeat 4 8))
+      y-rnd-2 (map
+               #(let [rnd-idx (rand %1)
+                      rnd-row (nth rows rnd-idx)]))]
+  (prn "rows=" rows)
+  (prn "y-rnd=" y-rnd))
+
+(let [s #{1 2 3}
+      t (conj s 4)]
+  (prn "count t=" (count t)))
+
+(def urs-seq #{})
+(def urs-idx 0)
+"generate a non-repeating set of random numbers
+from the specified range for a length of n
+(unique-rnd-seq 8 4) -> #{2 3 5 6}
+(unique-rnd-seq 10 18 3) -> #{11 13 18} "
+(defn unique-rnd-seq
+  ([range-max n] (unique-rnd-seq 0 range-max n))
+  ([range-min range-max n]
+   (set! urs-seq #{})
+   (set! urs-idx 0)
+   (prn "rang-max=" range-max "range-min=" range-min ",n=" n)
+   (while (and (< (count urs-seq) n) (< urs-idx (* range-max 3)))
+     (set! urs-seq (conj urs-seq (+ (rand-int (- range-max range-min)) range-min)))
+     (set! urs-idx (+ urs-idx 1))
+     (prn "loop: urs-seq=" urs-seq ", urs-idx=" urs-idx))
+   urs-seq))
+   ; (let [range (range range-min range-max)])
+   ; (map-indexed
+   ;   (fn [i itm]))))
+(unique-rnd-seq 8 4)
+(unique-rnd-seq 8 16 4)
+
+urs-seq
+(take 5 (repeatedly #(rand-int 8)))
+
+(map-indexed
+ (fn [i x]))
+
+(filter
+ #(do
+    (prn "%1=" %1)
+    (< %1 10))
+  (range 20))
+
+(let [x 0]
+  (set! urs-seq #{})
+  (some #(do
+           (set! urs-seq (conj urs-seq %1))
+           (>= (count urs-seq) 5))
+    (take 20 (repeatedly #(rand-int 8))))
+  urs-seq)
+
+(loop [x 10 y 7]
+  (when (> x 1)
+    (println x "," y)
+    (recur (- x 2) (- y 1))))
+
+(loop [rnd-stream (take 20 (repeatedly #(rand-int 8)))
+       uniq-seq #{}
+       idx 0]
+  (if (and (< (count uniq-seq) 4) (< idx 30))
+    (recur rnd-stream (conj uniq-seq (nth rnd-stream idx)) (inc idx))
+    uniq-seq))
+
+(rand-int 3)
+
+(every? (< 8) #{0 4 3 5})
+(every? #(< % 3) #{0 4 3 5})
+
+(nth (seq #{1 2 3}) 1)
+
+(let [s #{1 2 3}]
+  (map-indexed (fn [i x]
+                 (prn "i=" i ",x=" x)
+                 (prn "s-i=" (nth (seq s) i)))
+       #{2 4 8}))
+
+(keyword (str "abc" "-" (+ 1 1)))

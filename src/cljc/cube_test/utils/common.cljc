@@ -67,3 +67,19 @@
   "true if coll contains elm"
   [coll elm]
   (some #(= elm %) coll))
+
+"generate a non-repeating set of random numbers
+from the specified range for a length of n
+(unique-rnd-seq 8 4) -> #{2 3 5 6}
+(unique-rnd-seq 10 18 3) -> #{11 13 18} "
+(defn unique-rnd-seq
+  ([range-max n] (unique-rnd-seq 0 range-max n))
+  ([range-min range-max n]
+  ;; note: n * 10 is just a heuristic amount to prevent run away loops
+   (let [limit (* n 10)]
+     (loop [rnd-stream (take limit (repeatedly #(rand-int (- range-max range-min))))
+            uniq-seq #{}
+            idx 0]
+       (if (and (< (count uniq-seq) n) (< idx limit))
+         (recur rnd-stream (conj uniq-seq (+ (nth rnd-stream idx) range-min)) (inc idx))
+         uniq-seq)))))

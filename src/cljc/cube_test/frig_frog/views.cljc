@@ -38,6 +38,8 @@
                                         (ff-rules/query-top-player-last-pos)
                                         (ff-rules/query-btm-player-last-pos))} "query btm-top-player-last-pos"]
      [:button.user-action {:on-click #(ff-rules/query-player)} "query player"]
+     [:button.user-action {:on-click #(ff-rules/query-top-balls)} "query top-balls"]
+     [:button.user-action {:on-click #(ff-rules/query-btm-balls)} "query btm-balls"]
      [:br]
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/init-frog-2 0 5])} "init frog-2"]

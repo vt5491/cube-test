@@ -48,6 +48,7 @@
         [::ball ::y y]
         [::ball ::sub-id sub-id]
         :then
+        (prn "rules: time-dt-ball match")
         (do
           (let [dist (player-to-ball-dist (str "ball-" sub-id))]
             (when (and dist (< dist 1.0))
@@ -63,22 +64,32 @@
       ::time-dt-btm-ball
       [:what
         [::time ::delta dt]
-        [::btm-ball ::x x]
-        [::btm-ball ::y y]
-        [::btm-ball ::sub-id sub-id]
+        ; [::btm-ball-3 ::x x]
+        ; [::btm-ball-3 ::y y]
+        ; [::btm-ball-3 ::sub-id sub-id]
+        [id ::x x]
+        [id ::y y]
+        [id ::sub-id sub-id]
         :then
-        (ball-player-collision-test ::btm-ball sub-id ::btm-player)]
+        ; (ball-player-collision-test ::btm-ball sub-id ::btm-player)
+        (ball-player-collision-test id sub-id ::btm-player)
+        (ball-player-collision-test id sub-id ::top-player)]
         ; (let [dist (ball-player-collision ::btm-ball sub-id ::btm-player)]
         ;   (when (and dist (< dist 1.0))
         ;     (prn "time-dt: btm-ball collision. dist=" dist)))]
-      ::time-dt-top-ball
-      [:what
-        [::time ::delta dt]
-        [::top-ball ::x x]
-        [::top-ball ::y y]
-        [::top-ball ::sub-id sub-id]
-        :then
-        (ball-player-collision-test ::top-ball sub-id ::top-player)]
+
+      ; ::time-dt-top-ball
+      ; [:what
+      ;   [::time ::delta dt]
+      ;   ; [::top-ball ::x x]
+      ;   ; [::top-ball ::y y]
+      ;   ; [::top-ball ::sub-id sub-id]
+      ;   [id ::x x]
+      ;   [id ::y y]
+      ;   [id ::sub-id sub-id]
+      ;   :then
+      ;   ; (ball-player-collision-test ::top-ball sub-id ::top-player)
+      ;   (ball-player-collision-test id sub-id ::top-player)]
 
       ::train-id-cnt
       [:what
@@ -127,8 +138,11 @@
         [id ::anim anim]
         :then
         (let [
-              mesh-id (common/gen-mesh-id-from-rule-id id sub-id)
+              ; mesh-id (common/gen-mesh-id-from-rule-id id sub-id)
+              mesh-id (common/gen-mesh-id-from-rule-id id)
+              ; _ (prn "rules: ball-glide: mesh-id=" mesh-id)
               mesh-pos (ff.ball/get-mesh-pos mesh-id)
+              ; _ (prn "rules: ball-glide: mesh-pos=" mesh-pos)
               ; x (.-x mesh-pos)
               ; ;; note how mesh z equals out logical y.
               ; y (.-z mesh-pos)
@@ -143,7 +157,8 @@
                   new-y (+ y dy)]
               (if (< new-x 0)
                 (do
-                  (ball-move-to-2 id 8 3))
+                  ; (ball-move-to-2 id 8 3)
+                  (ball-move-to-2 id 8 y))
                 (ff.ball/move-ball id sub-id (* vx dt 0.001) (* vy dt 0.001))))))]
 
       ::frog
@@ -291,7 +306,7 @@
 ; (defn blah [& {:keys [key1 key2 key3]}])
 ; (defn init-ball-pos [id x y vx vy anim])
 (defn init-ball-pos [& {:keys [id sub-id x y vx vy anim] :as opts}]
-  ; (prn "rules.init-ball-pos: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",anim=" anim)
+  (prn "rules.init-ball-pos: id=" id ",sub-id=" sub-id ",x=" x ",y=" y ",anim=" anim)
   (swap! *session
     (fn [session]
       (-> session
@@ -337,9 +352,13 @@
           (o/insert id {::sub-id sub-id ::x row ::y col ::anim toggled-anim}))))))
 
 (defn ball-player-collision-test [ball-id ball-sub-id player-id]
+  ; (prn "rules.ball-player-collision-test: ball-id=" ball-id)
   (let [dist (ball-to-player-dist ball-id ball-sub-id player-id)]
+        ; _ (when (= ball-id ::top-ball-4)
+        ;     (do
+        ;       (prn "rules.ball-player-collision-test: dist=" dist ",player-id=" player-id)))]
     (when (and dist (< dist 1.0))
-      (prn "time-dt: btm-ball collision. dist=" dist)
+      ; (prn "time-dt: btm-ball collision. dist=" dist)
       ; (player-move-tile-delta player-id 0 -2 true)
       (player-move-tile-delta ::top-player 0 -2 true)
       (player-move-tile-delta ::btm-player 0 -2 true))))
@@ -467,6 +486,7 @@
   (let [
         ; ball-mesh-id (common/gen-mesh-id-from-rule-id ball-id ball-sub-id)
         ball-mesh (ff.ball/get-mesh ball-id ball-sub-id)
+        ; _ (prn "rules.ball-to-player-dist: ball-mesh=" ball-mesh)
         ball-pos (if ball-mesh
                    (.-position ball-mesh)
                    nil)
@@ -606,6 +626,16 @@
   (let [last-pos (o/query-all @*session ::btm-player-last-pos)]
     (prn "rules: btm-player-last-pos=" last-pos)
     last-pos))
+
+(defn query-top-balls []
+  (let [balls (o/query-all @*session ::top-ball)]
+    (prn "rules: top-balls=" balls)
+    balls))
+
+(defn query-btm-balls []
+  (let [balls (o/query-all @*session ::btm-ball)]
+    (prn "rules: btm-balls=" balls)
+    balls))
 ;;
 ;; admin
 ;;
