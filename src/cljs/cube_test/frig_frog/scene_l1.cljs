@@ -356,34 +356,40 @@
   ;   :anim true)
   ;; now generate some random balls that will vary each time
   ; (let [rnd-ball-rows (common/unique-rnd-sec)])
-  (comment)
   (let [rnd-ball-rows #{5 8 2}
-        rnd-vx #{-1.0 -0.8 -1.1 -1.2}]
-  ; (let [rnd-ball-rows #{5}
-  ;       rnd-vx #{-1.0 -2.0}]
-   ; (map-indexed (fn [i x]
-   ;               (prn "rnd-2:i=" i))
-   ;         [1 2 3])
-   (doall (map-indexed (fn [i row]
-                         (prn "rnd-balls: i=" i ",row=" row)
-                         (ff.rules/init-ball-pos
-                              :id (keyword (str "cube-test.frig-frog.rules/btm-ball" "-" (+ i 3)))
-                              :sub-id (+ i 3)
-                              :x 8 :y row
-                              :vx (nth (seq rnd-vx) i) :vy 0
-                              :anim true))
-                       rnd-ball-rows)))
+        rnd-vx #{1.0 -0.8 -1.1 -1.2}]
+    (doall
+      (map-indexed
+        (fn [i row]
+          ; (prn "rnd-balls: i=" i ",row=" row)
+          (let [vx (nth (seq rnd-vx) i)]
+            (ff.rules/init-ball-pos
+              :id (keyword (str "cube-test.frig-frog.rules/btm-ball" "-" (+ i 3)))
+              :sub-id (+ i 3)
+              :x (if (neg? vx)
+                   8
+                   0)
+              :y row
+              :vx vx :vy 0
+              :anim true)))
+        rnd-ball-rows)))
   (let [rnd-ball-rows #{4 7}
-        rnd-vx #{-1.0 -0.5 -1.1 -1.2}]
-   (doall (map-indexed (fn [i row]
-                         (prn "rnd-balls: i=" i ",row=" row)
-                         (ff.rules/init-ball-pos
-                              :id (keyword (str "cube-test.frig-frog.rules/top-ball" "-" (+ i 3)))
-                              :sub-id (+ i 3)
-                              :x 8 :y row
-                              :vx (nth (seq rnd-vx) i) :vy 0
-                              :anim true))
-                       rnd-ball-rows))))
+        rnd-vx #{1.0 -0.5}]
+    (doall
+      (map-indexed
+       (fn [i row]
+         ; (prn "rnd-balls: i=" i ",row=" row)
+         (let [vx (nth (seq rnd-vx) i)]
+            (ff.rules/init-ball-pos
+             :id (keyword (str "cube-test.frig-frog.rules/top-ball" "-" (+ i 3)))
+             :sub-id (+ i 3)
+             :x (if (neg? vx)
+                  8
+                  0)
+             :y row
+             :vx (nth (seq rnd-vx) i) :vy 0
+             :anim true)))
+       rnd-ball-rows))))
 
 (defn init [db]
   (let [scene main-scene/scene

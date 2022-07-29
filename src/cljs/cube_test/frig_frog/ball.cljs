@@ -51,8 +51,11 @@
          ; mesh-id (common/gen-mesh-id-from-rule-id id sub-id)
          mesh-id (common/gen-mesh-id-from-rule-id id)
          ; _ (prn "draw-ball: mesh-id=" mesh-id)
-         mesh (or (.getMeshByID scene mesh-id) (bjs/Mesh.CreatePolyhedron. mesh-id (js-obj "type" 3 "size" 0.5) scene))]
+         mesh (or (.getMeshByID scene mesh-id) (bjs/Mesh.CreatePolyhedron. mesh-id (js-obj "type" 3 "size" 0.5) scene))
+         tile-width cube-test.frig-frog.board/tile-width
+         tile-height cube-test.frig-frog.board/tile-height]
      (set! (.-position mesh) (bjs/Vector3. x y z)))))
+     ; (set! (.-position mesh) (bjs/Vector3. x y (+ z (* 4 0.2)))))))
      ; (js-debugger))))
 
 ; (defn draw-ball-2
