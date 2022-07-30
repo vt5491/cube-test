@@ -28,6 +28,8 @@
 (def cmd-gui-adv-text)
 (def cam-gui-adv-text)
 (def ball-moving false)
+(def intro-snd)
+; (def player-move-snd)
 
 (defn init-non-vr-view
   ([] (init-non-vr-view 180))
@@ -391,6 +393,25 @@
              :anim true)))
        rnd-ball-rows))))
 
+; (defn play-intro []
+;   (prn "intro loaded"))
+;
+(defn init-snd []
+  (set! intro-snd (bjs/Sound.
+                    "intro-snd"
+                    "sounds/frig_frog/breeze_intro.ogg"
+                    main-scene/scene
+                    #(do
+                       (prn "intro loaded")
+                       (.play intro-snd)))))
+                    ; js-obj("readyToPlayCallback" #(prn "intro loaded"))
+                    ; js-obj("readyToPlayCallback" (fn [x](prn "intro loaded")))
+                    ; js-obj("readyToPlayCallback" play-intro))))
+  ; (set! player-move-snd (bjs/Sound.
+  ;                          "intro-snd"
+  ;                          "sounds/frig_frog/plastic_swipe.ogg"
+  ;                          main-scene/scene)))
+
 (defn init [db]
   (let [scene main-scene/scene
         ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
@@ -424,7 +445,8 @@
     ; (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)
     (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)
     (init-balls)
-    (ff.tile/init)))
+    (ff.tile/init)
+    (init-snd)))
 
 (defn tick []
   (ff.train/tick)

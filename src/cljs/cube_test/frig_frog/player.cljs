@@ -12,6 +12,8 @@
 (def ^:dynamic btm-player-jumped false)
 (def open-for-service true)
 (def player-left-thumbstick)
+(def player-move-snd)
+(def player-hit-snd)
 
 (defn get-mesh [player-id]
   (let [mesh-id (common/gen-mesh-id-from-rule-id player-id)
@@ -22,7 +24,7 @@
 (defn move-player-to
   ; ([mesh-id x y]  (move-player-to mesh-id x cube-test.frig-frog.board/board-height y))
   ([mesh-id x y]  (let [prfx (-> (re-matches #"^(.*)-.*" mesh-id) second)]
-                    (prn "player.move-player-to: prfx=" prfx)
+                    ; (prn "player.move-player-to: prfx=" prfx)
                     (case prfx
                       "top" (move-player-to mesh-id x (:top cube-test.frig-frog.board/board-heights) y)
                       "btm" (move-player-to mesh-id x (:btm cube-test.frig-frog.board/board-heights) y)
@@ -101,10 +103,31 @@
 (defn ctrl-added [xr-ctrl]
   (-> xr-ctrl .-onMotionControllerInitObservable (.add player-motion-ctrl-added)))
 
+(defn play-move-snd []
+  (.play player-move-snd))
+
+(defn play-hit-snd []
+  (.play player-hit-snd))
+
+; (defn init-snd [player-move-snd-file])
+(defn init-snd [{:keys [move-snd-file hit-snd-file] :as parms}]
+  (set! player-move-snd (bjs/Sound.
+                           "plyr-move-snd"
+                           move-snd-file
+                           main-scene/scene))
+  (set! player-hit-snd (bjs/Sound.
+                           "plyr-hit-snd"
+                           hit-snd-file
+                           main-scene/scene)))
 (defn init-player []
   (utils/disable-default-joystick-ctrl)
   (let [xr-helper main-scene/xr-helper]
-    (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added))))
+    (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
+  ; (init-snd "sounds/frig_frog/plastic_swipe.ogg")
+  ; (init-snd "sounds/frig_frog/cloth_slide.ogg")
+  ; (init-snd "sounds/frig_frog/paper_slide.ogg")
+  (init-snd {:move-snd-file "sounds/frig_frog/paper_slide.ogg"
+             :hit-snd-file "sounds/frig_frog/wipeout.ogg"}))
 
 (defn ^:export tick []
   ;; Note: accessing the vr/xr controller has to be "on the tick".  It's simply not

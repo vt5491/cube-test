@@ -129,14 +129,13 @@
         [::top-player ::x x]
         [::top-player ::y y]
         [::top-player ::sub-id sub-id]]
-      ::player
-      ; ::player-move
-      [:what
-        [::player ::x x]
-        [::player ::y y]
-        :then
-        ; (prn "rules: player match, x=" x ",y=" y)
-        (ff.player/move-player-to "player" x y)]
+      ; ::player
+      ; [:what
+      ;   [::player ::x x]
+      ;   [::player ::y y]
+      ;   :then
+      ;   ; (prn "rules: player match, x=" x ",y=" y)
+      ;   (ff.player/move-player-to "player" x y)]
 
       ::top-player
       [:what
@@ -157,7 +156,9 @@
         (ff.player/move-player-to "btm-player" x y)
         (o/insert! ::tile {::x x ::y y ::prfx "btm" ::mat ff.tile/hot-tile-mat})
         (utils/sleep #(reset-last-tile ::btm-player-last-pos x y) 10)
-        o/fire-rules]
+        o/fire-rules
+        (ff.player/play-move-snd)]
+
 
       ::top-player-last-pos
       [:what
@@ -235,7 +236,8 @@
   (let [dist (ball-to-player-dist ball-id ball-sub-id player-id)]
     (when (and dist (< dist 1.0))
       (player-move-tile-delta ::top-player 0 -2 true)
-      (player-move-tile-delta ::btm-player 0 -2 true))))
+      (player-move-tile-delta ::btm-player 0 -2 true)
+      (ff.player/play-hit-snd))))
 
 ;;
 ;; frog

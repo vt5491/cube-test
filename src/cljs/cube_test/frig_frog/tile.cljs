@@ -78,11 +78,11 @@
   (let [b (:board db)
         row (nth b row-num)
         row-kw (keyword (str "row-" row-num))
-        tmp (prn "b=" b ", row=" row ", row-kw=" row-kw)
+        ; tmp (prn "b=" b ", row=" row ", row-kw=" row-kw)
         tile (-> (row-kw row) (nth col-num))
         ; new-tile (assoc tile :state 7)
         new-tile (update-fn tile)]
-      (prn "tile.update-tile: tile=" tile)
+      ; (prn "tile.update-tile: tile=" tile)
       ; (assoc (-> (nth b row-num) (row-kw) (nth col-num)) :state 7)))
       ; (assoc db (-> db :board (nth row-num) (row-kw) (nth col-num)) new-tile)))
       (assoc-in db [:board row-num row-kw col-num] new-tile)))
@@ -99,7 +99,7 @@
         y (:col tile-pos)
         mesh-id (str prfx "-tile-" x "-" y)]
         ; mesh-id (format "%s-tile-%s-%s" prfx x y)]
-    (prn "tile: mesh-id=" mesh-id)
+    ; (prn "tile: mesh-id=" mesh-id)
     (.getMeshByID scene mesh-id)))
 
 (defn update-tile-mesh
@@ -107,7 +107,7 @@
   [prfx x y mat]
   (let [mesh (get-mesh prfx x y)]
     (when mesh
-      (prn "update-tile-mesh: mesh=" mesh ",mat=" mat)
+      ; (prn "update-tile-mesh: mesh=" mesh ",mat=" mat)
       ; (set! (.-material mesh) main-scene/green-mat)
       ; (set! (.-material mesh) hot-tile-mat)
       (set! (.-material mesh) mat))))
