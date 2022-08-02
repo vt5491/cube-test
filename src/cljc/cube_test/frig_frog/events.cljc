@@ -291,14 +291,14 @@
    {
      :db (:db cofx)}))
 
-(rf/reg-event-fx
- ::init-view
- (fn [cofx [_ rot-delta]]
-   (if rot-delta
-     (ff.scene-l1/init-view rot-delta)
-     (ff.scene-l1/init-view))
-   {
-     :db (:db cofx)}))
+; (rf/reg-event-fx
+;  ::init-view
+;  (fn [cofx [_ rot-delta]]
+;    (if rot-delta
+;      (ff.scene-l1/init-view rot-delta)
+;      (ff.scene-l1/init-view))
+;    {
+;      :db (:db cofx)}))
 
 (rf/reg-event-fx
  ::reset-view

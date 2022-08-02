@@ -19,6 +19,7 @@
    ;; is here.
    [cube-test.twizzlers.events]
    [cube-test.utils.events]
+   ; [cube-test.top-scene.events]
    ;; workers
    [cljs-workers.core :as main]
    [cljs-workers.worker :as worker]

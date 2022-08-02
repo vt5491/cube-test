@@ -8,6 +8,7 @@
    [re-frame.loggers :as loggers]
    [clojure.spec.alpha :as s]
    [cube-test.main-scene :as main-scene]
+   [cube-test.base :as base]
    [babylonjs :as bjs]))
 
 
@@ -101,3 +102,26 @@
         ; (prn "utils.ddjc b")
         (.detach tf)
         (set! (.-rotationAngle tf) 0))))
+
+;; Every scene may need to potentially alter the xr camera, so we supply
+;; this in utils instead of duplicating for each scene.
+(defn tweak-xr-view [xr yr zr state]
+  ; ([state delta-rot]
+   ; (prn "utils: init view entered,xr=" xr, ",state=" state)
+   (when (= state bjs/WebXRState.IN_XR)
+     (let [
+           ;; this is a floating value that covers both vr and non-vr cameras
+           current-cam (.-activeCamera main-scene/scene)
+           ; quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 0)
+           quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG xr) (* base/ONE-DEG yr) (* base/ONE-DEG zr))
+           pos-delta (bjs/Vector3. 0 0 (if (neg? xr)
+                                         -1
+                                         1))
+           x-rot (-> current-cam (.-rotation) (.-x))
+           y-rot (-> current-cam (.-rotation) (.-y))
+           delta-rot-rads (-> (bjs/Angle.FromDegrees xr) (.radians))
+           unit-circ (bjs/Vector3. (js/Math.sin (+ y-rot delta-rot-rads)) 0 (js/Math.cos (+ y-rot delta-rot-rads)))
+           new-tgt (.add (.-position current-cam) unit-circ)]
+        (.setTarget current-cam new-tgt)
+        ; (set! (.-rotation current-cam) (bjs/Vector3. (* 20 base/ONE-DEG) 0 0))
+        (set! (.-rotation current-cam) (bjs/Vector3. (* xr base/ONE-DEG) (* yr base/ONE-DEG) (* yr base/ONE-DEG))))))

@@ -236,8 +236,9 @@
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0))
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles (* -35 base/ONE-DEG) (* 135 base/ONE-DEG) (* 5 base/ONE-DEG)))
-        (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) (* 5 base/ONE-DEG)))
-        (cube-test.frig-frog.scene-l1.init-view 30))))
+        (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) (* 5 base/ONE-DEG))))))
+        ;; TODO this shouldn't be here. a total hack
+        ; (cube-test.frig-frog.scene-l1.init-view 30))))
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0))
           ;; scruz
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -90 base/ONE-DEG) 0)))))
@@ -274,6 +275,7 @@
     (set! (.-reflectionTexture skybox-mat) (bjs/CubeTexture. "textures/skybox/skybox" scene))
     (set! (-> skybox-mat .-reflectionTexture .-coordinatesMode) (-> bjs .-Texture .-SKYBOX_MODE))
     (set! (-> skybox-mat .-diffuseColor) (bjs/Color3. 0 0 0))
+    ; (set! (-> skybox-mat .-diffuseColor) (bjs/Color3.Red))
     (set! (-> skybox-mat .-specularColor) (bjs/Color3. 0 0 0))
     (set! (.-material skybox) skybox-mat)))
 

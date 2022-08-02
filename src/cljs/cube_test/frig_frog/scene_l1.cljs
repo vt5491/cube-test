@@ -58,26 +58,29 @@
 ;; ".currentVRCamera" is supposed to return the vr or non-vr camera depending on the mode,
 ;; but I find it doesn't work. So you have to distinguish the use cases yourself.
 ;; Note: solution is to set position on the vrHelper itself
-(defn init-view
-  ([] (init-view 180))
-  ([delta-rot]
-   (let [
-         ; camera main-scene/camera
-         ; vrHelper main-scene/vrHelper
-         ; xrHelper main-scene/xr-helper
-         ;; this is a floating value that covers both vr and non-vr cameras
-         current-cam (.-activeCamera main-scene/scene)
-         quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 0)
-         pos-delta (bjs/Vector3. 0 0 (if (neg? delta-rot)
-                                      -1
-                                      1))
-         x-rot (-> current-cam (.-rotation) (.-x))
-         y-rot (-> current-cam (.-rotation) (.-y))
-         delta-rot-rads (-> (bjs/Angle.FromDegrees delta-rot) (.radians))
-         unit-circ (bjs/Vector3. (js/Math.sin (+ y-rot delta-rot-rads)) 0 (js/Math.cos (+ y-rot delta-rot-rads)))
-         new-tgt (.add (.-position current-cam) unit-circ)]
-      (.setTarget current-cam new-tgt)
-      (set! (.-rotation current-cam) (bjs/Vector3. (* 20 base/ONE-DEG) 0 0)))))
+;; Note: now in utils/tweak-xr-view
+; (defn init-view
+;   ([state] (init-view state 180))
+;   ([state delta-rot]
+;    (prn "ff.frog.scene_l1: init view entered,state=" state)
+;    (when (= state bjs/WebXRState.IN_XR)
+;      (let [
+;            ; camera main-scene/camera
+;            ; vrHelper main-scene/vrHelper
+;            ; xrHelper main-scene/xr-helper
+;            ;; this is a floating value that covers both vr and non-vr cameras
+;            current-cam (.-activeCamera main-scene/scene)
+;            quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 0)
+;            pos-delta (bjs/Vector3. 0 0 (if (neg? delta-rot)
+;                                          -1
+;                                          1))
+;            x-rot (-> current-cam (.-rotation) (.-x))
+;            y-rot (-> current-cam (.-rotation) (.-y))
+;            delta-rot-rads (-> (bjs/Angle.FromDegrees delta-rot) (.radians))
+;            unit-circ (bjs/Vector3. (js/Math.sin (+ y-rot delta-rot-rads)) 0 (js/Math.cos (+ y-rot delta-rot-rads)))
+;            new-tgt (.add (.-position current-cam) unit-circ)]
+;         (.setTarget current-cam new-tgt)
+;         (set! (.-rotation current-cam) (bjs/Vector3. (* 20 base/ONE-DEG) 0 0))))))
 
 (defn create-tiled-box []
   (let [scene main-scene/scene
@@ -431,6 +434,13 @@
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     ; (init-gui)
+    ;; set-up scene level "enter xr" hook
+    (let [tweak-partial (partial utils/tweak-xr-view 20 0 0)]
+      (-> main-scene/xr-helper
+                          (.-baseExperience)
+                          (.-onStateChangedObservable)
+                          (.add tweak-partial)))
+
     (load-cmd-gui)
     (load-cam-gui)
     (set! (.-position spin-cube) (bjs/Vector3. 4 6 10))
