@@ -1,4 +1,6 @@
-;; This is re-frame's hook environment.
+;; This is re-frame's hook environment .
+; import { createRoot } from 'react-dom/client
+; import { createRoot } from 'react-dom/client';
 (ns cube-test.core
   (:require
    ;; try calling rules early so re-frame doesnt hook it
@@ -6,6 +8,16 @@
    ;;
    [reagent.core :as reagent]
    [reagent.dom :as rdom]
+   ; [reagent.dom.server :as rdom-server]
+   ; ["react-dom/client" :as rdom-client]
+   ;; note how react is separated with "-" and not "."
+   ;; note: there is some conflict (eg. function overridding)
+   ;; between react native and reagent, so you should be careful
+   ;; about mixing them.  Thus, these are commented out for now
+   ;; except for router-dom which is orthoganal to reagent.
+   ; ["react-dom" :as react-dom]
+   ; ["react-dom/client" :as react-dom-client]
+   ["react-router-dom" :refer (Route Link) :rename {BrowserRouter Router}]
    [re-frame.core :as re-frame]
    [cube-test.events :as events]
    [cube-test.views :as views]
@@ -86,6 +98,18 @@
   (let [root-el (.getElementById js/document "app")]
     (rdom/unmount-component-at-node root-el)
     (rdom/render [views/main-panel] root-el)))
+
+; (defn ^:dev/after-load mount-root []
+;   (re-frame/clear-subscription-cache!)
+;   (let [container (.getElementById js/document "app")
+;         root (react-dom-client/createRoot container)]
+;         ; root (rdom-client/createRoot container)]
+;         ; root (react.dom.client.createRoot container)]
+;     ; (rdom/unmount-component-at-node container)
+;     (.render root [views/main-panel])))
+;     ; (.render root (views/main-panel))))
+;     ; (.render root views/main-panel)))
+;     ; (react.dom/render root [views/main-panel])))
 
 ;; worker support
 (defn worker

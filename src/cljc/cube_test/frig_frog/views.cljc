@@ -20,7 +20,8 @@
         trains                @(subscribe [:trains-changed])
         quanta-width          @(subscribe [:quanta-width-changed])
         n-rows                @(subscribe [:n-rows-changed])
-        n-cols                @(subscribe [:n-cols-changed])]
+        n-cols                @(subscribe [:n-cols-changed])
+        _ (prn "now in ff.init-panel")]
     [:div
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [::ff-events/reset-rules ])} "reset rules"]
