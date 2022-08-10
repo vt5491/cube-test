@@ -1231,7 +1231,7 @@ urs-seq
     (recur rnd-stream (conj uniq-seq (nth rnd-stream idx)) (inc idx))
     uniq-seq))
 
-(rand-int 3)
+(rand-int 9)
 
 (every? (< 8) #{0 4 3 5})
 (every? #(< % 3) #{0 4 3 5})
@@ -1245,3 +1245,8 @@ urs-seq
        #{2 4 8}))
 
 (keyword (str "abc" "-" (+ 1 1)))
+(neg? -7)
+
+(let [v1 (bjs/Vector3. 1 1 -1)
+      _ (.scaleInPlace v1 0.3)]
+  (prn "v1=" v1))

@@ -2,6 +2,7 @@
   (:require
    [re-frame.core :refer [dispatch subscribe] :as rf]
    [cube-test.frig-frog.subs :as frig-frog.subs]
+   [cube-test.events :as events]
    [cube-test.frig-frog.events :as ff-events]
    [cube-test.events :as events]
    [cube-test.frig-frog.board :as ff-board]
@@ -11,6 +12,7 @@
    [cube-test.frig-frog.rules :as ff-rules]))
 
 (defn init-panel []
+  (prn "view.ff.init-panel entered")
   (let [
         ; board                 @(subscribe [:board-changed])
         btm-board             @(subscribe [:btm-board-changed {:prfx :btm}])
@@ -54,4 +56,11 @@
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/player 0 1)} "move player"]
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/btm-player 0 1)} "move btm-player"]
      [:button.user-action {:on-click #(ff-rules/player-move-tile-delta ::ff-rules/top-player 0 1)} "move top-player"]
-     [:button.user-action {:on-click #(ff-rules/reset-last-tile :cube-test.frig-frog.rules/btm-player 1 1)} "reset last tile"]]))
+     [:button.user-action {:on-click #(ff-rules/reset-last-tile :cube-test.frig-frog.rules/btm-player 1 1)} "reset last tile"]
+     [:br]
+     ; [:button.user-action {:on-click #(rf/dispatch [::events/switch-app :top-scene])} "switch to top scene"]
+     ; [:button.user-action {:on-click #(rf/dispatch [::events/switch-app :face-slot-scene])} "switch to face slot"]
+     ; [:button.user-action {:on-click #(rf/dispatch [::events/switch-app :twizzlers])} "switch to twizzlers"]
+     [:button.user-action {:on-click #(events/soft-switch-app :top-scene)} "switch to top scene"]
+     [:button.user-action {:on-click #(events/soft-switch-app :face-slot-scene)} "switch to face slot"]
+     [:button.user-action {:on-click #(events/soft-switch-app :twizzlers)} "switch to twizzlers"]]))

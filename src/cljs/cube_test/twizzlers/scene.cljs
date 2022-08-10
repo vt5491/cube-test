@@ -66,6 +66,7 @@
                file
                main-scene/scene
                #(space-portal-loaded %1 %2 %3 %4 name user-cb)))
+               
 (defn append-portal-loaded [loaded-scene]
   ; (println "append-portal-loaded: loaded-scene=" loaded-scene)
   ; (println "Point light=" (.getLightByName loaded-scene "Point"))

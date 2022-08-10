@@ -5,6 +5,7 @@
    ; [cube-test.frig-frog.game :as ff.game]
    [cube-test.main-scene :as main-scene]
    [cube-test.top-scene.top-scene :as top-scene]))
+   ; [cube-test.game :as game]))
 
 ;;
 ;; game level events
@@ -14,6 +15,15 @@
  (fn [db [_ game-db]]
    (let [default-db top-scene/default-db]
      default-db)))
+
+; (reg-event-db
+;  ::switch-app
+;  (fn [db [_ top-level-scene]]
+;    (let [scene main-scene/scene
+;          engine main-scene/engine]
+;      (.stopRenderLoop engine)
+;      (.dispose scene)
+;      (cube-test.game.init top-level-scene))))
 
 ;;
 ;; scene level events

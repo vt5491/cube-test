@@ -78,6 +78,7 @@
     (-> vrHelper .-onControllerMeshLoadedObservable (.add ctrl-mesh-loaded-handler)))
   (re-frame/dispatch [:cube-test.frig-frog.events/init-worker]) ;; necessary?
   (re-frame/dispatch [:cube-test.frig-frog.events/ff-worker-start])
+  (re-frame/dispatch [:cube-test.frig-frog.events/init-boards])
   (re-frame/dispatch [:cube-test.frig-frog.events/init-btm-board])
   (re-frame/dispatch [:cube-test.frig-frog.events/init-top-board])
   (re-frame/dispatch [:cube-test.frig-frog.events/init-player]))

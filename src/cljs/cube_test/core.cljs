@@ -19,6 +19,7 @@
    ; ["react-dom/client" :as react-dom-client]
    ["react-router-dom" :refer (Route Link) :rename {BrowserRouter Router}]
    [re-frame.core :as re-frame]
+   [cube-test.base :as base]
    [cube-test.events :as events]
    [cube-test.views :as views]
    [cube-test.subs :as subs]
@@ -93,11 +94,12 @@
   ;; worker-support
   ; (worker-setup))
 
-(defn ^:dev/after-load mount-root []
+; (defn ^:dev/after-load mount-root [])
+(defn ^:dev/after-load mount-root [top-level-scene]
   (re-frame/clear-subscription-cache!)
   (let [root-el (.getElementById js/document "app")]
     (rdom/unmount-component-at-node root-el)
-    (rdom/render [views/main-panel] root-el)))
+    (rdom/render [views/main-panel top-level-scene] root-el)))
 
 ; (defn ^:dev/after-load mount-root []
 ;   (re-frame/clear-subscription-cache!)
@@ -136,10 +138,20 @@
   (worker/bootstrap))
 ;; end worker support
 
-(defn init []
-  (re-frame/dispatch-sync [::events/initialize-db])
-  (dev-setup)
-  ;; worker
-  ; (worker-setup)
-  (mount-root)
-  (game/init))
+(defn init
+  ([] (init base/top-level-scene))
+  ([top-level-scene]
+   (re-frame/dispatch-sync [::events/initialize-db])
+   (dev-setup)
+   ;; worker
+   ; (worker-setup)
+   (mount-root top-level-scene)
+   (game/init top-level-scene)))
+
+; (defn re-init [top-level-scene]
+;   (re-frame/dispatch-sync [::events/initialize-db])
+;   (dev-setup)
+;   ;; worker
+;   ; (worker-setup)
+;   (mount-root)
+;   (game/init))

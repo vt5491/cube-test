@@ -341,6 +341,13 @@
 ;;
 ;; board(s)
 ;;
+(reg-event-fx
+  ::init-boards
+  (fn [cofx _]
+    (ff.board/init-boards)
+    {
+      :db (:db cofx)}))
+      
 (reg-event-db
   ::init-btm-board
   (fn [db [_ val]]

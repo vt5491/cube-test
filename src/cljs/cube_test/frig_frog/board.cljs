@@ -136,3 +136,9 @@
   (case prfx
     :btm *last-btm-board*
     :top *last-top-board*))
+
+(defn init-boards []
+  ;; we have to do this each initialization because
+  ;; users may now be swapping between scenes.
+  (swap! *last-btm-board* (fn [x] nil))
+  (swap! *last-top-board* (fn [x] nil)))

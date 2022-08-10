@@ -31,6 +31,9 @@
    [cube-test.utils.common :as common]))
    ; [cube-test.worker :as worker]))
 
+;;
+;; System
+;;
 (re-frame/reg-event-db
  ::initialize-db
  (fn [_ _]
@@ -55,6 +58,40 @@
   [a-spec db]
   (when-not (s/valid? a-spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
+
+;; Note: this is *not* a reg-event-fx because core.init
+;; has a 'dispatch-sync' and you cannot call 'dispatch-sync'
+;; from an event.  Thus we write this as an ordinary function
+;; but leave in events as a sort of 'logical' event.
+(defn switch-app [top-level-scene]
+  (let [scene main-scene/scene
+        engine main-scene/engine]
+   (.stopRenderLoop engine)
+   (.dispose scene)
+   ; (cube-test.game.init top-level-scene)
+   (cube-test.core.init top-level-scene)))
+
+(defn soft-switch-app [top-level-scene]
+  (let [scene main-scene/scene
+        engine main-scene/engine]
+   (.stopRenderLoop engine)
+   ; (.dispose scene)
+   ; (cube-test.game.init top-level-scene)
+   (set! game/soft-switch true)
+   (cube-test.core.init top-level-scene)))
+
+; (reg-event-fx
+;  ::switch-app
+;  ; (fn [db [_ top-level-scene]])
+;  (fn [cofx [_ top-level-scene]]
+;    (let [scene main-scene/scene
+;          engine main-scene/engine]
+;      (.stopRenderLoop engine)
+;      (.dispose scene)
+;      ; (cube-test.game.init top-level-scene)
+;      (cube-test.core.init top-level-scene))
+;    {
+;     :db (:db cofx)}))
 
 ;; game
 ;;

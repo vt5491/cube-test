@@ -244,36 +244,40 @@
   (init-start-gui-2))
 
 (defn cmd-gui-loaded []
+  (prn "cmd-gui-loaded: cmd-gui-adv-text=" cmd-gui-adv-text)
   (let [add-train-btn (.getControlByName cmd-gui-adv-text "add_train_btn")
+        _ (prn "add-train-btn=" add-train-btn)
+        ; _ (prn "add-train-btn.onPointer=" (.-onPointerClickObservable add-train-btn))
         init-top-ball-btn (.getControlByName cmd-gui-adv-text "init_top_ball_btn")
         init-btm-ball-btn (.getControlByName cmd-gui-adv-text "init_btm_ball_btn")
         toggle-btm-ball-btn (.getControlByName cmd-gui-adv-text "toggle_btm_ball_btn")
         toggle-top-ball-btn (.getControlByName cmd-gui-adv-text "toggle_top_ball_btn")]
-    (-> add-train-btn (.-onPointerClickObservable)
-        (.add #(rf/dispatch [:cube-test.frig-frog.events/post-add-train
-                              {:id-stem :tr-1 :vx -1 :vy 0 :length 5 :init-row 2 :init-col 4}])))
-    (-> init-top-ball-btn (.-onPointerClickObservable)
-        (.add #(do
-                 (set! ball-moving true)
-                 (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/top-ball
-                                          :sub-id 1
-                                          :x 8 :y 3
-                                          :vx -1 :vy 0
-                                          :anim true))))
-    (-> init-btm-ball-btn (.-onPointerClickObservable)
-        (.add #(do
-                 (set! ball-moving true)
-                 (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/btm-ball
-                                          :sub-id 1
-                                          :x 8 :y 3
-                                          :vx -1 :vy 0
-                                          :anim true))))
-    (-> toggle-btm-ball-btn (.-onPointerClickObservable)
-        (.add #(do
-                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/btm-ball 1))))
-    (-> toggle-top-ball-btn (.-onPointerClickObservable)
-        (.add #(do
-                 (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/top-ball 1))))))
+    (when add-train-btn
+      (-> add-train-btn (.-onPointerClickObservable)
+          (.add #(rf/dispatch [:cube-test.frig-frog.events/post-add-train
+                               {:id-stem :tr-1 :vx -1 :vy 0 :length 5 :init-row 2 :init-col 4}])))
+      (-> init-top-ball-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (set! ball-moving true)
+                   (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/top-ball
+                                            :sub-id 1
+                                            :x 8 :y 3
+                                            :vx -1 :vy 0
+                                            :anim true))))
+      (-> init-btm-ball-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (set! ball-moving true)
+                   (ff.rules/init-ball-pos  :id :cube-test.frig-frog.rules/btm-ball
+                                            :sub-id 1
+                                            :x 8 :y 3
+                                            :vx -1 :vy 0
+                                            :anim true))))
+      (-> toggle-btm-ball-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/btm-ball 1))))
+      (-> toggle-top-ball-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (ff.rules/ball-toggle-anim :cube-test.frig-frog.rules/top-ball 1)))))))
 
 (defn load-cmd-gui []
   (let [scene main-scene/scene
@@ -290,6 +294,7 @@
 
 (defn cam-gui-loaded []
   (let [x-radio-up-btn (.getControlByName cam-gui-adv-text "x_radio_up_btn")
+        _ (prn "add.cam-gui-loaded. x-radio-up-btn=" x-radio-up-btn)
         x-radio-down-btn (.getControlByName cam-gui-adv-text "x_radio_down_btn")
         y-radio-up-btn (.getControlByName cam-gui-adv-text "y_radio_up_btn")
         y-radio-down-btn (.getControlByName cam-gui-adv-text "y_radio_down_btn")
@@ -298,32 +303,33 @@
         ; cam-rot-axis-group (bjs/RadioGroup. "cam_rot_axis")
         ; _ (.addRadio cam-rot-axis-group)
         rot-cam-btn (.getControlByName cam-gui-adv-text "rot_cam_btn")]
-    (-> x-radio-up-btn (.-onPointerClickObservable)
-        (.add #(do
-                 (prn "x-radio-up-btn pressed"))))
-    (-> x-radio-down-btn (.-onPointerClickObservable)
-        (.add #(do
-                 (prn "x-radio-down-btn pressed"))))
-    (-> rot-cam-btn (.-onPointerClickObservable)
-        ; (.add #(do))
-        (.add (fn [value]
-                (let [cam main-scene/camera
-                      quat (.-rotationQuaternion cam)
-                      inc (* 10 base/ONE-DEG)]
-                  (when (.-isChecked x-radio-up-btn)
-                    (prn "rot x axis up")
-                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  (* -1 inc) 0 0)))
-                  (when (.-isChecked x-radio-down-btn)
-                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles inc 0 0))
-                    (prn "rot x axis down"))
-                  (when (.-isChecked y-radio-up-btn)
-                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  0 (* -1 inc) 0)))
-                  (when (.-isChecked y-radio-down-btn)
-                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 inc 0)))
-                  (when (.-isChecked z-radio-up-btn)
-                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  0 0 (* -1 inc))))
-                  (when (.-isChecked z-radio-down-btn)
-                    (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 0 inc)))))))))
+    (when x-radio-up-btn
+      (-> x-radio-up-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (prn "x-radio-up-btn pressed"))))
+      (-> x-radio-down-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (prn "x-radio-down-btn pressed"))))
+      (-> rot-cam-btn (.-onPointerClickObservable)
+          ; (.add #(do))
+          (.add (fn [value]
+                  (let [cam main-scene/camera
+                        quat (.-rotationQuaternion cam)
+                        inc (* 10 base/ONE-DEG)]
+                    (when (.-isChecked x-radio-up-btn)
+                      (prn "rot x axis up")
+                      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  (* -1 inc) 0 0)))
+                    (when (.-isChecked x-radio-down-btn)
+                      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles inc 0 0))
+                      (prn "rot x axis down"))
+                    (when (.-isChecked y-radio-up-btn)
+                      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  0 (* -1 inc) 0)))
+                    (when (.-isChecked y-radio-down-btn)
+                      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 inc 0)))
+                    (when (.-isChecked z-radio-up-btn)
+                      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles  0 0 (* -1 inc))))
+                    (when (.-isChecked z-radio-down-btn)
+                      (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 0 inc))))))))))
 
 
 (defn load-cam-gui []
@@ -435,7 +441,12 @@
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     ; (init-gui)
     ;; set-up scene level "enter xr" hook
-    (let [tweak-partial (partial utils/tweak-xr-view 20 0 0)]
+    (let [
+          ; tweak-partial (partial utils/tweak-xr-view 20 0 0)
+          ;left
+          ; tweak-partial (partial utils/tweak-xr-view 20 90 0)
+          ;top
+          tweak-partial (partial utils/tweak-xr-view 110 0 0)]
       (-> main-scene/xr-helper
                           (.-baseExperience)
                           (.-onStateChangedObservable)

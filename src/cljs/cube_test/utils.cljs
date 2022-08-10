@@ -105,10 +105,10 @@
 
 ;; Every scene may need to potentially alter the xr camera, so we supply
 ;; this in utils instead of duplicating for each scene.
-(defn tweak-xr-view [xr yr zr state]
+(defn tweak-xr-view [xr yr zr xr-state]
   ; ([state delta-rot]
    ; (prn "utils: init view entered,xr=" xr, ",state=" state)
-   (when (= state bjs/WebXRState.IN_XR)
+   (when (= xr-state bjs/WebXRState.IN_XR)
      (let [
            ;; this is a floating value that covers both vr and non-vr cameras
            current-cam (.-activeCamera main-scene/scene)
@@ -117,6 +117,8 @@
            pos-delta (bjs/Vector3. 0 0 (if (neg? xr)
                                          -1
                                          1))
+           pos-delta-left (bjs/Vector3. -5 0 6)
+           pos-delta-top (bjs/Vector3. 0 0 6)
            x-rot (-> current-cam (.-rotation) (.-x))
            y-rot (-> current-cam (.-rotation) (.-y))
            delta-rot-rads (-> (bjs/Angle.FromDegrees xr) (.radians))
@@ -124,4 +126,10 @@
            new-tgt (.add (.-position current-cam) unit-circ)]
         (.setTarget current-cam new-tgt)
         ; (set! (.-rotation current-cam) (bjs/Vector3. (* 20 base/ONE-DEG) 0 0))
-        (set! (.-rotation current-cam) (bjs/Vector3. (* xr base/ONE-DEG) (* yr base/ONE-DEG) (* yr base/ONE-DEG))))))
+        (set! (.-rotation current-cam) (bjs/Vector3. (* xr base/ONE-DEG) (* yr base/ONE-DEG) (* yr base/ONE-DEG)))
+        (set! (.-position current-cam) (.add (.-position current-cam) pos-delta-top)))))
+
+;; prety-print all the meshes in a scene
+(defn pretty-print-meshes [scene]
+  (let [mesh-objs (.-meshes scene)]
+    (doall (map #(prn (.-name %)) mesh-objs))))

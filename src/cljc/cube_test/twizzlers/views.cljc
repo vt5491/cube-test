@@ -3,6 +3,7 @@
    [re-frame.core :refer [dispatch subscribe] :as re-frame]
    [cube-test.subs :as subs]
    [cube-test.twizzlers.subs :as twiz.subs]
+   [cube-test.events :as events]
    [cube-test.twizzlers.events :as twiz.events]
    [cube-test.twizzlers.rules :as twiz.rules]))
 
@@ -15,6 +16,9 @@
     [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-twiz-cnt 3])} "update twiz cnt"]
     ;; [:button.user-action {:on-click #(re-frame/dispatch [::twiz.events/update-dmy-atom])} "update dummy atom"]
     [:button.user-action {:on-click #(twiz.rules/query-twiz-cnt)} "query twiz-cnt"]
+    [:br]
+    ; [:button.user-action {:on-click #(re-frame/dispatch [::events/switch-app :frig-frog])} "switch to frig-frog"]
+    [:button.user-action {:on-click #(events/switch-app :frig-frog)} "switch to frig-frog"]
     (let [tc-1 @(subscribe [:twiz-cnt])]
       [:p "twiz-cnt-2: " tc-1])
     (let [gen-twiz-cube @(subscribe [:gen-twiz-cube])])
