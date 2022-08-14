@@ -21,6 +21,8 @@
    [re-frame.core :as re-frame]
    [cube-test.base :as base]
    [cube-test.events :as events]
+   ;; need a global reference so it gets compiled
+   [cube-test.utils.choice-carousel.events :as cc-events]
    [cube-test.views :as views]
    [cube-test.subs :as subs]
    [cube-test.config :as config]

@@ -19,6 +19,7 @@
 
 ; (def top-level-scene :cube-spin-scene)
 ; (def top-level-scene :face-slot-scene)
+;; note: tic-tac-attack supplanted by vrubik-scene. 'tic-tac-attack' anims not working
 ; (def top-level-scene :tic-tac-attack-scene)
 ; (def top-level-scene :vrubik-scene)
 ; (def top-level-scene :geb-cube-scene)

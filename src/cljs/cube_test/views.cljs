@@ -77,7 +77,9 @@
             :twizzlers (do (twizzlers.views/init-panel))
             :beat-club (do (beat-club.views/init-panel))
             :frig-frog (do (frig-frog.views/init-panel))
-            :top-scene (do (top-scene.views/init-panel))
+            :top-scene (do
+                         (top-scene.views/init-panel))
+                         ; (cube-test.top-scene.top-scene/init-choice-carousel))
             [:br])
       [:br]])))
          ; (root)]))

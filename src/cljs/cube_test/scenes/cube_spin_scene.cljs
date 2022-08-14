@@ -80,11 +80,13 @@
 ;     (.appendChild vt-div btn)))
 
 (defn init-gui []
-  (let [left-plane (bjs/Mesh.CreatePlane. "left-plane" 2)
-        left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh. left-plane 1024 1024)
+  (let [scene main-scene/scene
+        ;; left-plane (bjs/Mesh.CreatePlane. "left-plane" 2)
+        left-plane (bjs/Mesh.CreatePlane "left-plane" (js-obj "width" 2, "height" 2) scene)
+        left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh left-plane 1024 1024)
         left-pnl (bjs-gui/StackPanel.)
         left-hdr (bjs-gui/TextBlock.)
-        bwd-btn (bjs-gui/Button.CreateImageButton. "bwd-spin" "bwd" "textures/tux_tada.jpg")
+        bwd-btn (bjs-gui/Button.CreateImageButton "bwd-spin" "bwd" "textures/tux_tada.jpg")
         cb (bjs-gui/Checkbox.)]
     (set! (.-position left-plane) (bjs/Vector3. -1.5 1.5 0.4))
     (.addControl left-adv-texture left-pnl)
@@ -109,10 +111,13 @@
 
 (defn init-gui-2 []
   (init-cube)
-  (let [plane (bjs/Mesh.CreatePlane. "plane" 1)
-        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh. plane)
-        plane-2 (bjs/Mesh.CreatePlane. "plane-2" 2)
-        adv-text-2 (bjs-gui/AdvancedDynamicTexture.CreateForMesh. plane-2)
+  (let [
+        ;; plane (bjs/Mesh.CreatePlane. "plane" 1)
+        scene main-scene/scene
+        plane (bjs/Mesh.CreatePlane "plane" (js-obj "width" 1, "height" 1) scene)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane)
+        plane-2 (bjs/Mesh.CreatePlane "plane-2" 2)
+        adv-text-2 (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane-2)
         panel (bjs-gui/StackPanel.)
         panel-2 (bjs-gui/StackPanel.)
         header (bjs-gui/TextBlock.)
@@ -121,7 +126,7 @@
         ; fwd-btn (bjs-gui/Button3D. "fwd")
         cb (bjs-gui/Checkbox.)
         ; fwd-btn (bjs-gui/Button.CreateSimpleButton. "fwd" "click me")]
-        fwd-btn (bjs-gui/Button.CreateImageButton. "fwd" "click me" "textures/tux_tada.jpg")]
+        fwd-btn (bjs-gui/Button.CreateImageButton "fwd" "click me" "textures/tux_tada.jpg")]
         ; fwd-btn (bjs-gui/HolographicButton. "fwd")]
     (set! (.-position plane) (bjs/Vector3. -3.4 1.5 0.4))
     (set! (.-position plane-2) (bjs/Vector3. 1.4 1.5 0.4))

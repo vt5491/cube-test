@@ -13,6 +13,7 @@
 (def cross2)
 (def ring-plex2)
 (def cube-anim)
+(declare init-rubiks-cube)
 ; (def rubiks-cube-grid)
 ;;
 ;; load models
@@ -68,7 +69,8 @@
                      (set! (.-scaling %1)(bjs/Vector3. -0.3 0.3 0.3))
                      (set! (.-position %1)(bjs/Vector3. 0 2 0))))
               meshes))
-  (when user-cb (user-cb)))
+  (init-rubiks-cube))
+  ;; (when user-cb (user-cb)))
 
 (defn load-rubiks-cube [path file user-cb]
   ; (println "tta.load-rubiks-cube: path=" path ", file=" file)
@@ -77,6 +79,7 @@
                file
                main-scene/scene
                #(rubiks-cube-loaded %1 %2 %3 %4 user-cb)))
+              ;;  rubiks-cube-loaded))
 
 (defn init-top-gui []
   (let [top-plane (bjs/Mesh.CreatePlane. "top-plane" 2)
@@ -426,9 +429,9 @@
    "rubiks_cube.glb"
    (fn [] (do
             (re-frame/dispatch [:init-rubiks-cube])
-            (println "rubiks-grid=" (re-frame/dispatch [:init-rubiks-grid]))
+            ;; (println "rubiks-grid=" (re-frame/dispatch [:init-rubiks-grid]))
             ; (re-frame/dispatch [:print-db])
-            (re-frame/dispatch [:unlazy-db])
+            ;; (re-frame/dispatch [:unlazy-db])
             (let [s (re-frame/dispatch [:get-main-scene])]
               (println "s=" s))
             (let [db (re-frame/dispatch [:unlazy-db])]

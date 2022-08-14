@@ -134,6 +134,9 @@
                                                (re-frame/dispatch [::top-scene-events/init-scene]))
                                              (re-frame/dispatch [:init-fps-panel main-scene/scene])
                                              (re-frame/dispatch [::top-scene-events/run-scene])))])))))
+                                             ; (utils/sleep #(do
+                                             ;                 (prn "sleep: now driving init-choice-carousel")
+                                             ;                 (top-scene/init-choice-carousel)) 15000)))])))))
 
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)

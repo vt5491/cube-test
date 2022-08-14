@@ -28,12 +28,10 @@
 ;;
 ;; scene level events
 ;;
-(rf/reg-event-fx
+(rf/reg-event-db
  ::init-scene
- (fn [cofx _]
-   (top-scene/init)
-   {
-    :db (:db cofx)}))
+ (fn [db [_]]
+   (top-scene/init db)))
 
 (rf/reg-event-fx
  ::run-scene

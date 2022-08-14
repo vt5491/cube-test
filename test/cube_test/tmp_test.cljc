@@ -22,6 +22,7 @@
 
 (prn "hi h=" h)
 (print h)
+(prn "hi")
 
 (let [ {{{:keys [:is-enabled]} {:keys :ybot-rumba}} :models} h]
   (prn "val=" models))
@@ -1250,3 +1251,23 @@ urs-seq
 (let [v1 (bjs/Vector3. 1 1 -1)
       _ (.scaleInPlace v1 0.3)]
   (prn "v1=" v1))
+
+(-> 2 * (+ 4 3))
+
+(-> 2 (* (+ 4 3)))
+
+(def a 0)
+(+ a 1)
+
+(let [a 0
+      b (or nil (+ a 2))]
+  (prn "b=" b))
+
+(let [h {}
+      h2 (assoc h :a 7)]
+  (prn "h2=" h2))
+
+(let a []
+  (c))
+
+(name :abc)
