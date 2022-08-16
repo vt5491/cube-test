@@ -245,6 +245,7 @@
 
 (defn cmd-gui-loaded []
   (prn "cmd-gui-loaded: cmd-gui-adv-text=" cmd-gui-adv-text)
+  ;; (js-debugger)
   (let [add-train-btn (.getControlByName cmd-gui-adv-text "add_train_btn")
         _ (prn "add-train-btn=" add-train-btn)
         ; _ (prn "add-train-btn.onPointer=" (.-onPointerClickObservable add-train-btn))

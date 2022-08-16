@@ -39,3 +39,27 @@
    (top-scene/run-scene)
    {
     :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::app-selected
+ (fn [cofx _]
+   ; (top-scene/run-scene)
+   (prn "top-scene.events: app-selected")
+   {
+    :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::app-left
+ (fn [cofx _]
+   ; (top-scene/run-scene)
+   (prn "top-scene.events: app-left")
+   {
+    :db (:db cofx)}))
+
+(rf/reg-event-fx
+ ::app-right
+ (fn [cofx _]
+   ; (top-scene/run-scene)
+   (prn "top-scene.events: app-right")
+   {
+    :db (:db cofx)}))

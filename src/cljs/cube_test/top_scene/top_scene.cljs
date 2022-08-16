@@ -11,6 +11,7 @@
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]
    ; [cube-test.events :as events]
+   ; [cube-test.top-scene.events :as top-scene-events]
    [cube-test.base :as base]
    [cube-test.utils :as utils]
    [babylonjs-loaders :as bjs-l]
@@ -105,6 +106,10 @@
 
 (defn init-scene-carousel []
   (prn "top-scene.init-scene-carousel entered")
+  (cc/load-choice-carousel-gui
+   :cube-test.top-scene.events/app-left
+   :cube-test.top-scene.events/app-right
+   :cube-test.top-scene.events/app-selected)
   (let [choices [{:id :ff}
                  {:id :cube-spin}
                  {:id :face-slot}

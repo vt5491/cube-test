@@ -13,9 +13,11 @@
    ; [cube-test.utils.choice-carousel.events :as cc-events]
    [cube-test.base :as base]
    [cube-test.utils :as utils]
-   [babylonjs-loaders :as bjs-l]))
+   [babylonjs-loaders :as bjs-l]
+   [promesa.core :as p]))
    ; [cube-test.utils.choice-carousel.subs :as cc-subs]))
 
+; (def tmp-text nil)
 
 (defn init [{:keys [id radius choices] :as parms} db]
   (let [db-2 (if (:choice-carousels db)
@@ -55,3 +57,44 @@
                 :radius radius
                 :theta theta} i scene))
           choices))))
+
+(defn choice-carousel-gui-loaded [adv-text left-evt right-evt select-evt]
+  (prn "choice-carousel-gui-loaded: adv-text=" adv-text)
+  ; (prn "choice-carousel-gui-loaded: tmp-text=" tmp-text)
+  ; (js-debugger)
+  (let [select-btn (.getControlByName adv-text "select_btn")
+        left-arrow (.getControlByName adv-text "left_arrow_img")
+        right-arrow (.getControlByName adv-text "right_arrow_img")
+        ; _ (js-debugger)
+        _ (prn "select-btn=" select-btn)
+        _ (prn "left-arrow-img=" left-arrow)]
+        ; btn-2 (.getControlByName tmp-text "select_btn")
+        ; _ (prn "btn-2=" btn-2)]))
+        ; _ (prn "add-train-btn.onPointer=" (.-onPointerClickObservable add-train-btn))
+    ;     init-top-ball-btn (.getControlByName cmd-gui-adv-text "init_top_ball_btn")
+    ;     init-btm-ball-btn (.getControlByName cmd-gui-adv-text "init_btm_ball_btn")
+    ;     toggle-btm-ball-btn (.getControlByName cmd-gui-adv-text "toggle_btm_ball_btn")
+    ;     toggle-top-ball-btn (.getControlByName cmd-gui-adv-text "toggle_top_ball_btn")]
+    (when select-btn
+      (prn "now setting up select-btn")
+      (-> select-btn (.-onPointerClickObservable)
+        (.add #(rf/dispatch [select-evt])))
+      (-> left-arrow (.-onPointerClickObservable)
+        (.add #(rf/dispatch [left-evt])))
+      (-> right-arrow (.-onPointerClickObservable)
+        (.add #(rf/dispatch [right-evt]))))))
+
+
+(defn load-choice-carousel-gui [left-evt right-evt select-evt]
+  (let [scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 4, "height" 4) scene)
+        _ (set! (.-position plane) (bjs/Vector3. 0 3 0))
+        _ (.enableEdgesRendering plane)
+        _ (set! (.-edgesWidth plane) 1.0)
+        ; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 768 768)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 1920 1080)]
+        ; _ (set! tmp-text adv-text)]
+    (-> adv-text
+     (.parseFromURLAsync "guis/top_scene/choice_carousel_gui.json")
+     (p/then #(choice-carousel-gui-loaded adv-text left-evt right-evt select-evt)))))
+     ; (p/then partial(choice-carousel-gui-loaded adv-text)))))
