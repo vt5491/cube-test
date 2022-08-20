@@ -24,7 +24,7 @@
   :choice-carousels-changed
   :<- [:get-choice-carousels]
   (fn [choice-carousels query-v]
-    (prn "subs: now in choice-carousels-changed, choice-carousels=" choice-carousels)
+    ; (prn "subs: now in choice-carousels-changed, choice-carousels=" choice-carousels)
     (when (and choice-carousels (not (empty? choice-carousels)))
         (let [
               ; last-ccs @cube-test.utils.choice-carousel.choice-carousel.*last-choice-carousels*
@@ -37,12 +37,12 @@
               diff-new (first diff-a)
               diff-delta (second diff-a)
               diff (or diff-new diff-delta)]
-          (prn "cc.subs: diff-full=" diff-full)
-          (prn "cc.subs: diff-a=" diff-a)
-          (prn "cc.subs: second diff-a=" (second diff-a))
-          (prn "cc.subs: diff-b=" diff-b)
-          (prn "cc.subs: diff=" diff)
+          ; (prn "cc.subs: diff-full=" diff-full)
+          ; (prn "cc.subs: diff-a=" diff-a)
+          ; (prn "cc.subs: second diff-a=" (second diff-a))
+          ; (prn "cc.subs: diff-b=" diff-b)
+          ; (prn "cc.subs: diff=" diff)
           (when diff
-            (cc/init-meshes (:radius diff) (:choices diff)))
+            (cc/init-meshes (:radius diff) (:choices diff) (:colors diff)))
 
           (swap! *last-choice-carousels* (fn [x] choice-carousels))))))

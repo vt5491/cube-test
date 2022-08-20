@@ -50,16 +50,21 @@
 
 (rf/reg-event-fx
  ::app-left
- (fn [cofx _]
+ (fn [cofx [_ delta-theta]]
    ; (top-scene/run-scene)
    (prn "top-scene.events: app-left")
+   ; (top-scene/rot-app-carousel :left delta-theta)
+   (top-scene/animate-app-carousel :left)
    {
     :db (:db cofx)}))
 
 (rf/reg-event-fx
  ::app-right
- (fn [cofx _]
+ (fn [cofx [_ delta-theta]]
    ; (top-scene/run-scene)
    (prn "top-scene.events: app-right")
+   ; (set! top-scene/app-carousel-is-animating true)
+   ; (top-scene/rot-app-carousel :right delta-theta)
+   (top-scene/animate-app-carousel :right)
    {
     :db (:db cofx)}))

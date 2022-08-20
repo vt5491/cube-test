@@ -1271,3 +1271,21 @@ urs-seq
   (c))
 
 (name :abc)
+
+; [{:id :ff}
+;  {:id :cube-spin}]
+(str :ff :abc)
+(hash-map :a 7)
+
+(let [app-ids [:ff :cube-spin :face-slot :vrubik :get-cube :twizzlers :beat-club]
+      r (vec (map #(hash-map :id %) app-ids))]
+      ; r (doall (map #(str %) app-ids))]
+      ; r2 (doall (map (fn [x] {:id x})))]
+  (prn "r=" r))
+  ; (prn "r2=" r2))
+
+(let [h {:a [1 2 3] :b (count (:a h))}]
+  (prn h))
+
+(name :ff)
+(nth [0 1 2] 1)

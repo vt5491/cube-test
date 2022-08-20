@@ -107,7 +107,7 @@
 ;; this in utils instead of duplicating for each scene.
 (defn tweak-xr-view [xr yr zr xr-state]
   ; ([state delta-rot]
-   ; (prn "utils: init view entered,xr=" xr, ",state=" state)
+   (prn "utils: init view entered,xr=" xr, ",state=" xr-state)
    (when (= xr-state bjs/WebXRState.IN_XR)
      (let [
            ;; this is a floating value that covers both vr and non-vr cameras

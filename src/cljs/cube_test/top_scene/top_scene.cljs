@@ -20,8 +20,20 @@
 (def default-db
   {:top-scene-abc 7})
 
-(def app-carousel-parms {:radius 16.0})
+(def app-carousel-parms {:radius 16.0
+                         :app-ids [:ff :cube-spin :face-slot :vrubik :get-cube :twizzlers :beat-club]
+                         :colors [(bjs/Color3.Blue) (bjs/Color3.Gray) (bjs/Color3.Green) (bjs/Color3.Magenta)
+                                  (bjs/Color3.Red) (bjs/Color3.Yellow) (bjs/Color3.Teal) (bjs/Color3.Purple)]})
 
+(def app-carousel-theta-width (/ (* 2.0 js/Math.PI) (count (:app-ids app-carousel-parms)) 1))
+; (def app-carousel-theta-width (* base/ONE-DEG 5))
+(def app-carousel-origin (bjs/Vector3. 0 0 (:radius app-carousel-parms)))
+(def app-carousel-is-animating false)
+(def app-carousel-rot-remaining 0)
+(def app-carousel-rot-dir nil)
+(def app-carousel-rot-duration 1)
+
+;; Note: defunct
 (defn init-app-planes []
   (let [scene main-scene/scene
         n_apps 4
@@ -109,23 +121,58 @@
   (cc/load-choice-carousel-gui
    :cube-test.top-scene.events/app-left
    :cube-test.top-scene.events/app-right
-   :cube-test.top-scene.events/app-selected)
-  (let [choices [{:id :ff}
-                 {:id :cube-spin}
-                 {:id :face-slot}
-                 {:id :vrubik}
-                 {:id :geb-cube}
-                 {:id :twizzlers}
-                 {:id :beat-club}]
-        parms {:id :app-cc :radius 16.0 :choices choices}]
+   :cube-test.top-scene.events/app-selected
+   app-carousel-theta-width)
+  (let [
+        ; choices [{:id :ff}
+        ;          {:id :cube-spin}
+        ;          {:id :face-slot}
+        ;          {:id :vrubik}
+        ;          {:id :geb-cube}
+        ;          {:id :twizzlers}
+        ;          {:id :beat-club}]
+        choices (vec (map #(hash-map :id %) (:app-ids app-carousel-parms)))
+        parms {:id :app-cc :radius 16.0 :choices choices :colors (:colors app-carousel-parms)}]
     (rf/dispatch [:cube-test.utils.choice-carousel.events/init-choice-carousel parms])))
+
+(defn rot-app-carousel [dir delta-theta]
+  (let [scene main-scene/scene
+        ; m1 (.getMeshByID scene "ff")
+        ; origin (bjs/Vector3.Zero.)
+        theta (if (= dir :right)
+                  ; (* -1 app-carousel-theta-width)
+                  (* -1 delta-theta)
+                  ; app-carousel-theta-width
+                  delta-theta)]
+      ; (.rotateAround m1 app-carousel-origin bjs/Axis.Y theta)
+      (cc/rot-meshes (:app-ids app-carousel-parms) dir theta app-carousel-origin)))
+
+(defn animate-app-carousel [dir]
+  (set! app-carousel-is-animating true)
+  (set! app-carousel-rot-remaining app-carousel-theta-width)
+  (set! app-carousel-rot-dir dir))
+
+(defn tmp-rot [dir]
+  (let [scene main-scene/scene
+        m (.getMeshByID scene "twizzlers")
+        x-quat (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 10)))
+        y-quat (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG 10)))
+        z-quat (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Z (* base/ONE-DEG 10)))]
+      (case dir
+        :x (.multiplyInPlace (.-rotationQuaternion m) x-quat)
+        :y (.multiplyInPlace (.-rotationQuaternion m) y-quat)
+        :z (.multiplyInPlace (.-rotationQuaternion m) z-quat))))
+      ; (.multiplyInPlace (.-rotationQuaternion m) y-quat)))
 
 (defn init [db]
   ; (init-app-planes)
+  (prn "app-carousel-theta-width=" app-carousel-theta-width)
   (let [scene main-scene/scene
-        tweak-partial (partial utils/tweak-xr-view -10 10 10)
+        tweak-partial (partial utils/tweak-xr-view 20 10 10)
+        ; tweak-partial (partial utils/tweak-xr-view -40 0 0)
+        ; tweak-partial #()
         light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
-        light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 2 5) scene)]
+        light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 8 5) scene)]
     (set! (.-isVisible (.getMeshByID main-scene/scene "ground")) false)
     (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
     ;; set-up scene level "enter xr" hook
@@ -159,7 +206,17 @@
     (controller-xr/tick))
   (if fps-panel/fps-pnl
     (fps-panel/tick main-scene/engine))
-  (.render main-scene/scene))
+  (.render main-scene/scene)
+  (when app-carousel-is-animating
+    ;;TODO: add less than zero rounding so never go beyond theta-width 
+    (let [dt (/ (.getDeltaTime main-scene/engine) 1000)
+          delta-theta (* (/ dt app-carousel-rot-duration) app-carousel-theta-width)]
+        (rot-app-carousel app-carousel-rot-dir delta-theta)
+        (set! app-carousel-rot-remaining (- app-carousel-rot-remaining delta-theta))
+        ; (prn "rot-remain=" app-carousel-rot-remaining)
+        (when (< app-carousel-rot-remaining 0)
+          (set! app-carousel-is-animating false)))))
+
 
 (defn run-scene []
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))

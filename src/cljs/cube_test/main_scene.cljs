@@ -78,8 +78,8 @@
   (set! canvas (-> js/document (.getElementById "renderCanvas")))
   (set! engine (bjs/Engine. canvas true))
   ;; Note: even though scene is defined inside 'init' it has file level scope.
-  ; (defonce scene (bjs/Scene. engine))
-  (def scene (bjs/Scene. engine))
+  (defonce scene (bjs/Scene. engine))
+  ; (def scene (bjs/Scene. engine))
   (set! scene (bjs/Scene. engine))
   (re-frame/dispatch [:set-main-scene scene])
   ;; Note: we have to manually create our own ground in order to
