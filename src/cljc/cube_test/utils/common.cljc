@@ -83,3 +83,11 @@ from the specified range for a length of n
        (if (and (< (count uniq-seq) n) (< idx limit))
          (recur rnd-stream (conj uniq-seq (+ (nth rnd-stream idx) range-min)) (inc idx))
          uniq-seq)))))
+
+; "given a path like 'abc/def/ghi.txt' return:
+;  {:path 'abc/def/' :file 'ghi.txt'}"
+(defn extract-path-file [file-name]
+  (let [r (re-matches #"^([\w/]*/)([\w\.]*)$" file-name)]
+    (if r
+      {:path (nth r 1) :file (nth r 2)}
+      nil)))

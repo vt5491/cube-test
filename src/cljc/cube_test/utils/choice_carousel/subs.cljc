@@ -43,6 +43,7 @@
           ; (prn "cc.subs: diff-b=" diff-b)
           ; (prn "cc.subs: diff=" diff)
           (when diff
-            (cc/init-meshes (:radius diff) (:choices diff) (:colors diff)))
+            (cc/init-meshes (:radius diff) (:choices diff) (:colors diff))
+            (cc/init-models (:choices diff)))
 
           (swap! *last-choice-carousels* (fn [x] choice-carousels))))))

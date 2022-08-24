@@ -41,6 +41,19 @@
     (t/is (= (count r) 5))
     (t/is (and (every? #(< % 16) r) (every? #(>= % 8) r)))))
 
+(t/deftest extract-path-file-test
+  (t/testing "extract-path-file")
+  (let [
+        r (common/extract-path-file "/abc/def/ghi.txt")
+        ; _ (prn "r=" r)
+        ; r {:path 7 :file 8}
+        path (:path r)
+        file (:file r)]
+    (prn "path=" path)
+    (prn "file=" file)
+    (t/is (= path "/abc/def/"))
+    (t/is (= file "ghi.txt"))))
+
 (t/run-tests 'cube-test.utils.common-test)
 
 (comment
@@ -58,4 +71,5 @@
   (t/test-vars [#'cube-test.utils.common-test.round-places-test])
   (clojure.test/test-vars [#'cube-test.utils.common-test/round-places-test])
   (t/test-vars [#'idx-of-id])
-  (t/test-vars [#'unique-rnd-seq-test]))
+  (t/test-vars [#'unique-rnd-seq-test])
+  (t/test-vars [#'extract-path-file-test]))

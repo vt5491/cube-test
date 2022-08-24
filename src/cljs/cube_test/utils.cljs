@@ -133,3 +133,11 @@
 (defn pretty-print-meshes [scene]
   (let [mesh-objs (.-meshes scene)]
     (doall (map #(prn (.-name %)) mesh-objs))))
+
+
+(defn load-model [path file name user-cb]
+  (.ImportMesh bjs/SceneLoader ""
+               path
+               file
+               main-scene/scene
+               user-cb))

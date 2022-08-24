@@ -1289,3 +1289,26 @@ urs-seq
 
 (name :ff)
 (nth [0 1 2] 1)
+
+(map #(+ %1 %2) [1 2 3] [2 1 0])
+
+(defn get-path-file [file-name]
+  (+ 1 1))
+
+(get-path-file "/abc/def/ghi.txt")
+
+(re-seq #"([/\w]*)/([\w]*)" "abc/def/ghi.txt")
+(re-matches #"([a-z]*)" "abc/def/ghi.txt")
+(re-matches #"^abc" "abc/def/ghi.txt")
+(re-matches #"^abc" "abcdef")
+(re-seq #"\w+" "mary had a little lamb")
+(+ 1 1)
+(re-matches #"^hello, (.*)" "hello, world")
+(re-matches #"^([\w]*,) (.*)" "hello9, world")
+(re-matches #"^([\w/]*)/([\w\.]*)$" "abc/def/ghi.txt")
+
+(name :ff)
+(str (name :ff) "def")
+(str :ff)
+
+(get-in {:abc {:def 7}} [:abc :def])

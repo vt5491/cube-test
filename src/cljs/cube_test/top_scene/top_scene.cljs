@@ -17,11 +17,16 @@
    [babylonjs-loaders :as bjs-l]
    [cube-test.utils.choice-carousel.choice-carousel :as cc]))
 
+(declare animate-app-carousel)
+
 (def default-db
   {:top-scene-abc 7})
 
 (def app-carousel-parms {:radius 16.0
                          :app-ids [:ff :cube-spin :face-slot :vrubik :get-cube :twizzlers :beat-club]
+                         :model-files ["models/top_scene/sub_scenes/ff_scene.glb"
+                                       nil nil nil nil nil nil]
+                         :scales [0.3 nil nil nil nil nil nil]
                          :colors [(bjs/Color3.Blue) (bjs/Color3.Gray) (bjs/Color3.Green) (bjs/Color3.Magenta)
                                   (bjs/Color3.Red) (bjs/Color3.Yellow) (bjs/Color3.Teal) (bjs/Color3.Purple)]})
 
@@ -119,8 +124,11 @@
 (defn init-scene-carousel []
   (prn "top-scene.init-scene-carousel entered")
   (cc/load-choice-carousel-gui
-   :cube-test.top-scene.events/app-left
-   :cube-test.top-scene.events/app-right
+   ; :cube-test.top-scene.events/app-left
+   ;; Note: calling directly is slightly less "jerky" than dispatching a (re-frame) event.
+   (partial animate-app-carousel :left)
+   ; :cube-test.top-scene.events/app-right
+   (partial animate-app-carousel :right)
    :cube-test.top-scene.events/app-selected
    app-carousel-theta-width)
   (let [
@@ -131,7 +139,10 @@
         ;          {:id :geb-cube}
         ;          {:id :twizzlers}
         ;          {:id :beat-club}]
-        choices (vec (map #(hash-map :id %) (:app-ids app-carousel-parms)))
+        choices (vec (map #(hash-map :id %1 :model-file %2 :scale %3)
+                          (:app-ids app-carousel-parms)
+                          (:model-files app-carousel-parms)
+                          (:scales app-carousel-parms)))
         parms {:id :app-cc :radius 16.0 :choices choices :colors (:colors app-carousel-parms)}]
     (rf/dispatch [:cube-test.utils.choice-carousel.events/init-choice-carousel parms])))
 
@@ -150,7 +161,8 @@
 (defn animate-app-carousel [dir]
   (set! app-carousel-is-animating true)
   (set! app-carousel-rot-remaining app-carousel-theta-width)
-  (set! app-carousel-rot-dir dir))
+  (set! app-carousel-rot-dir dir)
+  (cc/play-rot-snd))
 
 (defn tmp-rot [dir]
   (let [scene main-scene/scene
@@ -208,13 +220,17 @@
     (fps-panel/tick main-scene/engine))
   (.render main-scene/scene)
   (when app-carousel-is-animating
-    ;;TODO: add less than zero rounding so never go beyond theta-width 
+    ;;TODO: add less than zero rounding so never go beyond theta-width
     (let [dt (/ (.getDeltaTime main-scene/engine) 1000)
           delta-theta (* (/ dt app-carousel-rot-duration) app-carousel-theta-width)]
         (rot-app-carousel app-carousel-rot-dir delta-theta)
         (set! app-carousel-rot-remaining (- app-carousel-rot-remaining delta-theta))
         ; (prn "rot-remain=" app-carousel-rot-remaining)
         (when (< app-carousel-rot-remaining 0)
+          ;; stub rotate "backward" so we don't get any cumulative "angular drift".
+          ; (prn "stub rotate=" (* base/ONE-DEG app-carousel-rot-remaining))
+          ; (rot-app-carousel (if (= app-carousel-rot-dir :left) :right :left) app-carousel-rot-remaining)
+          (rot-app-carousel app-carousel-rot-dir app-carousel-rot-remaining)
           (set! app-carousel-is-animating false)))))
 
 

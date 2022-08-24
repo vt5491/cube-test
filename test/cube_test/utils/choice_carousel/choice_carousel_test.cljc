@@ -23,7 +23,7 @@
     (let [
           i-db @db/app-db
           ; r (cc/init {:id :test-cc, :abc 7} r-db)
-          choices [{:id :ff} {:id :cube-spin} {:id :face-slot}]
+          choices [{:id :ff :model-file "models/top_scene/sub_scenes/ff_scene.glb"} {:id :cube-spin} {:id :face-slot}]
           parms {:id :test-cc, :radius 16.0 :choices choices}
           ; r (dispatch-sync [::cc-events/init-choice-carousel parms i-db])
           r (dispatch-sync [:cube-test.utils.choice-carousel.events/init-choice-carousel parms i-db])
@@ -45,7 +45,8 @@
             _ (prn "test: r-choices=" r-choices)]
         ; (t/is (= (get-in r-db [:test-cc :val]) 7))
         (t/is (= (count r-choices) 3))
-        (t/is (= r-radius 16.0))))))
+        (t/is (= r-radius 16.0))
+        (t/is (exists? (:model-file (first choices))))))))
 
 (comment
   (+ 1 1)
@@ -61,6 +62,7 @@
   ;; the module somewhere, then it should automatically be refreshed.
   ;; (including cc.events and cc.subs)
   (use 'cube-test.utils.choice-carousel.choice-carousel' :reload)
+  (use 'cube-test.top-scene.top-scene' :reload)
   ;; run a single test
   ;; make sure to shift-ctrl-alt-b the test first
   (t/test-vars [#'init-test]))

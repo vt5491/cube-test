@@ -13,15 +13,24 @@
    ; [cube-test.utils.choice-carousel.events :as cc-events]
    [cube-test.base :as base]
    [cube-test.utils :as utils]
+   [cube-test.utils.common :as common]
    [babylonjs-loaders :as bjs-l]
    [promesa.core :as p]))
    ; [cube-test.utils.choice-carousel.subs :as cc-subs]))
 
 ; (def tmp-text nil)
+(def cc-rot-snd)
+
+(defn init-snd [{:keys [rot-snd-file] :as parms}]
+  (set! cc-rot-snd (bjs/Sound.
+                    "cc-rot-snd"
+                    rot-snd-file
+                    main-scene/scene)))
 
 ;; simple insertion into the re-frame db.  Most of the work occurs on the subscribe.
 ;; (see :choice-carousel.subs:choice-carousel-changed) .hint: it calls cc/init-meshes
 (defn init [{:keys [id radius choices colors] :as parms} db]
+  (init-snd {:rot-snd-file "sounds/top_scene/plastic_swipe.ogg"})
   (let [db-2 (if (:choice-carousels db)
                db
                (assoc db :choice-carousels []))
@@ -30,65 +39,37 @@
         ; _ (prn "cc: ccs=" ccs)]
     (assoc db :choice-carousels ccs)))
 
+(defn play-rot-snd []
+  (.play cc-rot-snd))
 
-  ; (set! green-mat (bjs/StandardMaterial. "green-mat" scene))
-  ; (set! (.-diffuseColor green-mat) (bjs/Color3. 0 1 0)))
-; :choices [{:id :ff} {:id :cube-spin} {:id :face-slot}]
 ; (defn create-carousel-plane [parms idx scene])
 (defn create-carousel-plane [{:keys [radius theta color] :as parms} idx scene]
-  (prn "create-carousel-plane: theta=" theta)
+  ; (prn "create-carousel-plane: theta=" theta)
   (let [x-quat-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* base/ONE-DEG 90)))
-        ; y-quat-theta (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y (* base/ONE-DEG theta)))
-        y-quat-theta (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y theta))
-        ; z-quat-theta (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Z (* base/ONE-DEG theta)))
+        ; y-quat-theta (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Y theta))
         z-quat-theta (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Z (+ theta (/ js/Math.PI 1))))
-        z-quat-theta-2 (.normalize (bjs/Quaternion.FromEulerAngles 0 0 (* base/ONE-DEG theta)))
-        z-quat-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Z (* base/ONE-DEG 90)))
+        ; z-quat-theta-2 (.normalize (bjs/Quaternion.FromEulerAngles 0 0 (* base/ONE-DEG theta)))
+        ; z-quat-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.Z (* base/ONE-DEG 90)))
         id (name (:id parms))
         plane (bjs/MeshBuilder.CreatePlane.
                 id
-                ; (name (:id parms))
                 (clj->js {:width 3 :height 3
                            :sideOrientation bjs/Mesh.DOUBLESIDE})
                scene)
         plane-mat (bjs/StandardMaterial. (str id "-mat") scene)
-        ; cube (bjs/MeshBuilder.CreateBox (str id "-cube" (clj->js {:width 0.5 :height 3}) scene))
         cyl (bjs/MeshBuilder.CreateCylinder (str id "-cyl") (clj->js {:width 0.5 :height 3}) scene)
         cyl-mat (bjs/StandardMaterial. (str id "-cyl" "-mat") scene)
-        diffuse-num-text (bjs/Texture. "imgs/top_scene/number_mat.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)
-        _ (prn "z-quat-theta=" z-quat-theta)]
-        ; _ (prn "green color=" (bjs/Color3. 0 1 0))]
-        ; mesh.rotate(BABYLON.Axis.Z, -Math.PI, BABYLON.Space.LOCAL)];
-      ; mesh.setPivotMatrix(BABYLON.Matrix.Translation(x, y, z));
-      ; (set! (.-rotationQuaternion plane) x-quat-90)
-      ; (.computeWorldMatrix plane true)
+        diffuse-num-text (bjs/Texture. "imgs/top_scene/number_mat.png" scene true true bjs/Texture.BILINEAR_SAMPLINGMODE nil nil nil true)]
       ;; this is basically the same things as an "apply rotate" in blender.
       ; (.setPivotMatrix plane (bjs/Matrix.RotationX (* base/ONE-DEG 90) true))
-      ; (set! (.-rotationQuaternion plane) (.multiply x-quat-90 (.scale z-quat-90 0.5)))
-      ; (set! (.-rotationQuaternion plane) (.multiply x-quat-90 z-quat-theta-2))
-      ; (set! (.-rotationQuaternion plane) (.multiply y-quat-theta x-quat-90))
-      ; (set! (.-rotationQuaternion plane) (.multiply x-quat-90 y-quat-theta))
       (set! (.-rotationQuaternion plane) (.multiply x-quat-90 z-quat-theta))
-      ; (.rotate plane bjs/Axis.X (* base/ONE-DEG 90 bjs/Space.WORLD))
-      ; (.rotate plane bjs/Axis.Y (* base/ONE-DEG -45) bjs/Space.WORLD)
-      ; (.rotate plane bjs/Axis.Y theta bjs/Space.WORLD)
       (set! (.-isPickable plane) true)
-      ; (set! (.-position plane) (bjs/Vector3.
-      ;                            (* radius (js/Math.cos (* idx theta)))
-      ;                            0
-      ;                            (+ (* radius (js/Math.sin (* idx theta))) radius)))
       (set! (.-position plane) (bjs/Vector3.
                                  (* radius (js/Math.cos theta))
                                  0
                                  (+ (* radius (js/Math.sin theta)) radius)))
-      ; (set! (.-diffuseColor plane-mat) color)
       (set! (.-diffuseTexture plane-mat) diffuse-num-text)
-      ; (set! (.-diffuseColor plane-mat) (bjs/Color3. 0 1 0))
       (set! (.-material plane) plane-mat)
-      ; (set! (.-position cyl) (bjs/Vector3.
-      ;                                  (* (+ radius 2) (js/Math.cos (* idx theta)))
-      ;                                  0
-      ;                                  (+ (* (+ radius 2) (js/Math.sin (* idx theta))) radius)))
       (set! (.-position cyl) (bjs/Vector3.
                                        (* (+ radius 2) (js/Math.cos theta))
                                        0
@@ -97,8 +78,9 @@
       (set! (.-material cyl) cyl-mat)))
 
 
+;; called by a subscribe (reg-sub choice-carousels-changed)
 (defn init-meshes [radius choices colors]
-  ; (prn "init-meshes: colors=" colors)
+  ; (prn "init-meshes: choices=" choices)
   (let [scene main-scene/scene
         n-choices (count choices)
         ; x-quat(.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* base/ONE-DEG (/ 360 n-choices))))
@@ -106,12 +88,81 @@
       (doall
         (map-indexed
           (fn [i choice]
-            (create-carousel-plane
-               {:id (:id choice)
-                :radius radius
-                :theta (* theta-delta i)
-                :color (nth colors i)} i scene))
+            ; (when-not (:model-file choice)
+              (create-carousel-plane
+                         {:id (:id choice)
+                          :radius radius
+                          :theta (* theta-delta i)
+                          :color (nth colors i)} i scene))
           choices))))
+
+(defn choice-model-loaded [user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
+  ;; promote into a re-frame call so we can get access to the rf db.
+  (rf/dispatch [:cube-test.utils.choice-carousel.events/choice-model-loaded-rf user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]))
+
+;; same as choice-model-loaded except we also have a db.
+; (defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups name user-cb])
+(defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
+  ; (prn "cc.choice-model-loaded: db=" db)
+  ; (prn "cc.choice-model-loaded: user-parms=" user-parms)
+  ; (prn "cc.choice-model-loaded: meshes=" meshes)
+  ; (prn "cc.choice-model-loaded: meshes 0=" (first meshes))
+  ; (prn "cc.choice-model-loaded: meshes 0 id=" (.-id (first meshes)))
+  ; (prn "cc.choice-model-loaded: id user-parms=" (:id user-parms))
+  ; (prn "cc.choice-model-loaded: id user-parms=" (get-in user-parms [:choice :id]))
+  (let [scene main-scene/scene
+        root-mesh (first meshes)
+        root-mesh-id (.-id root-mesh)
+        ; str-id (name (:id user-parms))
+        choice (:choice user-parms)
+        choice-id (name (:id choice))
+        ; _ (prn "str-id=" str-id)
+        ; new-id (str (name (:id user-parms)) "-root")
+        new-id (str choice-id "-root")
+        scale (:scale choice)
+        plane-mesh (.getMeshByID scene choice-id)
+        cyl-mesh (.getMeshByID scene (str choice-id "-cyl"))
+        x-quat-neg-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* base/ONE-DEG -90)))]
+        ; _ (prn "scale=" scale)]
+        ; choices (get-in db [:choice-carousels :choices])]
+        ; new-id (-> (:id user-pa))]
+    (when (= root-mesh-id "__root__")
+      (set! (.-name root-mesh) new-id)
+      (set! (.-id root-mesh) new-id)
+      (when scale
+        (.scaleInPlace (.-scaling root-mesh) scale))
+      (set! (.-position root-mesh) (.-position plane-mesh))
+      ;;TODO: parameterize this to allow for non-rotating models as well.
+      ;; undo the plane "flat" rot, so model will display properly.
+      (set! (.-rotationQuaternion plane-mesh) (.multiply (.-rotationQuaternion plane-mesh) x-quat-neg-90))
+      (set! (.-rotationQuaternion root-mesh) (.-rotationQuaternion plane-mesh))
+      ; (-> main-scene/scene (.getLightByID "Point.009") (.setEnabled false))))
+      ;; hide the default meshes used to denote this choice (since we now have a full model loaded)
+      (.setEnabled plane-mesh false)
+      (.setEnabled cyl-mesh false)))
+
+  db)
+
+;; called by a subscription, upon insertion into the db of ':choice-carousels'.
+(defn init-models [choices]
+  (let [scene main-scene/scene]
+    (doall
+      (map
+        (fn [choice]
+          (prn "choice" choice)
+          (when-let [model-file (:model-file choice)]
+            (prn "model-file=" model-file)
+            (let [path-file (common/extract-path-file model-file)
+                  path (:path path-file)
+                  file (:file path-file)]
+              ; (prn "init-models, path-file=" path-file)
+              ; (prn "init-models, path=" path ",file=" file))))
+              ; (utils/load-model path file main-scene/scene (partial choice-model-loaded {:id (:id choice)}))
+              (utils/load-model path file main-scene/scene (partial choice-model-loaded {:choice choice})))))
+              ; (utils/load-model path file main-scene/scene
+              ;                   (partial (rf/dispatch
+              ;                             [:cube-test.utils.choice-carousel.events/choice-model-loaded {:abc 7}]))))))
+        choices))))
 
 (defn choice-carousel-gui-loaded [adv-text left-evt right-evt select-evt delta-theta]
   (prn "choice-carousel-gui-loaded: adv-text=" adv-text)
@@ -141,11 +192,13 @@
       (-> select-btn (.-onPointerClickObservable)
         (.add #(rf/dispatch [select-evt])))
       (-> left-arrow (.-onPointerClickObservable)
-        (.add #(rf/dispatch [left-evt delta-theta])))
+        ; (.add #(rf/dispatch [left-evt delta-theta]))
+        (.add left-evt))
       (-> left-arrow-dbg (.-onPointerClickObservable)
         (.add #(rf/dispatch [left-evt (/ delta-theta 10)])))
       (-> right-arrow (.-onPointerClickObservable)
-        (.add #(rf/dispatch [right-evt delta-theta])))
+        ; (.add #(rf/dispatch [right-evt delta-theta]))
+        (.add right-evt))
       (-> right-arrow-dbg (.-onPointerClickObservable)
         (.add #(rf/dispatch [right-evt (/ delta-theta 10)]))))))
 
@@ -192,3 +245,11 @@
                       ; (.multiplyInPlace (.-rotationQuaternion mesh) z-quat-0)
                       ; (.multiplyInPlace (.-rotationQuaternion mesh) z-quat-90))
                   mesh-ids))))
+
+
+; (defn rot-app-carousel [dir delta-theta]
+;   (let [scene main-scene/scene
+;         theta (if (= dir :right)
+;                   (* -1 delta-theta)
+;                   delta-theta)]
+;       (cc/rot-meshes (:app-ids app-carousel-parms) dir theta app-carousel-origin)))
