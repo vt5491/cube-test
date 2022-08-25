@@ -197,6 +197,7 @@
  (fn [cofx [_]]
    (if (-> cofx :db :twitch-load-status (= 2))
      (do
+       (prn "full-twitch-seq: path a")
        {:fx [ [:dispatch [::play-track]]
               [:dispatch [::play-song-anim]]
               ; [:dispatch [::start-animation :ybot-rumba 1.6]]
@@ -205,6 +206,7 @@
               ; [:dispatch [::start-animation :dynamic 1.6]]]})
      ;; else
      (do
+       (prn "full-twitch-seq: path b")
        (beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)
        (beat-club.scene/create-drum-twitches)
        {:db (:db cofx)

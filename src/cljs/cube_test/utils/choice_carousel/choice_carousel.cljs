@@ -104,7 +104,8 @@
 ; (defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups name user-cb])
 (defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
   ; (prn "cc.choice-model-loaded: db=" db)
-  ; (prn "cc.choice-model-loaded: user-parms=" user-parms)
+  (prn "cc.choice-model-loaded: user-parms=" user-parms)
+  (prn "cc.choice-model-loaded: anim-groups=" anim-groups)
   ; (prn "cc.choice-model-loaded: meshes=" meshes)
   ; (prn "cc.choice-model-loaded: meshes 0=" (first meshes))
   ; (prn "cc.choice-model-loaded: meshes 0 id=" (.-id (first meshes)))

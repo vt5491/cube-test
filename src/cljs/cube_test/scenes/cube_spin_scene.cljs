@@ -1,3 +1,4 @@
+;; Developed between approx. 06/2020 & 07/2020.
 (ns cube-test.scenes.cube-spin-scene
   (:require-macros [cube-test.macros :as macros])
   (:require
@@ -24,10 +25,7 @@
   (.setEnabled light1 true)
   (bjs/HemisphericLight. "hemiLight" (bjs/Vector3. 0 1 0) main-scene/scene)
   (.attachControl main-scene/camera main-scene/canvas false)
-  ; (init-cube)
   (init-action-pnl)
-  ; (re-frame/dispatch [:setup-btn])
-  ; (re-frame/dispatch [:init-fps-panel scene])
   (if (= main-scene/xr-mode "xr")
     (-> (.-onPointerObservable main-scene/scene) (.add pointer-handler)))
   (init-gui)
@@ -43,13 +41,10 @@
 (defn pointer-handler [pointer-info]
   (macros/when-let* [type (.-type pointer-info)
                      picked-mesh (-> pointer-info (.-pickInfo) (.-pickedMesh))]
-                    ; (prn "pointer-handler: picked-mesh.name=" (.-name picked-mesh))
                     (when (re-matches #"action-pnl" (.-name picked-mesh))
                       (cond
                         (= type js/BABYLON.PointerEventTypes.POINTERDOWN)
                         (do
-                          ; (re-frame/dispatch [:reset-spin-projectile 1])
-                          ; (re-frame/dispatch [:reset-projectiles])
                           (re-frame/dispatch [:toggle-pause-projectiles])
                           (prn "action-pnl pointerdown"))))))
 
@@ -66,53 +61,37 @@
     (set! (.-diffuseColor mat) (js/BABYLON.Color3. 1 1 0))
     (set! (.-material action-pnl) mat)))
 
-; (defn setup-btn []
-;   (prn "setup-btn: entered")
-;   (let [vt-div (-> js/document (.getElementById "vt-div"))
-;         btn (js/document.createElement "button")]
-;     (set! (.-name btn) "abc-name")
-;     (set! (.-value btn) "abc-value")
-;     (.setAttribute btn "id" "vt-btn")
-;     (set! (.-innerHTML btn) "vt-btn")
-;     (.addEventListener btn "click" (fn []
-;                                      (prn "you click vt-btn")
-;                                      (enter-vr)))
-;     (.appendChild vt-div btn)))
-
 (defn init-gui []
-  (let [scene main-scene/scene
-        ;; left-plane (bjs/Mesh.CreatePlane. "left-plane" 2)
-        left-plane (bjs/Mesh.CreatePlane "left-plane" (js-obj "width" 2, "height" 2) scene)
-        left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh left-plane 1024 1024)
-        left-pnl (bjs-gui/StackPanel.)
-        left-hdr (bjs-gui/TextBlock.)
-        bwd-btn (bjs-gui/Button.CreateImageButton "bwd-spin" "bwd" "textures/tux_tada.jpg")
-        cb (bjs-gui/Checkbox.)]
-    (set! (.-position left-plane) (bjs/Vector3. -1.5 1.5 0.4))
-    (.addControl left-adv-texture left-pnl)
-    (set! (.-text left-hdr) "Backward")
-    (set! (.-height left-hdr) "100px")
-    (set! (.-color left-hdr) "white")
-    (set! (.-textHorizontalAlignment left-hdr) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
-    (set! (.-fontSize left-hdr) "80")
-    (set! (.-horizontalAlignment left-pnl) bjs-gui/StackPanel.HORIZONTAL_ALIGNMENT_CENTER)
-    (set! (.-verticalAlignment left-pnl) bjs-gui/StackPanel.VERTICAL_ALIGNMENT_CENTER)
-    (-> bwd-btn .-onPointerUpObservable (.add (fn [value]
-                                               (prn "bwd the palace btn style")
-                                               (re-frame/dispatch [:update-spin-ang-vel (bjs/Vector3. 0 0.002 0)]))))
-    (.addControl left-pnl bwd-btn)
-    (.addControl left-pnl left-hdr)
-    ;;cb
-    (set! (.-width cb) "100px")
-    (set! (.-height cb) "100px")
-    (.addControl left-pnl cb)))
-    ; (.addControl left-pnl left-hdr)))
+ (let [scene main-scene/scene
+       left-plane (bjs/Mesh.CreatePlane "left-plane" (js-obj "width" 2, "height" 2) scene)
+       left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh left-plane 1024 1024)
+       left-pnl (bjs-gui/StackPanel.)
+       left-hdr (bjs-gui/TextBlock.)
+       bwd-btn (bjs-gui/Button.CreateImageButton "bwd-spin" "bwd" "textures/tux_tada.jpg")
+       cb (bjs-gui/Checkbox.)]
+   (set! (.-position left-plane) (bjs/Vector3. -1.5 1.5 0.4))
+   (.addControl left-adv-texture left-pnl)
+   (set! (.-text left-hdr) "Backward")
+   (set! (.-height left-hdr) "100px")
+   (set! (.-color left-hdr) "white")
+   (set! (.-textHorizontalAlignment left-hdr) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
+   (set! (.-fontSize left-hdr) "80")
+   (set! (.-horizontalAlignment left-pnl) bjs-gui/StackPanel.HORIZONTAL_ALIGNMENT_CENTER)
+   (set! (.-verticalAlignment left-pnl) bjs-gui/StackPanel.VERTICAL_ALIGNMENT_CENTER)
+   (-> bwd-btn .-onPointerUpObservable (.add (fn [value]
+                                              (prn "bwd the palace btn style")
+                                              (re-frame/dispatch [:update-spin-ang-vel (bjs/Vector3. 0 0.002 0)]))))
+   (.addControl left-pnl bwd-btn)
+   (.addControl left-pnl left-hdr)
+   ;;cb
+   (set! (.-width cb) "100px")
+   (set! (.-height cb) "100px")
+   (.addControl left-pnl cb)))
 
 
 (defn init-gui-2 []
   (init-cube)
   (let [
-        ;; plane (bjs/Mesh.CreatePlane. "plane" 1)
         scene main-scene/scene
         plane (bjs/Mesh.CreatePlane "plane" (js-obj "width" 1, "height" 1) scene)
         adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane)
@@ -123,15 +102,10 @@
         header (bjs-gui/TextBlock.)
         header-2 (bjs-gui/TextBlock.)
         picker (bjs-gui/ColorPicker.)
-        ; fwd-btn (bjs-gui/Button3D. "fwd")
         cb (bjs-gui/Checkbox.)
-        ; fwd-btn (bjs-gui/Button.CreateSimpleButton. "fwd" "click me")]
         fwd-btn (bjs-gui/Button.CreateImageButton "fwd" "click me" "textures/tux_tada.jpg")]
-        ; fwd-btn (bjs-gui/HolographicButton. "fwd")]
     (set! (.-position plane) (bjs/Vector3. -3.4 1.5 0.4))
     (set! (.-position plane-2) (bjs/Vector3. 1.4 1.5 0.4))
-    ; (set! (.-material plane) green-mat)
-    ; (set! (.-material plane-2) green-mat)
     (.addControl adv-text panel)
     (.addControl adv-text-2 panel-2)
     (set! (.-text header) "Color GUI")
@@ -140,7 +114,6 @@
     (set! (.-textHorizontalAlignment header) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
     (set! (.-fontSize header) "120")
     (.addControl panel header)
-    ; (.addControl panel-2 header)
     (set! (.-value picker) (-> cube .-material .-diffuseColor))
     (set! (.-horizontalAlignment picker) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
     (set! (.-height picker) "350px")
@@ -158,7 +131,6 @@
     (set! (.-fontSize header-2) "80")
     (set! (.-color header-2) "red")
     (.addControl panel-2 header-2)
-    ; (set! (.-x (.-position fwd-btn)) 1.5)
     (-> fwd-btn .-onPointerUpObservable (.add (fn [value]
                                                (prn "up the palace btn style")
                                                (re-frame/dispatch [:update-spin-ang-vel (bjs/Vector3. 0 -0.002 0)]))))

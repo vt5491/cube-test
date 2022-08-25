@@ -1,3 +1,4 @@
+;; developed approx between 8/7/2021 and 9/4/2021
 (ns cube-test.beat-club.scene
   (:require-macros [cube-test.macros :as macros])
   (:require
@@ -14,9 +15,6 @@
    [cube-test.utils :as utils]
    [cube-test.beat-club.twitch-stream :as twitch-stream]
    [babylonjs-loaders :as bjs-l]))
-
-   ; [goog.object :as g]
-   ; [clojure.data.json :as json]))
 
 (declare twitch-stream)
 (declare twitch-control-stream)
@@ -43,13 +41,10 @@
     (set! (.-material mesh) mat)))
 
 (defn set-mat [mesh mat]
-  ; (let [scene main-scene/scene]
-        ; mesh (.getMeshByID mesh-id scene)]
     (set! (.-material mesh) mat))
 
 (defn twitch-note [voice]
   (let [scene main-scene/scene
-        ; snare (.getMeshByID scene "snare-drum")
         snare-twitch (.getMeshByID scene "snare-twitch")
         kick-twitch (.getMeshByID scene "kick-twitch")
         hi-hat-twitch (.getMeshByID scene "hi-hat-twitch")
@@ -57,8 +52,6 @@
         tom-2-twitch (.getMeshByID scene "tom-2-twitch")
         tom-3-twitch (.getMeshByID scene "tom-3-twitch")
         crash-twitch (.getMeshByID scene "crash-twitch")]
-    ; (set! (.-material snare) main-scene/green-mat)
-    ; (js/setTimeout #(set-mat-2 "snare-drum" main-scene/blue-mat) 200)
 
     (case voice
       :SNARE (do
@@ -113,7 +106,6 @@
        interval)
     (and (not (nil? interval)) (empty? intervals))
     (js/setTimeout #(do action [])
-                      ; (twitch-control-stream obj intervals action))
                    interval)))
 
 (defn twitch-control-stream [type obj intervals action]
@@ -132,9 +124,7 @@
   (twitch-stream :TOM-3 (-> db :intervals :tom-3))
   (twitch-stream :CRASH (-> db :intervals :crash))
   ;; control intervals
-  ; (doall (map (fn [x] (.push (-> pool-mat .-reflectionTexture .-renderList) x))))
   (when (-> db :control-intervals :toggle-model)
-    ; (let [model (-> db)])
     (doall (map (fn [hash]
                   (prn "scene.play-song-anim: hash=" hash)
                   (prn "scene.play-song-anim: map? hash=" (map? hash) ",vector? hash=" (vector? hash))
@@ -147,14 +137,8 @@
                                            #(utils/toggle-enabled model))))
                 (-> db :control-intervals :toggle-model)))))
 
-    ; (let [model (-> db :control-intervals :toggle-model :obj name)
-    ;       intervals (-> db :control-intervals :toggle-model :intervals)]
-    ;   (twitch-control-stream :TOGGLE-MODEL
-    ;                          intervals
-    ;                          #(utils/toggle-enabled model)))))
-
 (defn stop-song-anim [db]
-  (assoc db :twitch-streaming-active false))
+ (assoc db :twitch-streaming-active false))
 
 (defn mp3-loaded []
   (prn "mp3-loaded2: rock-candy ready to roll, rock-candy-track=" rock-candy-track)
@@ -162,15 +146,6 @@
   (re-frame/dispatch [:cube-test.beat-club.events/inc-twitch-load-status])
   (prn "mp3-loaded: about to dispatch song-loaded")
   (re-frame/dispatch [:cube-test.beat-club.events/song-loaded]))
-  ; (.play rock-candy-track))
-  ; (bjs/Sound. ))
-
-; (defn ^:export mutha []
-;   (prn "mutha"))
-;
-; (defn ^:export mutha2 []
-;   (prn "mutha2"))
-
 
 (defn load-mp3
   ([id filename]
@@ -180,8 +155,8 @@
    (prn "load-mp3: 3 arg sig, cb=" cb)
    (prn "beat-club.scene.load-mp3: entered")
    (. js/window console.log "abcdef")
-   (let [
-         tmp js/mutha4]
+   (let []
+        ;;  tmp js/mutha4]
      (prn "about to call bjs/Sound,id=" id ", filename=" filename)
      (set! rock-candy-track (bjs/Sound. id filename main-scene/scene
                               cb))
@@ -191,20 +166,16 @@
   (.pause rock-candy-track))
 
 (defn stop-song []
-  ; (js-debugger)
   (prn "scene: stop-song: stopping " rock-candy-track)
   (.stop rock-candy-track))
 
 (defn play-track []
   (prn "play-track entered")
   (.play rock-candy-track))
-  ; (play-song-anim))
 
 (defn create-drum-twitches []
   (set! snare-twitch (note-twitch/init "snare-twitch" 1 1 (bjs/Vector3. 3 4 0)))
-  ; (prn "create-drum-twitchs: snare-twitch=" snare-twitch)
   (set! kick-twitch (note-twitch/init "kick-twitch" 2 2 (bjs/Vector3. 3 1 0)))
-  ; (prn "create-drum-twitchs: kick-twitch=" kick-twitch)
   (set! hi-hat-twitch (note-twitch/init "hi-hat-twitch" 1.5 1.5 (bjs/Vector3. 0 4 0) :SPHERE))
   (set! tom-1-twitch (note-twitch/init "tom-1-twitch" 0.75 0.75 (bjs/Vector3. 5 4 0) :CUBE))
   (set! tom-2-twitch (note-twitch/init "tom-2-twitch" 0.75 0.75 (bjs/Vector3. 6 4 0) :CUBE))
@@ -299,8 +270,6 @@
     (do
       (set! particle-helper (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4)))
       (.start particle-helper))))
-  ; (let [ph (bjs/ParticleHelper.CreateDefault. (bjs/Vector3. 0 3 4))]
-  ;   (.start ph)))
 
 ;;TODO: put into some scene helper class as this isn't really direclty view-orientd
 ;; (a little but more state-oriented)
@@ -316,28 +285,15 @@
 ;   loader.animationStartMode = BABYLON.GLTFLoaderAnimationStartMode.NONE;
 (defn model-loaded [new-meshes particle-systems skeletons name is-enabled is-playing props]
   (prn "model-loaded: count new-meshes=" (count new-meshes))
-  ; (js-debugger)
   (doall (map #(set! (.-scaling %1) (-> (js/BABYLON.Vector3.One) (.scale 2))) new-meshes))
-  ;; use the following on the original boxing
-  (let [scene main-scene/scene])
-  (doall (map #(set! (.-rotation %1) (js/BABYLON.Vector3. (-> %1 .-rotation .-x)
-                                                        (* base/ONE-DEG 180)
-                                                        (-> %1 .-rotation .-z))) new-meshes))
   (doall (map #(do
                  (when (re-matches #"__root__" (.-id %1))
                      (set! (.-name %1) name)
                      (set! (.-id %1) name)))
               new-meshes))
   (re-frame/dispatch [:cube-test.beat-club.events/model-loaded name is-enabled is-playing props])
-  ; (re-frame/dispatch [:cube-test.beat-club.events/init-animation-speed name])
-  (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
-  ; (re-frame/dispatch [:cube-test.beat-club.events/toggle-model-enabled name]))
+  ;;vt-x (re-frame/dispatch [:cube-test.beat-club.events/stop-animation name])
   (utils/toggle-enabled name))
-  ; (let [scene main-scene/scene
-  ;       anim-name-fq (str name "-anim")
-  ;       ag (.getAnimationGroupByName scene anim-name-fq)
-  ;       dyn-ag (twitch-stream/create-sub-anim-group ag name 1 72)]))
-  ;   ; (js-debugger)))
 
 (defn load-model [path file name is-enabled is-playing props]
   (prn "scene.load-model: name= " name)
@@ -348,9 +304,7 @@
              #(model-loaded %1 %2 %3 name is-enabled is-playing props)))
 
 (defn load-model-2 [path file name]
-  ; (load-model path file name))
   (prn "scene.load-model-2: name=" name)
-  ; (js/setTimeout #(set-mat-2 "tom-1-twitch" main-scene/blue-mat) 200)
   (js/setTimeout #(.then (.ImportMeshAsync js/BABYLON.SceneLoader ""
                                               path
                                               file
@@ -364,40 +318,14 @@
              path
              file
              main-scene/scene
-             ; #(model-loaded %1 %2 %3 name is-enabled is-playing props)
              #(do
                 (prn "model" file " is loaded")
-                ; (start-animation  1.0)
                 (let [ag-1 (.getAnimationGroupByName main-scene/scene "mv_right_simp")
                       ag-2 (.getAnimationGroupByName main-scene/scene "mv_up_simp")
                       ag-3 (.getAnimationGroupByName main-scene/scene "mv_combo_baked")
                       ag-4 (.getAnimationGroupByName main-scene/scene "mv_rot_simp")
                       vt-baked-anim (.getAnimationGroupByName main-scene/scene "vt_baked")
                       ag-new (bjs/AnimationGroup. "ag-new")]
-                      ; ag-new (twitch-stream/create-sub-anim-group ag-1 "ag-new" 0 60)
-                      ; ag-new-2 (twitch-stream/create-sub-anim-group ag-new "ag-new" 0 60)]
-                  ; (set! (.-isAdditive ag-1) true)
-                  ; (set! (.-isAdditive ag-2) true)
-                  ; (.start ag-1 true)
-                  ; (.start ag-2 true)
-                  ; (let [children (.-children ag-1)]
-                  ;   (doall (for [ta children]
-                  ;            (.addTargetedAnimation ag-new
-                  ;                   ; (.clone (.-animation ta))
-                  ;                   (.-animation ta)
-                  ;                   (.-target ta)))))
-                  ; (let [children (.-children ag-4)]
-                  ;   ; (doseq [ta (map (fn [x] x) children)])
-                  ;   (doseq [ta children]
-                  ;    (prn "ta=" ta ", animation ta=" (.-animation ta))
-                  ;    (let [anim (force (.-animation ta))
-                  ;          ; tmp (js-debugger)
-                  ;          anim-sub (twitch-stream/set-anim-key-range anim 1 30)]
-                  ;      (.addTargetedAnimation ag-new
-                  ;                             ; (.clone (.-animation ta))
-                  ;                             ; (.-animation ta)
-                  ;                             anim
-                  ;                             (.-target ta)))))
                   (.start vt-baked-anim true)))))
 
 (defn load-model-4 [path file name]
@@ -411,12 +339,6 @@
                 (let [ag (.getAnimationGroupByName main-scene/scene "idle_grasp_baked")]
                   (.start ag true)))))
 
-; const assetsManager = new BABYLON.AssetsManager(scene);
-; const meshTask = assetsManager.addMeshTask('piano task', '', './assets/', 'piano.obj');
-; meshTask.onSuccess = (task) => {}
-;     const pianoMesh = task.loadedMeshes[0];
-;     // Do something with the mesh here
-                  ; assetsManager.load())))
 ;; Note: bjs does not support fbx, so this doesn't work
 (defn load-model-fbx [path file name]
   (let [am (bjs/AssetsManager. main-scene/scene)
@@ -432,10 +354,7 @@
  (let [scene main-scene/scene
        anim-name-fq (str (name model-kw) "-anim")
        ag (.getAnimationGroupByName scene anim-name-fq)]
-   ; (.start ag)
-   ; (set! (.-loopAnimation ag) true)
    (set! (.-speedRatio ag) speed-factor)))
-   ; (js-debugger)))
 
 (defn start-animation [anim-name speed-ratio from to]
  (prn "scene.start-animation: anim-name=" anim-name ", speed-ratio=" speed-ratio
@@ -443,39 +362,22 @@
  (let [scene main-scene/scene
        anim-name-fq (str (name anim-name) "-anim")
        ag (.getAnimationGroupByName scene anim-name-fq)]
-   ; (set! (.-loopAnimation ag) true)
-   ; (set! (.-speedRatio ag) speed-factor)
-   ; (.stop ag)
    (.reset ag)
    (.start ag true speed-ratio from to)
-   ; (set! (.-onAnimationGroupEndObservable ag) #(prn "scene: groupEndObservable ag=" %1))
-   ; (-> (.-onAnimationGroupEndObservable ag) (.add #(prn "scene: groupEndObservable ag=" %1)))
-   ; (-> (.-onAnimationGroupLoopObservable ag) (.add #(prn "scene: groupLoopObservable ag=" %1)))
    (-> (.-onAnimationGroupLoopObservable ag) (.clear))
    (-> (.-onAnimationGroupLoopObservable ag) (.add twitch-stream/animGroupLoopHandler))))
-   ; (js-debugger)))
-   ; (-> (.-onAnimationGroupLoopObservable ag) (.addOnce twitch-stream/animGroupLoopHandler))))
-   ; (set! (.-onAnimationGroupLoopObservable ag) #(prn "scene: groupLoopObservable ag=" %1))))
 
 (defn stop-animation [anim-name]
   (prn "scene.stop-animation: anim-name=" anim-name)
-  ; (js-debugger)
   (let [scene main-scene/scene
         anim-name-fq (str (name anim-name) "-anim")
         ag (.getAnimationGroupByName scene anim-name-fq)]
       (prn "scene.stop-animation: anim-name-fq=" anim-name-fq)
       (.stop ag)))
-    ; (-> (nth (.-animationGroups scene) 0) .stop)))
 
 (defn init [db]
   (let [scene main-scene/scene
-        ; snare-drum (bjs/MeshBuilder.CreateBox "snare-drum" (js-obj "width" 2 "height" 2) scene)
         light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)
         camera main-scene/camera
         camera-pos (.-position camera)]
     (init-gui)))
-    ; (set! (.-position camera) (.subtract camera-pos (bjs/Vector3. 0 0 2)))))
-
-    ; (prn "scene.blue-mat=" main-scene/blue-mat)
-    ; (set! (.-material snare-drum) main-scene/blue-mat)
-    ; (set! (.-position snare-drum) (bjs/Vector3. 0 1 0))))

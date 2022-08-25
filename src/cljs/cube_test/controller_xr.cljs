@@ -24,8 +24,9 @@
 (def last-grip-vel)
 (def last-grip-time)
 ; (def grip-factor 1.9) ;; probably the best
+(def grip-factor 1.8) ;; 2022-08-25
 ; (def grip-factor 2.1) ;; good for scale-factor=100
-(def grip-factor (if (>= base/scale-factor 100) 2.1 1.9))
+; (def grip-factor (if (>= base/scale-factor 100) 2.1 1.9))
 ; (def GRIP_DECELERATION_INT 1000)
 (def GRIP_DECELERATION_INT 1500)
 (def game-pad-mgr)

@@ -23,10 +23,31 @@
   {:top-scene-abc 7})
 
 (def app-carousel-parms {:radius 16.0
-                         :app-ids [:ff :cube-spin :face-slot :vrubik :get-cube :twizzlers :beat-club]
-                         :model-files ["models/top_scene/sub_scenes/ff_scene.glb"
-                                       nil nil nil nil nil nil]
-                         :scales [0.3 nil nil nil nil nil nil]
+                         :app-ids [:ff
+                                   :cube-spin
+                                   :face-slot
+                                   :vrubik
+                                   :geb-cube
+                                   :twizzlers
+                                   :beat-club]
+                         :model-files [
+                                       ; "models/top_scene/sub_scenes/ff_scene.glb"
+                                       ; "models/top_scene/sub_scenes/ff_scene_3.glb"
+                                       "models/top_scene/sub_scenes/ff_scene_no_anim.glb"
+                                       nil
+                                       nil
+                                       nil
+                                       nil
+                                       nil
+                                       ; nil
+                                       "models/top_scene/sub_scenes/beat_club_scene_blender_no_anim.glb"]
+                         :scales [0.3
+                                  nil
+                                  nil
+                                  nil
+                                  nil
+                                  nil
+                                  0.2]
                          :colors [(bjs/Color3.Blue) (bjs/Color3.Gray) (bjs/Color3.Green) (bjs/Color3.Magenta)
                                   (bjs/Color3.Red) (bjs/Color3.Yellow) (bjs/Color3.Teal) (bjs/Color3.Purple)]})
 
@@ -95,31 +116,32 @@
                #(ff-cube-loaded %1 %2 %3 %4 name user-cb)))
 
 ; (defn model-loaded [root-prfx scale meshes particle-systems skeletons anim-groups name user-cb])
-(defn model-loaded [user-parms meshes particle-systems skeletons anim-groups name user-cb]
-  ; (println "model-loaded")
-  (let [root-prfx (:root-prfx user-parms)
-        scale (:scale user-parms)
-        delta-pos (:delta-pos user-parms)]
-    (doall (map #(do
-                   ; (prn "model-loaded: id %1=" (.-id %1) ",root-prfx=" root-prfx)
-                   (when (re-matches #"__root__" (.-id %1))
-                         ; (set! (.-name %1) name)
-                         ; (set! (.-id %1) name)
-                         ; (set! (.-name %1) "root")
-                         ; (set! (.-id %1) "root")
-                         (set! (.-name %1) root-prfx)
-                         (set! (.-id %1) root-prfx)
-                         (.scaleInPlace (.-scaling %1) scale)
-                         (when delta-pos
-                           (set! (.-position %1) (.add (.-position %1) delta-pos)))))
-                meshes))))
-
-(defn load-model [path file name user-cb]
-  (.ImportMesh bjs/SceneLoader ""
-               path
-               file
-               main-scene/scene
-               user-cb))
+;; following 2 defunct: replaced by cc/choice-model-loaded
+; (defn model-loaded [user-parms meshes particle-systems skeletons anim-groups name user-cb]
+;   (println "model-loaded")
+;   (let [root-prfx (:root-prfx user-parms)
+;         scale (:scale user-parms)
+;         delta-pos (:delta-pos user-parms)]
+;     (doall (map #(do
+;                    ; (prn "model-loaded: id %1=" (.-id %1) ",root-prfx=" root-prfx)
+;                    (when (re-matches #"__root__" (.-id %1))
+;                          ; (set! (.-name %1) name)
+;                          ; (set! (.-id %1) name)
+;                          ; (set! (.-name %1) "root")
+;                          ; (set! (.-id %1) "root")
+;                          (set! (.-name %1) root-prfx)
+;                          (set! (.-id %1) root-prfx)
+;                          (.scaleInPlace (.-scaling %1) scale)
+;                          (when delta-pos
+;                            (set! (.-position %1) (.add (.-position %1) delta-pos)))))
+;                 meshes))))
+;
+; (defn load-model [path file name user-cb]
+;   (.ImportMesh bjs/SceneLoader ""
+;                path
+;                file
+;                main-scene/scene
+;                user-cb))
 
 (defn init-scene-carousel []
   (prn "top-scene.init-scene-carousel entered")
