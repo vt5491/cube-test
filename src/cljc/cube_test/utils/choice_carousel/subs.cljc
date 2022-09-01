@@ -41,9 +41,16 @@
           ; (prn "cc.subs: diff-a=" diff-a)
           ; (prn "cc.subs: second diff-a=" (second diff-a))
           ; (prn "cc.subs: diff-b=" diff-b)
-          ; (prn "cc.subs: diff=" diff)
-          (when diff
+          (prn "cc.subs: diff=" diff)
+          ; (when diff)
+          ;; We denote a "new" choice insertion as any choice that has an ":id"
+          ;; We need to distinguish this path because we may add other keys but
+          ;; do *not* want to drive the full initialization path.
+          ; (when (and diff (get-in diff [:choice :id])))
+          (when (and diff (get-in diff [:id]))
             (cc/init-meshes (:radius diff) (:choices diff) (:colors diff))
-            (cc/init-models (:choices diff)))
+            ; (cc/init-models (:choices diff))
+            (rf/dispatch [:cube-test.utils.choice-carousel.events/init-model-containers])
+            (prn "just dispatched"))
 
           (swap! *last-choice-carousels* (fn [x] choice-carousels))))))

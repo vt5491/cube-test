@@ -71,14 +71,43 @@
    ; (cube-test.game.init top-level-scene)
    (cube-test.core.init top-level-scene)))
 
-(defn soft-switch-app [top-level-scene]
-  (let [scene main-scene/scene
-        engine main-scene/engine]
-   (.stopRenderLoop engine)
-   ; (.dispose scene)
-   ; (cube-test.game.init top-level-scene)
-   (set! game/soft-switch true)
-   (cube-test.core.init top-level-scene)))
+(defn init-non-vr-view
+  ([] (init-non-vr-view 180))
+  ([delta-rot]
+   (let [camera main-scene/camera])))
+
+; (defn soft-switch-app-2
+;   ([top-level-scene] (soft-switch-app-2 top-level-scene 7))
+;   ([top-level-scene cleanup-f
+;      (let [camera main-scene/camera])]))
+
+; (defn soft-switch-app-3
+;   ([top-level-scene] (soft-switch-app-3 top-level-scene 7))
+;   ([top-level-scene cleanup
+;     (prn "soft-switch-app-3")]))
+
+; (defn soft-switch-app
+;   ([top-level-scene] (soft-switch-app top-level-scene nil))
+;   ([top-level-scene cleanup]))
+; (defn soft-switch-app [top-level-scene])
+(defn soft-switch-app
+  ([top-level-scene] (soft-switch-app top-level-scene nil))
+  ([top-level-scene cleanup-fn]
+   (prn "events.soft-switch-app:top-level-scene =" top-level-scene)
+   (let [scene main-scene/scene
+         engine main-scene/engine]
+     (.stopRenderLoop engine)
+     ; (.dispose scene)
+     ; (cube-test.game.init top-level-scene)
+     (set! game/soft-switch true)
+     ; (js-debugger)
+     ; (.removeAllFromScene cube-test.top-scene.top-scene.top-scene-assets)
+     (when cleanup-fn
+       (cleanup-fn))
+     (re-frame/dispatch-sync [:cube-test.top-scene.events/remove-asset-containers])
+     ; (when)
+     ; (cube-test.top-scene.top-scene/)
+     (cube-test.core.init top-level-scene))))
 
 ; (reg-event-fx
 ;  ::switch-app
@@ -332,13 +361,13 @@
    (face-slot-scene/anim-bwd hlq mute)
    db))
 
-; (re-frame/reg-event-db
-;   :face-slot-super-anim-bwd
-;  (fn [db [_]]
-;    ; (println "init-cube-fx event handler")
-;    ;side effect
-;    (face-slot-scene/super-anim-bwd)
-;    db))
+(re-frame/reg-event-db
+  :face-slot-super-anim-bwd
+ (fn [db [_]]
+   ; (println  "init-cube-fx event handler")
+   ;side effect
+   (face-slot-scene/super-anim-bwd)
+   db))
 
 (re-frame/reg-event-db
   :face-slot-anim-fwd
@@ -347,14 +376,14 @@
    ;side effect
    (face-slot-scene/anim-fwd hlq mute)
    db))
-;
-; (re-frame/reg-event-db
-;   :face-slot-super-anim-fwd
-;  (fn [db [_]]
-;    ; (println "init-cube-fx event handler")
-;    ;side effect
-;    (face-slot-scene/super-anim-fwd)
-;    db))
+
+(re-frame/reg-event-db
+  :face-slot-super-anim-fwd
+ (fn [db [_]]
+   ; (println "init-cube-fx event handler")
+   ;side effect
+   (face-slot-scene/super-anim-fwd)
+   db))
 
 (re-frame/reg-event-db
  :init-top-rotor

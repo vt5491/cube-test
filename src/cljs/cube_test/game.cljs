@@ -19,6 +19,12 @@
 (declare render-loop)
 (def soft-switch false)
 
+;; Just a common method used to control if a hard switch is done, or a soft one.
+(defn init-applicable-dispatch [full-dispatch support-dispatch]
+  (if soft-switch
+    (support-dispatch)
+    (full-dispatch)))
+
 (defn init
   ([] (init base/top-level-scene))
   ([top-level-scene]
@@ -79,18 +85,25 @@
       ; (re-frame/dispatch [:run-msg-cube-scene]))))
      :twizzlers (do
                    (println "top-level-scene=twizzlers")
-                   (re-frame/dispatch [:init-main-scene
-                                        (fn [] (do
-                                                (re-frame/dispatch [::twizzler-events/init-db])
-                                                               ; (re-frame/dispatch [::init-twizzlers-game])
-                                                               ; (re-frame/dispatch [:twizzler-events/init-twizzlers-game])
-                                                               ; (re-frame/dispatch [:init-twizzlers-game])
-                                                (re-frame/dispatch [::twizzler-events/init-game])
-                                                (re-frame/dispatch [::twizzler-events/run-game])))])
-                   ; (re-frame/dispatch [:init-twizzlers-game-fx])
-                   ; (re-frame/dispatch [:msg-cube.abc])))])
-                   ; (re-frame/dispatch [:run-msg-cube-game])))])
-                   (re-frame/dispatch [:init-fps-panel main-scene/scene]))
+                   ; (re-frame/dispatch [:init-main-scene
+                   ;                      (fn [] (do
+                   ;                              (re-frame/dispatch [::twizzler-events/init-db])
+                   ;                                             ; (re-frame/dispatch [::init-twizzlers-game])
+                   ;                                             ; (re-frame/dispatch [:twizzler-events/init-twizzlers-game])
+                   ;                                             ; (re-frame/dispatch [:init-twizzlers-game])
+                   ;                              (re-frame/dispatch [::twizzler-events/init-game])
+                   ;                              (re-frame/dispatch [::twizzler-events/run-game])))])
+                   ; (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                   (let [support-init-seq #(do
+                                             (re-frame/dispatch [::twizzler-events/init-db])
+                                             (re-frame/dispatch [::twizzler-events/init-game])
+                                             (re-frame/dispatch [::twizzler-events/run-game])
+                                             (re-frame/dispatch [:init-fps-panel main-scene/scene]))
+                         full-init-seq #(re-frame/dispatch [:init-main-scene support-init-seq])]
+                     ;   (if soft-switch
+                     ;     (support-init-seq)
+                     ;     (re-frame/dispatch [:init-main-scene support-init-seq]))
+                      (init-applicable-dispatch full-init-seq support-init-seq)))
      :beat-club (do
                   (println "top-level-scene=beat-club")
                   (re-frame/dispatch [:init-main-scene
@@ -108,9 +121,14 @@
                                     (re-frame/dispatch [:init-fps-panel main-scene/scene])
                                     (re-frame/dispatch [::frig-frog-events/run-game]))]
                      (println "top-level-scene=frig-frog, soft-switch=" soft-switch)
-                     (when (not soft-switch)
-                       (re-frame/dispatch [:init-main-scene top-level-init-seq]))
-                     (top-level-init-seq)))
+                     ; (when (not soft-switch)
+                     ;   (re-frame/dispatch [:init-main-scene top-level-init-seq]))
+                     ; (top-level-init-seq)
+                     (if soft-switch
+                       ;; leave out 'init-main-scene' i.e. just call the support dispatches.
+                       (top-level-init-seq)
+                       ;; e.g. call 'init-main-scene', then the support dispatches.
+                       (re-frame/dispatch [:init-main-scene top-level-init-seq]))))
                      ; (re-frame/dispatch [:init-main-scene ff-top-level-seq])
                      ; (re-frame/dispatch [:init-main-scene ff-top-level-seq])))
                      ; (re-frame/dispatch [:init-main-scene
@@ -126,17 +144,22 @@
                      ;                                        (re-frame/dispatch [::frig-frog-events/run-game])))])))
      :top-scene (do
                    (println "top-level-scene=top-scene")
-                   (re-frame/dispatch [:init-main-scene
-                                         (fn []
-                                           (do
-                                             (re-frame/dispatch [::top-scene-events/init-db top-scene/default-db])
-                                             (when (not soft-switch)
-                                               (re-frame/dispatch [::top-scene-events/init-scene]))
-                                             (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                                             (re-frame/dispatch [::top-scene-events/run-scene])))])))))
-                                             ; (utils/sleep #(do
-                                             ;                 (prn "sleep: now driving init-choice-carousel")
-                                             ;                 (top-scene/init-choice-carousel)) 15000)))])))))
+                   ; (re-frame/dispatch [:init-main-scene
+                   ;                       (fn []
+                   ;                         (do
+                   ;                           (re-frame/dispatch [::top-scene-events/init-db top-scene/default-db])
+                   ;                           (when (not soft-switch)
+                   ;                             (re-frame/dispatch [::top-scene-events/init-scene]))
+                   ;                           (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                   ;                           (re-frame/dispatch [::top-scene-events/run-scene])))])
+                   (let [support-dispatch #(do
+                                               (re-frame/dispatch [::top-scene-events/init-db top-scene/default-db])
+                                               ; (when (not soft-switch))
+                                               (re-frame/dispatch [::top-scene-events/init-scene])
+                                               (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                                               (re-frame/dispatch [::top-scene-events/run-scene]))
+                         full-dispatch #(re-frame/dispatch [:init-main-scene support-dispatch])]
+                     (init-applicable-dispatch full-dispatch support-dispatch))))))
 
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)

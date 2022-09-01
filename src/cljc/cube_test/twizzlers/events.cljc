@@ -10,63 +10,22 @@
    [cube-test.twizzlers.rules :as twizzlers.rules]
    [cube-test.utils :as utils]))
 
-; (re-frame/reg-fx
-;  :init-msg-cube-scene-fx
-;  (fn [_]
-;   ; (simp-scene/init-once)
-;   (msg-cube.scene/init)))
 (def dummy 7)
 
-; (def msg-cube-check-spec-interceptor (after (partial check-and-throw ::msg-cube.spec/db-spec)));
 (def twizzlers-check-spec-interceptor (after (partial utils/check-and-throw ::twizzlers.db/db-spec)));
 
-; (re-frame/reg-event-fx
-;   :init-msg-cube-game
-;   (fn [cofx _]
-;      {:db (msg-cube.game/init (:db cofx))
-;       ; :init-msg-cube-game-fx nil
-;       :init-msg-cube-scene nil}))
-; (re-frame/reg-fx)
 (re-frame/reg-event-fx
- ; :init-twizzlers-scene
  ::init-scene
- ; (fn [_])
- ; (fn [cofx _])
  (fn [cofx _]
-   ; (prn "::init-scene: cofx=" cofx)
    (twizzlers.scene/init (:db cofx))
    cofx))
 
-
-; (re-frame/reg-fx
-;   :db
-;   (fn [value]
-;     (reset! re-frame.db/app-db value)))
-
 (re-frame/reg-event-fx
- ; :init-twizzlers-game
- ; (fn []
- ;   (twizzlers.game/init))
  ::init-game
  (fn [cofx _]
    twizzlers.game/init
-   ; (prn "::init-game: cofx=" cofx)
    {
-    ; :db (twizzlers.game/init)
-    ; :db (:db cofx)
-    ; :init-scene cofx
     :fx [[:dispatch [::init-scene]]]}))
-    ; ::init-scene (:db cofx)}))
-
-; (re-frame/reg-event-fx
-;  ::init-game
-;  (fn [_]
-;    (twizzlers.game/init)))
-;
-; (re-frame/reg-event-fx
-;  ::init-scene
-;  (fn [_]
-;    (twizzlers.scene/init)))
 
 (re-frame/reg-event-fx
  ::run-game

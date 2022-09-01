@@ -19,6 +19,8 @@
    ; [cube-test.utils.choice-carousel.subs :as cc-subs]))
 
 ; (def tmp-text nil)
+(declare choice-model-container-loaded)
+(declare get-choice-idx-by-id)
 (def cc-rot-snd)
 
 (defn init-snd [{:keys [rot-snd-file] :as parms}]
@@ -96,21 +98,15 @@
                           :color (nth colors i)} i scene))
           choices))))
 
-(defn choice-model-loaded [user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
-  ;; promote into a re-frame call so we can get access to the rf db.
-  (rf/dispatch [:cube-test.utils.choice-carousel.events/choice-model-loaded-rf user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]))
+; (defn choice-model-loaded [user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
+;   ;; promote into a re-frame call so we can get access to the rf db.
+;   (rf/dispatch [:cube-test.utils.choice-carousel.events/choice-model-loaded-rf user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]))
 
 ;; same as choice-model-loaded except we also have a db.
 ; (defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups name user-cb])
-(defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
-  ; (prn "cc.choice-model-loaded: db=" db)
-  (prn "cc.choice-model-loaded: user-parms=" user-parms)
-  (prn "cc.choice-model-loaded: anim-groups=" anim-groups)
-  ; (prn "cc.choice-model-loaded: meshes=" meshes)
-  ; (prn "cc.choice-model-loaded: meshes 0=" (first meshes))
-  ; (prn "cc.choice-model-loaded: meshes 0 id=" (.-id (first meshes)))
-  ; (prn "cc.choice-model-loaded: id user-parms=" (:id user-parms))
-  ; (prn "cc.choice-model-loaded: id user-parms=" (get-in user-parms [:choice :id]))
+; (defn choice-model-loaded-rf [db user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb])
+;; Note: works, but defunct (replaced by choice-model-container-loaded)
+(defn choice-model-loaded [user-parms meshes particle-systems skeletons anim-groups transform-nodes geometries lights user-cb]
   (let [scene main-scene/scene
         root-mesh (first meshes)
         root-mesh-id (.-id root-mesh)
@@ -140,11 +136,25 @@
       ; (-> main-scene/scene (.getLightByID "Point.009") (.setEnabled false))))
       ;; hide the default meshes used to denote this choice (since we now have a full model loaded)
       (.setEnabled plane-mesh false)
-      (.setEnabled cyl-mesh false)))
-
-  db)
+      (.setEnabled cyl-mesh false))
+      ; var container = new BABYLON.AssetContainer(scene)));
+      ; (.push (.-meshes cube-test.top-scene.top-scene.top-scene-assets) root-mesh))))
+;       var keepAssets = new BABYLON.KeepAssets())));
+; keepAssets.cameras.push(camera);
+; container.moveAllFromScene(keepAssets);
+    (prn "count meshes=" (count meshes))
+    (when (= choice-id "face-slot")
+      (doall (map #(do
+                     (prn "mesh-id=" (.-id %1))
+                     (when (not (re-matches #".*root.*" (.-id %1)))
+                       ; (.push (.-meshes cube-test.top-scene.top-scene.top-scene-assets) %1)
+                       (.push (.-meshes cube-test.top-scene.top-scene.keep-assets) %1)))
+                meshes)))))
+      ; (.moveAllFromScene cube-test.top-scene.top-scene.top-scene-assets cube-test.top-scene.top-scene.keep-assets))))
+  ; db)
 
 ;; called by a subscription, upon insertion into the db of ':choice-carousels'.
+;; Note: works, but defunct (replaced by init-model-containers)
 (defn init-models [choices]
   (let [scene main-scene/scene]
     (doall
@@ -152,46 +162,112 @@
         (fn [choice]
           (prn "choice" choice)
           (when-let [model-file (:model-file choice)]
-            (prn "model-file=" model-file)
+            ; (prn "model-file=" model-file)
             (let [path-file (common/extract-path-file model-file)
                   path (:path path-file)
                   file (:file path-file)]
               ; (prn "init-models, path-file=" path-file)
               ; (prn "init-models, path=" path ",file=" file))))
               ; (utils/load-model path file main-scene/scene (partial choice-model-loaded {:id (:id choice)}))
-              (utils/load-model path file main-scene/scene (partial choice-model-loaded {:choice choice})))))
+              (if (or (= (:id choice) :face-slot) (= (:id choice) :geb-cube))
+                (.LoadAssetContainer bjs/SceneLoader
+                                     path file scene
+                                     (partial choice-model-container-loaded {:choice choice}))
+                                     ; (fn [ac](do
+                                     ;           (let [root-mesh (.getMeshByID scene "__root__")]
+                                     ;             (prn "root-mesh=" root-mesh)
+                                     ;             ; (set! (.-name root-mesh ) "face-slot-root")
+                                     ;             ; (set! (.-id root-mesh) "face-slot-root")
+                                     ;             (prn "ac=" ac)
+                                     ;             (.createRootMesh ac)
+                                     ;             (prn "ac.id=" (.-id ac))
+                                     ;             (prn "ac.name=" (.-name ac))
+                                     ;             (prn "ac.meshes=" (.-meshes ac))
+                                     ;             (when (= (:id choice) :face-slot)
+                                     ;               (set! cube-test.top-scene.top-scene.face-slot-assets ac))
+                                     ;             (when (= (:id choice) :geb-cube)
+                                     ;               (set! cube-test.top-scene.top-scene.geb-cube-assets ac))
+                                     ;             (.addAllToScene ac)
+                                     ;             (let [root (.getMeshByName scene "assetContainerRootMesh")]
+                                     ;               ;; note: important to use .name not .id
+                                     ;               (set! (.-name root) (str (name (:id choice)) "-root"))
+                                     ;               (set! (.-id root) (str (name (:id choice)) "-root")))))))
+                (utils/load-model path file main-scene/scene (partial choice-model-loaded {:choice choice}))))))
               ; (utils/load-model path file main-scene/scene
               ;                   (partial (rf/dispatch
               ;                             [:cube-test.utils.choice-carousel.events/choice-model-loaded {:abc 7}]))))))
         choices))))
 
+; (defn choice-model-container-loaded [db user-parms ac])
+(defn choice-model-container-loaded [user-parms ac]
+  (let [scene main-scene/scene
+        choice (:choice user-parms)
+        choices (:choices user-parms)
+        choice-id (:id choice)
+        choice-id-name (name choice-id)
+        ; idx (get-choice-idx-by-id (get-in db [:carousels 0 :choices] id))
+        ; idx (rf/dispatch-sync [:cube-test.utils.choice-carousel.events/get-choice-idx-by-id-2 id])
+        idx (get-choice-idx-by-id choices choice-id)]
+        ; root-mesh (.getMeshByID scene "__root__")]
+
+    ; (prn "db=" db)
+    ; (prn "idx=" idx)
+    ; (assoc choice :abc 7)
+    ; (assoc-in db [:choice-carousels 0 :choices idx] (assoc choice :abc idx))
+    (.createRootMesh ac)
+    (.addAllToScene ac)
+    ; (rf/dispatch [:cube-test.utils.choice-carousel.events/update-choice idx (assoc choice :abc idx)])
+    (rf/dispatch [:cube-test.utils.choice-carousel.events/update-choice idx (assoc choice :asset-container ac)])
+    (let [root (.getMeshByName scene "assetContainerRootMesh")
+          scale (:scale choice)
+          plane-mesh (.getMeshByID scene choice-id-name)
+          cyl-mesh (.getMeshByID scene (str choice-id-name "-cyl"))
+          x-quat-neg-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* base/ONE-DEG -90)))]
+      (set! (.-name root) (str (name choice-id) "-root"))
+      (set! (.-id root) (str (name choice-id) "-root"))
+      (when scale
+        (.scaleInPlace (.-scaling root) scale))
+      (set! (.-position root) (.-position plane-mesh))
+      (set! (.-rotationQuaternion plane-mesh) (.multiply (.-rotationQuaternion plane-mesh) x-quat-neg-90))
+      (set! (.-rotationQuaternion root) (.-rotationQuaternion plane-mesh))
+      (.setEnabled plane-mesh false)
+      (.setEnabled cyl-mesh false))))
+
+; (defn init-model-containers [choices])
+;;TODO: pretty sure I don't need db here e.g can be a direct call (bypassing re-frame)
+(defn init-model-containers [db]
+  (let [scene main-scene/scene
+        ;; TODOD parameterize cc array index
+        choices (get-in db [:choice-carousels 0 :choices])]
+    ; (prn "choices=" choices)
+    (doall
+      (map
+        (fn [choice]
+          (when-let [model-file (:model-file choice)]
+            (let [path-file (common/extract-path-file model-file)
+                  path (:path path-file)
+                  file (:file path-file)]
+              (.LoadAssetContainer bjs/SceneLoader
+                                   path file scene
+                                   (partial choice-model-container-loaded {:choice choice :choices choices})))))
+        choices)))
+  db)
+
+
 (defn choice-carousel-gui-loaded [adv-text left-evt right-evt select-evt delta-theta]
-  (prn "choice-carousel-gui-loaded: adv-text=" adv-text)
-  ; (prn "choice-carousel-gui-loaded: tmp-text=" tmp-text)
-  ; (js-debugger)
   (let [select-btn (.getControlByName adv-text "select_btn")
         left-arrow (.getControlByName adv-text "left_arrow_img")
         left-arrow-dbg (.getControlByName adv-text "left_arrow_img_dbg")
         right-arrow (.getControlByName adv-text "right_arrow_img")
-        right-arrow-dbg (.getControlByName adv-text "right_arrow_img_dbg")
-        ; _ (js-debugger)
-        _ (prn "select-btn=" select-btn)
-        _ (prn "left-arrow-img=" left-arrow)
-        _ (prn "left-arrow-img.source=" (.-source left-arrow))]
-        ; _ (set! (.-source right-arrow) "guis/top_scene/left_arrow.png")
-        ; _ (set! (.-source right-arrow) "https://localhost:8281/guis/top_scene/left_arrow.png")
-        ; _ (prn "right-arrow-img.source=" (.-source right-arrow))]
-        ; btn-2 (.getControlByName tmp-text "select_btn")
-        ; _ (prn "btn-2=" btn-2)]))
-        ; _ (prn "add-train-btn.onPointer=" (.-onPointerClickObservable add-train-btn))
-    ;     init-top-ball-btn (.getControlByName cmd-gui-adv-text "init_top_ball_btn")
-    ;     init-btm-ball-btn (.getControlByName cmd-gui-adv-text "init_btm_ball_btn")
-    ;     toggle-btm-ball-btn (.getControlByName cmd-gui-adv-text "toggle_btm_ball_btn")
-    ;     toggle-top-ball-btn (.getControlByName cmd-gui-adv-text "toggle_top_ball_btn")]
+        right-arrow-dbg (.getControlByName adv-text "right_arrow_img_dbg")]
+        ; _ (prn "select-btn=" select-btn)
+        ; _ (prn "left-arrow-img=" left-arrow)
+        ; _ (prn "left-arrow-img.source=" (.-source left-arrow))]
     (when select-btn
       (prn "now setting up select-btn")
       (-> select-btn (.-onPointerClickObservable)
-        (.add #(rf/dispatch [select-evt])))
+        ; (.add #(rf/dispatch [select-evt]))
+        (.add select-evt))
       (-> left-arrow (.-onPointerClickObservable)
         ; (.add #(rf/dispatch [left-evt delta-theta]))
         (.add left-evt))
@@ -247,10 +323,38 @@
                       ; (.multiplyInPlace (.-rotationQuaternion mesh) z-quat-90))
                   mesh-ids))))
 
-
+(defn switch-app [top-level-scene]
+  (let [scene main-scene/scene
+        engine main-scene/engine]
+   (.stopRenderLoop engine)
+   (.dispose scene)
+   ; (cube-test.game.init top-level-scene)
+   (cube-test.core.init top-level-scene)))
 ; (defn rot-app-carousel [dir delta-theta]
 ;   (let [scene main-scene/scene
 ;         theta (if (= dir :right)
 ;                   (* -1 delta-theta)
 ;                   delta-theta)]
 ;       (cc/rot-meshes (:app-ids app-carousel-parms) dir theta app-carousel-origin)))
+;; Return the index into the choice array by id.
+(defn get-choice-idx-by-id [choices id]
+  ; (->> [{:id 1} {:id 2} {:id 2}])
+  ; (prn "get-choice-idx-by-id: choices=" choices ",id=" id)
+  ; (let [r1 (map-indexed (fn [i choice]
+  ;                         (if (= (:id choice) id)
+  ;                           i
+  ;                           nil))
+  ;                       choices)
+  ;       _ (prn "r1=" r1)
+  ;       r2 (filter #(not (nil? %)) r1)
+  ;       _ (prn "r2=" r2)
+  ;       r3 (first r2)
+  ;       _ (prn "r3=" r3)]
+  ;     r3)
+  (->> choices
+       (map-indexed (fn [i choice]
+                      (if (= (:id choice) id)
+                        i
+                        nil)))
+      (filter #(not (nil? %)))
+      (first)))

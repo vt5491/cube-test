@@ -1312,3 +1312,29 @@ urs-seq
 (str :ff)
 
 (get-in {:abc {:def 7}} [:abc :def])
+(mod 7 7)
+(dec 4)
+(count [ 1 2 3])
+(re-matches #".*root.*" "ff-soot")
+
+(assoc [0 1 2] 1 3)
+(let [h {:abc {:def 7}}
+      h2 {:abc [{:def 7}]}]
+  ; (assoc-in h [:abc :def] 8)
+  (assoc-in h2 [:abc 0 :def] 9))
+  ; (filter))
+  ; (assoc-in h [:abc] 7))
+; (range 4)
+; (filter #(= %1 2) [1 2 3 2])
+(->> [0 1 2] (map #(inc %1)))
+(map #(inc %1) [0 1 2])
+(->> [{:id 1} {:id 2} {:id 2}]
+    ; (map-indexed #(if (= (:id %2) 2)))
+    (map-indexed (fn [i x]
+                   (if (= (:id x) 7)
+                     i
+                     nil)))
+    (filter #(not (nil? %)))
+    (first))
+
+; (filter #(not (nil? %)) (map-indexed #(if ())))

@@ -48,6 +48,16 @@
         (t/is (= r-radius 16.0))
         (t/is (exists? (:model-file (first choices))))))))
 
+(t/deftest get-choice-idx-by-id-test
+  (t/testing "get-choice-idx-by-id")
+  (let [choices [{:id :abc :val 7}{:id :def :val 8}{:id :ghi :val 9}]
+        r-abc (cc/get-choice-idx-by-id choices :abc)
+        r-ghi (cc/get-choice-idx-by-id choices :ghi)
+        r-xyz (cc/get-choice-idx-by-id choices :xyz)]
+    (t/is (= r-abc 0))
+    (t/is (= r-ghi 2))
+    (t/is (= r-xyz nil))))
+
 (comment
   (+ 1 1)
   ;; switch to cljs repl
@@ -65,4 +75,5 @@
   (use 'cube-test.top-scene.top-scene' :reload)
   ;; run a single test
   ;; make sure to shift-ctrl-alt-b the test first
-  (t/test-vars [#'init-test]))
+  (t/test-vars [#'init-test])
+  (t/test-vars [#'get-choice-idx-by-id-test]))

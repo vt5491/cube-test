@@ -40,14 +40,17 @@
    {
     :db (:db cofx)}))
 
-(rf/reg-event-fx
- ::app-selected
- (fn [cofx _]
-   ; (top-scene/run-scene)
-   (prn "top-scene.events: app-selected")
-   {
-    :db (:db cofx)}))
-
+; (rf/reg-event-fx
+;  ::app-selected
+;  (fn [cofx _]
+;    ; (top-scene/run-scene)
+;    (prn "top-scene.events: app-selected, idx=" top-scene/app-cc-idx)
+;    (cube-test.utils.choice-carousel.choice-carousel/switch-app (nth (:top-level-scene top-scene/app-carousel-parms) top-scene/app-cc-idx))
+;    {
+;     :db (:db cofx)}))
+;;
+;; gui
+;;
 (rf/reg-event-fx
  ::app-left
  (fn [cofx [_ delta-theta]]
@@ -68,3 +71,30 @@
    (top-scene/animate-app-carousel :right)
    {
     :db (:db cofx)}))
+
+;;
+;; db access
+;;
+(rf/reg-event-db
+ ::add-asset-containers
+ (fn [db [_]]
+   (let [choices (get-in db [:choice-carousels 0 :choices])]
+     ; (prn "ts-events: choices=" choices)
+     (when choices
+       (top-scene/add-asset-containers choices)))
+  db))
+
+(rf/reg-event-db
+ ::remove-asset-containers
+ (fn [db [_]]
+   (let [choices (get-in db [:choice-carousels 0 :choices])]
+     (prn "ts-events: choices=" choices)
+     (when choices
+       (top-scene/remove-asset-containers choices)))
+  db))
+
+;; debug/development
+(rf/reg-event-db
+ ::tmp
+ (fn [db [_ val]]
+   (top-scene/tmp db val)))
