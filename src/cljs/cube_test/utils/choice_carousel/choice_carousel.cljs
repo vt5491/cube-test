@@ -150,7 +150,7 @@
                        ; (.push (.-meshes cube-test.top-scene.top-scene.top-scene-assets) %1)
                        (.push (.-meshes cube-test.top-scene.top-scene.keep-assets) %1)))
                 meshes)))))
-      ; (.moveAllFromScene cube-test.top-scene.top-scene.top-scene-assets cube-test.top-scene.top-scene.keep-assets))))
+      ; (.moveAllFromScene  cube-test.top-scene.top-scene.top-scene-assets cube-test.top-scene.top-scene.keep-assets))))
   ; db)
 
 ;; called by a subscription, upon insertion into the db of ':choice-carousels'.
@@ -335,7 +335,7 @@
 ;         theta (if (= dir :right)
 ;                   (* -1 delta-theta)
 ;                   delta-theta)]
-;       (cc/rot-meshes (:app-ids app-carousel-parms) dir theta app-carousel-origin)))
+;       (cc/rot-meshes (:app-ids app-carousel-parms)  dir theta app-carousel-origin)))
 ;; Return the index into the choice array by id.
 (defn get-choice-idx-by-id [choices id]
   ; (->> [{:id 1} {:id 2} {:id 2}])
@@ -358,3 +358,8 @@
                         nil)))
       (filter #(not (nil? %)))
       (first)))
+
+;; this is the opposite of 'init'.  Clean up and release any resources as we
+;; switch to a new logical scene.
+(defn release []
+  (cube-test.utils.choice-carousel.subs.release))

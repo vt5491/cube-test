@@ -1313,7 +1313,7 @@ urs-seq
 
 (get-in {:abc {:def 7}} [:abc :def])
 (mod 7 7)
-(dec 4)
+(dec 5)
 (count [ 1 2 3])
 (re-matches #".*root.*" "ff-soot")
 
@@ -1338,3 +1338,20 @@ urs-seq
     (first))
 
 ; (filter #(not (nil? %)) (map-indexed #(if ())))
+(defn f1 []
+  (prn "hi"))
+
+(defn f2 []
+  (prn " world"))
+
+
+(f2)
+(comp f1 f2)
+
+(defn f3 [p1]
+  (prn "msg is:") (p1))
+
+(f3 f1)
+(f3 (comp f1 f2))
+(f3 #(-> f1 f2))
+(f3 #(do (f1) (f2)))

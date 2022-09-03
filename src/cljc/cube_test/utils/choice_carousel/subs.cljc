@@ -54,3 +54,7 @@
             (prn "just dispatched"))
 
           (swap! *last-choice-carousels* (fn [x] choice-carousels))))))
+
+;; housekeeping
+(defn release []
+  (swap! *last-choice-carousels* (fn [x] atom [])))

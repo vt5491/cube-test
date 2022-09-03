@@ -18,6 +18,7 @@
    [cube-test.utils.choice-carousel.choice-carousel :as cc]))
 
 (declare animate-app-carousel)
+(declare release)
 (def keep-assets (bjs/KeepAssets.))
 (def top-scene-assets (bjs/AssetContainer. main-scene/scene))
 (def face-slot-assets (bjs/AssetContainer. main-scene/scene))
@@ -75,24 +76,38 @@
 (def app-carousel-rot-dir nil)
 (def app-carousel-rot-duration 1)
 
+(def left-thumbrest)
+(def y-btn)
 
+
+(def tmp-container)
+(def tmp-keep-assets)
 (defn tmp [db hash]
-  ; (assoc-in db [])
-  ; (assoc [0 1 2] 1 3)
-  ; (let [ccs (get-in db :choice-carousels)])
-  (let [
-        ; ccs (:choice-carousels db)
-        ; cc (first ccs)
-        ; choices (:choices cc)
-        ; first-choice (first choices)
-        first-choice (get-in db [:choice-carousels 0 :choices 0])
-        new-choice (assoc first-choice :abc 7)]
-    (prn "first-choice=" first-choice)
-    (prn "new-choice=" new-choice)
-    ; (assoc db)
-    ; (assoc first-choice 0 new-choice)
-    ; (assoc choices 0 new-choice)
-    (assoc-in db [:choice-carousels 0 :choices 0] new-choice)))
+  (set! tmp-container (bjs/AssetContainer. main-scene/scene))
+  ; (.moveAllFromScene tmp-container)
+  (set! tmp-keep-assets (bjs/KeepAssets.))
+; keepAssets.cameras.push(camera)
+  (let [scene main-scene/scene
+        uni-cam (.getCameraByID scene "uni-cam")
+        light1 (.getLightByID scene "pointLight-1")
+        lights (.-lights tmp-keep-assets)]
+    (prn "uni-cam=" uni-cam)
+    (prn "light1=" light1)
+    (prn "lights=" lights)
+    ; (-> tmp-keep-assets (.-cameras) (.push uni-cam))
+    ; (-> tmp-keep-assets (.-lights) (.push light1))
+    ; (.push (.-lights tmp-keep-assets) light1)
+    (.push lights light1)
+    (.push (.-cameras tmp-keep-assets) uni-cam)
+    (prn "lights b=" lights)
+    ; (js-debugger)
+    (.moveAllFromScene tmp-container tmp-keep-assets)))
+  ; (let [
+  ;       first-choice (get-in db [:choice-carousels 0 :choices 0])
+  ;       new-choice (assoc first-choice :abc 7)]
+  ;   (prn "first-choice=" first-choice)
+  ;   (prn "new-choice=" new-choice)
+  ;   (assoc-in db [:choice-carousels 0 :choices 0] new-choice)))
 
 ;; Note: defunct
 ; (defn init-app-planes []
@@ -182,8 +197,8 @@
   (prn "top-scene:app-selected entered: app-cc-idx=" app-cc-idx)
   (let [top-level-scene (nth (:top-level-scenes app-carousel-parms) app-cc-idx)]
     (prn "top-scene. top-level-scene=" top-level-scene)
-    ; (cube-test.events/switch-app top-level-scene)
-    (cube-test.events/soft-switch-app top-level-scene)))
+    ;  (cube-test.events/switch-app top-level-scene)
+    (cube-test.events/soft-switch-app top-level-scene release)))
 
 (defn init-scene-carousel []
   (prn "top-scene.init-scene-carousel entered")
@@ -262,10 +277,32 @@
               (.addAllToScene ac)))
        choices)))
 
+(defn motion-ctrl-added [motion-ctrl]
+  (when (= (.-handedness motion-ctrl) "left")
+    ; (js-debugger)
+    ; (set! left-thumbrest (.getComponent motion-ctrl "thumbrest"))
+    (set! y-btn (.getComponent motion-ctrl "y-button"))))
+
+(defn ctrl-added [xr-ctrl]
+  (-> xr-ctrl .-onMotionControllerInitObservable (.add motion-ctrl-added)))
+
+(defn thumbrest-handler []
+  (prn "top-scene.thumbrest-handler: thumbrest pressed hasChanges=" (.-hasChanges left-thumbrest))
+  (js-debugger))
+
+(defn thumbrest-handler-2 []
+  (prn "top-scene.thumbrest-handler: thumbrest touched hasChanges=" (.-hasChanges left-thumbrest)))
+  ; (js-debugger))
+
+(defn y-btn-handler []
+  (prn "top-scene.y-btn-handler: y-btn pressed hasChanges=" (.-hasChanges y-btn)))
+  ;  (js-debugger))
 
 (defn init [db]
   ; (init-app-planes)
   (prn "app-carousel-theta-width=" app-carousel-theta-width)
+  (let [xr-helper main-scene/xr-helper]
+    (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
   (let [scene main-scene/scene
         tweak-partial (partial utils/tweak-xr-view 20 10 10)
         ground (.getMeshByID scene "ground")
@@ -273,7 +310,8 @@
         ; tweak-partial (partial utils/tweak-xr-view -40 0 0)
         ; tweak-partial #()
         light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
-        light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 8 5) scene)]
+        light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 8 5) scene)
+        cam (utils/get-xr-camera)]
     ; (set! (.-isVisible (.getMeshByID main-scene/scene "ground")) false)
     ; (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
     (when ground
@@ -292,7 +330,20 @@
             "ff-top-plane" (cube-test.events.soft-switch-app :frig-frog)
             "default"))))
     (bjs/TransformNode. "top-scene-root" scene)
-
+    (set! (.-position cam) (bjs/Vector3. 0 4 -15))
+    ; quat (-> camera .-rotationQuaternion)
+    ; var abcQuaternion = BABYLON.Quaternion.RotationQuaternionFromAxis(alpha, 0, 0);
+    ; (set! (.-rotationQuaternion cam) (bjs/Quaternion.RotationQuaternionFromAxis 0 0 0) )
+    (prn "cam=" cam)
+    ; (set! (.-rotationQuaternion cam) (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -3 base/ONE-DEG) 0))
+    (set! (.-rotationQuaternion cam) (bjs/Quaternion.FromEulerAngles (* 0 base/ONE-DEG) (* 0 base/ONE-DEG) 0))
+    ; (js-debugger)
+    (prn "cam quat=" (.-rotationQuaternion cam))
+    ; (prn "quat=" (bjs/Quaternion.RotationQuaternionFromAxis 0.0 0.0 0.0))
+    (prn "quat=" (bjs/Quaternion.FromEulerAngles 0.0 0.0 0.0))
+    ; (let [cam-quat (-> cam .-rotationQuaternion)]
+    ;   (set! ()))
+    ; (prn "top-scene: cam pos=" (.-position cam))
     ;; note: keep
     ; (load-model "models/top_scene/sub_scenes/" "ff_scene.glb" "ff-scene"
     ;             (partial model-loaded
@@ -306,10 +357,38 @@
     ; db))
     (init-scene-carousel)))
 
+(defn release []
+  (prn "top-scene.release: entered")
+  (set! top-scene-assets (bjs/AssetContainer. main-scene/scene))
+  (set! keep-assets (bjs/KeepAssets.))
+  (let [scene main-scene/scene
+        uni-cam (.getCameraByID scene "uni-cam")
+        webxr (.getCameraByID scene "webxr")
+        sky-box (.getMeshByID scene "sky-box")]
+    (.push (.-cameras keep-assets) uni-cam webxr)
+    (.push (.-meshes keep-assets) sky-box)
+    (.moveAllFromScene top-scene-assets keep-assets))
+    ; (js-debugger))
+
+  (cc/release))
+
+;; the main tick
 (defn render-loop []
   (if (= main-scene/xr-mode "vr")
     (controller/tick)
     (controller-xr/tick))
+  (main-scene/tick)
+  ; (when (= main-scene/xr-mode "xr")
+    ; (when (and left-thumbrest (.-hasChanges left-thumbrest)))
+    ; (prn "ts.tick: left-thumbrest=" left-thumbrest)
+    ; (when (and left-thumbrest (.-pressed left-thumbrest))
+    ;   (thumbrest-handler))
+    ; (when (and left-thumbrest) (.-touched left-thumbrest)
+    ;   (thumbrest-handler-2))
+    ; (when (and y-btn (.-pressed y-btn))
+    ;   (y-btn-handler)))
+      ; (let [axes (.-axes player-left-thumbstick)]
+      ;   (player-ctrl-handler axes))))
   (if fps-panel/fps-pnl
     (fps-panel/tick main-scene/engine))
   (.render main-scene/scene)

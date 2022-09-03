@@ -14,7 +14,7 @@
 (defn init-panel []
   (prn "view.top-scene.init-panel entered")
   (let [
-        ; ccs        @(subscribe [::cc-subs/choice-carousels-changed])]
+        ;ccs        @(subscribe [::cc-subs/choice-carousels-changed])]
         ; ccs    @(subscribe [:cube-test.utils.choice-carousel.subs/choice-carousels-changed])
         ;; Note: how sub getters are globals? (no need to fully qualify the path)
         ; ccs    @(subscribe [:get-choice-carousels])

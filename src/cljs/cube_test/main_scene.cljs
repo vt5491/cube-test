@@ -56,6 +56,8 @@
 (def gui-pnl)
 (def adv-texture)
 (def top-level-scene-init)
+(def a-btn)
+(def main-gui-adv-text)
 
 ;; we have to pre-declare scene because it's defined with 'init' as a defonce.
 (declare scene)
@@ -69,6 +71,8 @@
 (declare pointer-handler)
 (declare enter-xr-handler)
 (declare enter-vr-handler)
+(declare ctrl-added)
+(declare load-main-gui)
 
 (defn init [top-level-scene-initializer]
   (set! top-level-scene-init top-level-scene-initializer)
@@ -132,6 +136,9 @@
     true
     (set! xr-mode "xr"))
   (prn "xr-mode=" xr-mode)
+  ;; note: this needs to be called by the client scene, since the cleanup-fn is different
+  ;; for each scene.
+  (load-main-gui)
   (if (= xr-mode "vr")
     (do
       (println "now setting up vr")
@@ -179,6 +186,7 @@
                (-> xr-default-exp (.-baseExperience)
                    (.-onInitialXRPoseSetObservable)
                    (.addOnce #(do)))
+               (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added))
 
                (top-level-scene-initializer)))))))
 
@@ -281,9 +289,83 @@
     (set! (-> skybox-mat .-specularColor) (bjs/Color3. 0 0 0))
     (set! (.-material skybox) skybox-mat)))
 
+(defn motion-ctrl-added [motion-ctrl]
+  (when (= (.-handedness motion-ctrl) "right")
+    ; (js-debugger)
+    ; (set! left-thumbrest (.getComponent motion-ctrl "thumbrest"))
+    (set! a-btn (.getComponent motion-ctrl "a-button"))))
+
+(defn ctrl-added [xr-ctrl]
+  (-> xr-ctrl .-onMotionControllerInitObservable (.add motion-ctrl-added)))
+
+(defn a-btn-handler []
+  (prn "main-scene.a-btn-handler: a-btn pressed hasChanges=" (.-hasChanges a-btn))
+  (when (.-hasChanges a-btn)
+    (let [main-gui-plane (.getMeshByID scene "main-gui-plane")
+          cam (cube-test.utils.get-xr-camera)
+          cam-quat (.-rotationQuaternion cam)
+          cam-rot (.toEulerAngles cam-quat)
+          cam-rot-y (.-y cam-rot)
+          gui-radius 4.0
+          gui-delta-x (* gui-radius (js/Math.cos (.-x cam-rot)))
+          gui-delta-z (* gui-radius (js/Math.sin (.-z cam-rot)))
+          ; gui-delta (bjs/Vector3. gui-delta-x 0 gui-delta-z)
+          ; gui-delta (bjs/Vector3. 0 0 8)
+          gui-delta (bjs/Vector3. (* gui-radius (js/Math.sin cam-rot-y)) 0 (* gui-radius (js/Math.cos cam-rot-y)))]
+      (prn "a-btn-handler: cam-rot=" cam-rot)
+      (set! (.-position main-gui-plane) (.add (.-position cam) gui-delta))
+      (set! (.-rotation main-gui-plane) (bjs/Vector3. 0 cam-rot-y 0))
+      ; (.addInPlace (.-position main-gui-plane) gui-delta)
+      (.setEnabled main-gui-plane true))))
+
+(defn main-gui-loaded [cleanup-fn]
+  (prn "main-gui-loaded: main-gui-adv-text=" main-gui-adv-text)
+  ;; (js-debugger)
+  (let [yes-btn (.getControlByName main-gui-adv-text "yes-btn")
+        no-btn (.getControlByName main-gui-adv-text "no-btn")
+        cancel-btn (.getControlByName main-gui-adv-text "cancel-btn")]
+    (when yes-btn
+      (prn "main-scene: now initing buttons, no-btn=" no-btn)
+      (-> yes-btn (.-onPointerClickObservable)
+        ; (.add #(re-frame/dispatch [::cube-test.events.soft-switch-app :top-level-scene]))
+        (.add #(do
+                 (prn "yes")
+                 (cube-test.events.soft-switch-app :top-scene cleanup-fn))))
+    ; (when (or no-btn cancel-btn)
+      (-> no-btn (.-onPointerClickObservable)
+            (.add #(do
+                     (prn "main-scene: you clicked no")
+                     (.setEnabled (.getMeshByID scene "main-gui-plane") false))))
+      (-> cancel-btn (.-onPointerClickObservable)
+            (.add #(do
+                     (prn "main-scene: you clicked cancel")
+                     (.setEnabled (.getMeshByID scene "main-gui-plane") false)))))))
+
+(defn load-main-gui [cleanup-fn]
+  ; (prn "main-scene: load-main-gui: cleanup-fn=" cleanup-fn)
+  (let [;;scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "main-gui-plane" (js-obj "width" 4, "height" 4) scene)
+        ; plane (bjs/Mesh.CreatePlane "main-gui-plane" (js-obj "width" 4, "height" 4) scene)
+        ; _ (set! (.-position plane) (bjs/Vector3. 0 5 10))
+        _ (set! (.-position plane) (bjs/Vector3. 0 10 10))
+        _ (.enableEdgesRendering plane)
+        _ (set! (.-edgesWidth plane) 1.0)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 1024 1024)]
+    (.setEnabled plane false)
+    (set! main-gui-adv-text adv-text)
+    (-> adv-text
+     (.parseFromURLAsync "guis/main_scene/main_scene_gui_a_btn.json")
+     (p/then #(main-gui-loaded cleanup-fn)))))
 ;; Note: do not want render loop in main scene, since it needs to call the tick of other
 ;; namespaces, thus violating the "refer to few, referenced by many" principle.  We can normally
 ;; use a re-frame event dispatch to get around this, but you do not want to call re-frame on a game
 ;; tick for performance reasons.  Therefore, it's better to put into a module like 'game'.
+;; Note: ok, to call main-scene native methods.  You can also refer to other namespaces without
+;; a :require by saying something like 'cube-test.top-scene.top-scene/do-it'.  However, it's best
+;; to have "local" ticks and not one huge global tick.  If you want to call this main-scene tick
+;; don't forget to call from your subscene:  (main-scene/tick)
 
-(defn tick [])
+(defn tick []
+  (when (= xr-mode "xr")
+    (when (and a-btn (.-pressed a-btn))
+      (a-btn-handler))))

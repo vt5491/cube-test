@@ -368,7 +368,8 @@
         (prn "path=" path ", fn=" fn)
         (append-hemisferic
          path
-         fn))))
+         fn))
+      (main-scene/load-main-gui cleanup)))
     ;; (main-scene-overrides)))
 
 
@@ -376,5 +377,6 @@
   (let [engine main-scene/engine
         delta-time (.getDeltaTime engine)
         bldg-cube-rot-y-delta (* (.-y bldg-cube-ang-vel) delta-time)]
+    (main-scene/tick)
     (when bldg-cube
-      (.rotate bldg-cube bjs/Axis.Y bldg-cube-rot-y-delta bjs/Space.LOCAL))))
+     (.rotate bldg-cube bjs/Axis.Y bldg-cube-rot-y-delta bjs/Space.LOCAL))))
