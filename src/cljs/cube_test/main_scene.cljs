@@ -74,6 +74,22 @@
 (declare ctrl-added)
 (declare load-main-gui)
 
+(defn init-ground []
+  (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 30 "subdivisions" 10))]
+    (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
+    (set! (.-physicsImpostor grnd)
+      (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
+                            (js-obj "mass" 0 "restitution" 0.9) scene))
+    (set! (.-ground env) grnd)))
+
+(defn init-env []
+  ; (prn "top-scene.tmp-2: entered")
+  (set! env (bjs/EnvironmentHelper.
+             (js-obj
+              "createGround" false
+              "skyboxSize" 90)
+             scene)))
+
 (defn init [top-level-scene-initializer]
   (set! top-level-scene-init top-level-scene-initializer)
 
@@ -91,19 +107,20 @@
   (set! physics-plugin (bjs/OimoJSPlugin.))
   (.enablePhysics scene (bjs/Vector3. 0 -0.81 0) physics-plugin)
 
-  (set! env (bjs/EnvironmentHelper.
-             (js-obj
-              "createGround" false
-              "skyboxSize" 90)
-              ; "skyboxSize" 10)
-             scene))
+  (init-env)
+  ; (set! env (bjs/EnvironmentHelper.
+  ;            (js-obj
+  ;             "createGround" false
+  ;             "skyboxSize" 90)
+  ;            scene))
   ;; manually create a ground with a physicsImposter.
-  (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 30 "subdivisions" 10))]
-    (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
-    (set! (.-physicsImpostor grnd)
-      (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
-                            (js-obj "mass" 0 "restitution" 0.9) scene))
-    (set! (.-ground env) grnd))
+  (init-ground)
+  ; (let [grnd (bjs/MeshBuilder.CreateGround "ground" (js-obj "width" 10 "height" 30 "subdivisions" 10))]
+  ;   (set! (.-material grnd) (bjs-m/GridMaterial. "ground-mat" scene))
+  ;   (set! (.-physicsImpostor grnd)
+  ;     (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
+  ;                           (js-obj "mass" 0 "restitution" 0.9) scene))
+  ;   (set! (.-ground env) grnd))
 
   (set! grid-mat (bjs-m/GridMaterial. "ground-mat" scene))
   (set! red-mat (bjs/StandardMaterial. "red-mat" scene))
@@ -138,7 +155,7 @@
   (prn "xr-mode=" xr-mode)
   ;; note: this needs to be called by the client scene, since the cleanup-fn is different
   ;; for each scene.
-  (load-main-gui)
+  ; (load-main-gui)
   (if (= xr-mode "vr")
     (do
       (println "now setting up vr")

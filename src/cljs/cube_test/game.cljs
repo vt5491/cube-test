@@ -8,6 +8,7 @@
    [cube-test.utils :as utils]
    ; [cube-test.dummy-base :as dummy-base]
    ; [cube-test.dummy-base :as dummy-base]))
+   ; [cube-test.events :as events]
    [cube-test.twizzlers.events :as twizzler-events]
    [cube-test.beat-club.events :as beat-club-events]
    [cube-test.frig-frog.events :as frig-frog-events]
@@ -54,10 +55,16 @@
                       (re-frame/dispatch [:init-fps-panel main-scene/scene])
                       (re-frame/dispatch [:run-vrubik-scene]))
      :geb-cube-scene (do
-                        (println "top-level-scene= geb-cube-scene")
-                        (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-geb-cube-scene]))])
-                        (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                        (re-frame/dispatch [:run-geb-cube-scene]))
+                        (let [soft-init-seq #(do
+                                               (re-frame/dispatch [:init-geb-cube-scene])
+                                               (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                                               (re-frame/dispatch [:run-geb-cube-scene]))
+                              full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
+                          (init-applicable-dispatch full-init-seq soft-init-seq)))
+                        ; (println "top-level-scene= geb-cube-scene")
+                        ; (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-geb-cube-scene]))])
+                        ; (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                        ; (re-frame/dispatch [:run-geb-cube-scene]))
      :skyscrapers-scene (do
                            (println "top-level-scene= skyscrapers-scene")
                            (re-frame/dispatch [:init-main-scene(fn [] (re-frame/dispatch [:init-skyscrapers-scene]))])
@@ -85,24 +92,13 @@
       ; (re-frame/dispatch [:run-msg-cube-scene]))))
      :twizzlers (do
                    (println "top-level-scene=twizzlers")
-                   ; (re-frame/dispatch [:init-main-scene
-                   ;                      (fn [] (do
-                   ;                              (re-frame/dispatch [::twizzler-events/init-db])
-                   ;                                             ; (re-frame/dispatch [::init-twizzlers-game])
-                   ;                                             ; (re-frame/dispatch [:twizzler-events/init-twizzlers-game])
-                   ;                                             ; (re-frame/dispatch [:init-twizzlers-game])
-                   ;                              (re-frame/dispatch [::twizzler-events/init-game])
-                   ;                              (re-frame/dispatch [::twizzler-events/run-game])))])
-                   ; (re-frame/dispatch [:init-fps-panel main-scene/scene])
                    (let [support-init-seq #(do
+                                             ; (re-frame/dispatch [:cube-test.events/reset-db])
                                              (re-frame/dispatch [::twizzler-events/init-db])
                                              (re-frame/dispatch [::twizzler-events/init-game])
                                              (re-frame/dispatch [::twizzler-events/run-game])
                                              (re-frame/dispatch [:init-fps-panel main-scene/scene]))
                          full-init-seq #(re-frame/dispatch [:init-main-scene support-init-seq])]
-                     ;   (if soft-switch
-                     ;     (support-init-seq)
-                     ;     (re-frame/dispatch [:init-main-scene support-init-seq]))
                       (init-applicable-dispatch full-init-seq support-init-seq)))
      :beat-club (do
                   (println "top-level-scene=beat-club")
@@ -113,22 +109,24 @@
                                                 (re-frame/dispatch [::beat-club-events/run-game])
                                                 (re-frame/dispatch [:init-fps-panel main-scene/scene])))]))
      :frig-frog (do
-                   (let [top-level-init-seq
+                   (let [soft-init-seq
                             #(do
                                     (re-frame/dispatch [::frig-frog-events/init-game-db ff.game/default-game-db])
                                     (re-frame/dispatch [::frig-frog-events/init-rules])
                                     (re-frame/dispatch [::frig-frog-events/init-game])
                                     (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                                    (re-frame/dispatch [::frig-frog-events/run-game]))]
-                     (println "top-level-scene=frig-frog, soft-switch=" soft-switch)
+                                    (re-frame/dispatch [::frig-frog-events/run-game]))
+                         full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
+                      (init-applicable-dispatch full-init-seq soft-init-seq)))
+                     ; (println "top-level-scene=frig-frog, soft-switch=" soft-switch)
                      ; (when (not soft-switch)
                      ;   (re-frame/dispatch [:init-main-scene top-level-init-seq]))
                      ; (top-level-init-seq)
-                     (if soft-switch
-                       ;; leave out 'init-main-scene' i.e. just call the support dispatches.
-                       (top-level-init-seq)
-                       ;; e.g. call 'init-main-scene', then the support dispatches.
-                       (re-frame/dispatch [:init-main-scene top-level-init-seq]))))
+                     ; (if soft-switch
+                     ;   ;; leave out 'init-main-scene' i.e. just call the support dispatches.
+                     ;   (top-level-init-seq)
+                     ;   ;; e.g. call 'init-main-scene', then the support dispatches.
+                     ;   (re-frame/dispatch [:init-main-scene top-level-init-seq]))))
                      ; (re-frame/dispatch [:init-main-scene ff-top-level-seq])
                      ; (re-frame/dispatch [:init-main-scene ff-top-level-seq])))
                      ; (re-frame/dispatch [:init-main-scene

@@ -184,7 +184,10 @@
     (set! (.-name root) (str "twizzlers" "-root"))
     (set! (.-id root) (str "twizzlers" "-root")))
 
-  (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
+  (let [skybox (.getMeshByID main-scene/scene "BackgroundSkybox")]
+    (when skybox
+      (set! (.-isVisible skybox) false)))
+  ;; (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
   ;; turn off environmentTexture (ibl) so that only blender lights are in effect.
   ;; if you don't change this you'll see a weird building in the pool reflection.
   (set! (.-environmentTexture main-scene/scene) nil)
@@ -194,6 +197,7 @@
   ;; (-> main-scene/scene (.getLightByID "Point.009") (.setEnabled false))
   ;; (-> main-scene/scene (.getLightByID "dome_light_top.001") (.setEnabled false))
   (let [scene main-scene/scene
+        _ (prn "santa")
         walkway-l (.getMeshByID scene "walkway_l")
         walkway-l-mat (bjs/StandardMaterial. "walkway-l-mat" scene)
         walkway-l-world-matrix (.getWorldMatrix walkway-l)
@@ -202,6 +206,7 @@
         walkway-l-normal-vec (bjs/Vector3. (aget walkway-l-vertex-data 0) (aget walkway-l-vertex-data 1) (aget walkway-l-vertex-data 2))
         walkway-l-normal (bjs/Vector3.TransformNormal. walkway-l-normal-vec walkway-l-world-matrix)
         walkway-l-reflector (bjs/Plane.FromPositionAndNormal. (.-position walkway-l) (.scale walkway-l-normal -1))
+        _ (prn "claus")
 
         walkway-r (.getMeshByID scene "walkway_r")
         walkway-r-mat (bjs/StandardMaterial. "walkway-r-mat" scene)
@@ -209,6 +214,7 @@
         plane-mat (bjs/StandardMaterial. "plane-mat" scene)
         diffuse-text (bjs/Texture. "textures/hemi_walkway_texture_2k.png" scene
                              true true bjs/Texture.BILINEAR_SAMPLINGMODE)]
+    (prn "point a")
     (-> diffuse-text .-onLoadObservable (.add (fn [tex] (walkway-texture-loaded tex))))
     (set! (.-diffuseTexture walkway-l-mat) diffuse-text)
     (set! (.-backFaceCulling walkway-l-mat) false)
@@ -224,7 +230,8 @@
 
     (set! (.-diffuseTexture plane-mat) diffuse-text)
     (set! (.-backFaceCulling plane-mat) false)
-    (set! (.-material plane) plane-mat))
+    (set! (.-material plane) plane-mat)
+    (prn "point b"))
 
   (let [scene main-scene/scene
          probe (bjs/ReflectionProbe. "ref-probe" 512 scene)
@@ -283,6 +290,7 @@
             (.addFloorMesh main-scene/vrHelper walkway-l)
             (.addFloorMesh main-scene/vrHelper walkway-r))
      "xr" (do
+            (prn "twizzlers.scene: enabling teleportation")
             (->  main-scene/xr-helper .-teleportation (.addFloorMesh pool))
             (->  main-scene/xr-helper .-teleportation (.addFloorMesh hemi-floor))
             (->  main-scene/xr-helper .-teleportation (.addFloorMesh walkway-l))
@@ -308,8 +316,11 @@
 (defn main-scene-overrides []
   (let [scene main-scene/scene
         fps-pnl (.getMeshByID scene "fps-panel")
-        fps-pnl-pos (.-position fps-pnl)]
-    (set! (.-isVisible (.getMeshByID scene "ground")) false)
+        fps-pnl-pos (.-position fps-pnl)
+        ground (.getMeshByID scene "ground")]
+    (when ground
+      (set! (.-isVisible ground) false))
+    ;; (set! (.-isVisible (.getMeshByID scene "ground")) false)
     (set! (.-position fps-pnl) (bjs/Vector3. (.-x fps-pnl-pos) (-> fps-pnl-pos .-y (+ 5)) (.-z fps-pnl-pos)))))
 
 (defn init-mirror-sub-scene []
@@ -333,8 +344,9 @@
           (set! (-> mirror-material .-reflectionTexture .-level) 1)
           (set! (.-material glass) mirror-material))))))
 
-(defn cleanup []
-  (prn "twizzlers.cleanup: entered")
+(defn release []
+  (prn "twizzlers.release: entered")
+  (utils/release-common-scene-assets)
   (.removeAllFromScene hemisferic-asset-container))
 
 (defn init [db]
@@ -369,7 +381,7 @@
         (append-hemisferic
          path
          fn))
-      (main-scene/load-main-gui cleanup)))
+      (main-scene/load-main-gui release)))
     ;; (main-scene-overrides)))
 
 

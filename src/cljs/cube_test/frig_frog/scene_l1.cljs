@@ -421,6 +421,11 @@
   ;                          "intro-snd"
   ;                          "sounds/frig_frog/plastic_swipe.ogg"
   ;                          main-scene/scene)))
+ 
+(defn release []
+  (prn "ff.scene_l1.entered")
+  (utils/release-common-scene-assets))
+  ;; (.removeAllFromScene hemisferic-asset-container))
 
 (defn init [db]
   (let [scene main-scene/scene
@@ -468,7 +473,9 @@
     (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)
     (init-balls)
     (ff.tile/init)
-    (init-snd)))
+    (init-snd)
+    (main-scene/load-main-gui release)))
+
 
 (defn tick []
   (ff.train/tick)

@@ -51,3 +51,10 @@
    ; (prn "events.init-choice-carousel:6 parms=" parms "db=" db)
    ; (cc/init-model-containers db)))
    (assoc-in db [:choice-carousels 0 :choices choice-idx] new-choice)))
+
+(rf/reg-event-db
+ ::update-last-selected-idx
+ (fn [db [_ path-vec last-selected-idx]]
+   ; (assoc-in db [:choice-carousels 0 :last-selected-idx] last-selected-idx)))
+   ; (assoc-in db [:choice-carousels 0 :radius] last-selected-idx)))
+   (assoc-in db path-vec last-selected-idx)))

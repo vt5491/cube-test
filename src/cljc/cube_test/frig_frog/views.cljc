@@ -61,6 +61,6 @@
      ; [:button.user-action {:on-click #(rf/dispatch [::events/switch-app :top-scene])} "switch to top scene"]
      ; [:button.user-action {:on-click #(rf/dispatch [::events/switch-app :face-slot-scene])} "switch to face slot"]
      ; [:button.user-action {:on-click #(rf/dispatch [::events/switch-app :twizzlers])} "switch to twizzlers"]
-     [:button.user-action {:on-click #(events/soft-switch-app :top-scene)} "switch to top scene"]
+     [:button.user-action {:on-click #(events/soft-switch-app :top-scene cube-test.frig-frog.scene-l1/release)} "switch to top scene"]
      [:button.user-action {:on-click #(events/soft-switch-app :face-slot-scene)} "switch to face slot"]
      [:button.user-action {:on-click #(events/soft-switch-app :twizzlers)} "switch to twizzlers"]]))

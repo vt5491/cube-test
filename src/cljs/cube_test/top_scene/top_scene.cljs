@@ -28,16 +28,23 @@
 (def default-db
   {:top-scene-abc 7})
 
-(def app-cc-idx 6)
+; 0=ff, 5=geb, 6=twizzlers
+(def app-cc-idx-seed 0)
+;; yes, kind of a magic number, but at least it's not hard-coded everywhere.
+(def app-cc-idx-shift-factor -2)
+;; Note: this will be overriden by global->top-scene->last-selected-idx upon a "soft" switch.
+(def app-cc-idx app-cc-idx-seed)
+; (def app-cc-idx 5)
+; (def app-cc-idx 0)
 (def app-carousel-parms {:radius 16.0
-                         :app-ids [:ff
-                                   :cube-spin
-                                   :face-slot
-                                   :vrubik
-                                   :skyscraper
-                                   :geb-cube
-                                   :twizzlers
-                                   :beat-club]
+                         :app-ids [:ff         ;0
+                                   :cube-spin  ;1
+                                   :face-slot  ;2
+                                   :vrubik     ;3
+                                   :skyscraper ;4
+                                   :geb-cube   ;5
+                                   :twizzlers  ;6
+                                   :beat-club] ;7
                          :model-files [
                                        ; "models/top_scene/sub_scenes/ff_scene.glb"
                                        ; "models/top_scene/sub_scenes/ff_scene_3.glb"
@@ -67,7 +74,9 @@
                                             :geb-cube-scene
                                             :twizzlers
                                             :beat-club]})
-
+;; tried to make this dynamic, but too hard-- just settle with making it static instead.
+; (def n-choices (- 8 1))
+(def n-choices (count (:model-files app-carousel-parms)))
 (def app-carousel-theta-width (/ (* 2.0 js/Math.PI) (count (:app-ids app-carousel-parms)) 1))
 ; (def app-carousel-theta-width (* base/ONE-DEG 5))
 (def app-carousel-origin (bjs/Vector3. 0 0 (:radius app-carousel-parms)))
@@ -82,32 +91,8 @@
 
 (def tmp-container)
 (def tmp-keep-assets)
-(defn tmp [db hash]
-  (set! tmp-container (bjs/AssetContainer. main-scene/scene))
-  ; (.moveAllFromScene tmp-container)
-  (set! tmp-keep-assets (bjs/KeepAssets.))
-; keepAssets.cameras.push(camera)
-  (let [scene main-scene/scene
-        uni-cam (.getCameraByID scene "uni-cam")
-        light1 (.getLightByID scene "pointLight-1")
-        lights (.-lights tmp-keep-assets)]
-    (prn "uni-cam=" uni-cam)
-    (prn "light1=" light1)
-    (prn "lights=" lights)
-    ; (-> tmp-keep-assets (.-cameras) (.push uni-cam))
-    ; (-> tmp-keep-assets (.-lights) (.push light1))
-    ; (.push (.-lights tmp-keep-assets) light1)
-    (.push lights light1)
-    (.push (.-cameras tmp-keep-assets) uni-cam)
-    (prn "lights b=" lights)
-    ; (js-debugger)
-    (.moveAllFromScene tmp-container tmp-keep-assets)))
-  ; (let [
-  ;       first-choice (get-in db [:choice-carousels 0 :choices 0])
-  ;       new-choice (assoc first-choice :abc 7)]
-  ;   (prn "first-choice=" first-choice)
-  ;   (prn "new-choice=" new-choice)
-  ;   (assoc-in db [:choice-carousels 0 :choices 0] new-choice)))
+(defn tmp [db val]
+  (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx [:globals :top-scene :last-selected-idx] app-cc-idx]))
 
 ;; Note: defunct
 ; (defn init-app-planes []
@@ -145,7 +130,13 @@
 ;       (set! (.-position cube-spin-plane) (bjs/Vector3. (* r (js/Math.cos (* 1 theta))) 0 (+ (* r (js/Math.sin (* 1 theta))) r)))
 ;       (set! (.-position face-slot-plane) (bjs/Vector3. (* r (js/Math.cos (* 2 theta))) 0 (+ (* r (js/Math.sin (* 2 theta))) r)))
 ;       (set! (.-position vrubik-plane) (bjs/Vector3. (* r (js/Math.cos (* 4 theta))) 0 (+ (* r (js/Math.sin (* 4 theta))) r))))))
-
+(defn tmp-2 [val]
+  (prn "top-scene.tmp-2: entered")
+  (set! main-scene/env (bjs/EnvironmentHelper.
+                          (js-obj
+                           "createGround" false
+                           "skyboxSize" 90)
+                          main-scene/scene)))
 
 (defn ff-cube-loaded [meshes particle-systems skeletons anim-groups name user-cb]
   (println "ff-cube-loaded")
@@ -193,15 +184,25 @@
 ;                main-scene/scene
 ;                user-cb))
 
-(defn app-selected []
-  (prn "top-scene:app-selected entered: app-cc-idx=" app-cc-idx)
-  (let [top-level-scene (nth (:top-level-scenes app-carousel-parms) app-cc-idx)]
+(defn app-selected [magic-idx-shift n-choices]
+  (prn "top-scene:app-selected entered: app-cc-idx=" app-cc-idx ",magic-idx-shift=" magic-idx-shift ",n-choicse=" n-choices)
+  ; (let [mod-idx (mod (+ app-cc-idx -2) 8)])
+  ; (let [mod-idx (mod (+ app-cc-idx magic-idx-shift) n-choices)])
+  (let [mod-idx app-cc-idx
+        ; top-level-scene (nth (:top-level-scenes app-carousel-parms) app-cc-idx)
+        _ (prn "app-selected: mod-idx=" mod-idx)
+        top-level-scene (nth (:top-level-scenes app-carousel-parms) mod-idx)]
     (prn "top-scene. top-level-scene=" top-level-scene)
-    ;  (cube-test.events/switch-app top-level-scene)
+    ; (cube-test.events/switch-app top-level-scene)
+    ; (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
     (cube-test.events/soft-switch-app top-level-scene release)))
+    ; (rf/dispatch [:cube-test.events.soft-switch-app-evt top-level-scene release])
+    ; (rf/dispatch [:soft-switch-app-evt top-level-scene release])))
 
-(defn init-scene-carousel []
-  (prn "top-scene.init-scene-carousel entered")
+(defn init-scene-carousel [db]
+  (prn "init-scene-carousel: db=" db)
+  (prn "top-scene.init-scene-carousel entered, db.choice-carousels[0]=" (get-in db [:choice-carousels 0]))
+  ; (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
   (cc/load-choice-carousel-gui
    ; :cube-test.top-scene.events/app-left
    ;; Note: calling directly is slightly less "jerky" than dispatching a (re-frame) event.
@@ -209,7 +210,9 @@
    ; :cube-test.top-scene.events/app-right
    (partial animate-app-carousel :right)
    ; :cube-test.top-scene.events/app-selected
-   app-selected
+   ; (partial app-selected app-cc-idx-shift-factor (count (get-in db [:choice-carousels 0 :choices])))
+   ; #(rf/dispatch [:cube-test.top-scene.events/app-selected])
+   (partial app-selected app-cc-idx-shift-factor n-choices)
    app-carousel-theta-width)
   (let [
         choices (vec (map #(hash-map :id %1 :model-file %2 :scale %3 :top-level-scene %4)
@@ -218,7 +221,12 @@
                           (:scales app-carousel-parms)
                           (:top-level-scenes app-carousel-parms)))
         parms {:id :app-cc :radius 16.0 :choices choices :colors (:colors app-carousel-parms)}]
-    (rf/dispatch [:cube-test.utils.choice-carousel.events/init-choice-carousel parms])))
+    (rf/dispatch [:cube-test.utils.choice-carousel.events/init-choice-carousel parms]))
+  (let [last-idx (get-in db [:globals :top-scene :last-selected-idx])]
+    (if last-idx
+      (set! app-cc-idx last-idx)
+      (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx [:globals :top-scene :last-selected-idx] app-cc-idx])))
+  db)
 
 (defn rot-app-carousel [dir delta-theta]
   (let [scene main-scene/scene
@@ -241,7 +249,7 @@
   (let [n-apps (+ (count (:app-ids app-carousel-parms)) 0)]
     (if (= dir :left)
         ; (set! app-cc-idx (mod (inc app-cc-idx) n-apps))
-        ; (set! app-cc-idx (mod (dec app-cc-idx) n-apps))
+        ; (set! app-cc-idx (mod (dec app-cc-idx) n-apps)))))
         (set! app-cc-idx (mod (dec app-cc-idx) n-apps))
         (set! app-cc-idx (mod (inc app-cc-idx) n-apps)))))
 
@@ -258,12 +266,12 @@
       ; (.multiplyInPlace (.-rotationQuaternion m) y-quat)))
 
 (defn remove-asset-containers [choices]
-  (prn "ts.rac: choices=" choices)
+  ; (prn "ts.rac: choices=" choices)
   (doall
     (map #(do
-            (prn "rac: choice=" %1)
+            ; (prn "rac: choice=" %1)
             (let [ac (:asset-container %1)]
-              (prn "remove-asset-containers: ac=" ac)
+              ; (prn "remove-asset-containers: ac=" ac)
               (.removeAllFromScene ac)))
        choices)))
 
@@ -298,9 +306,31 @@
   (prn "top-scene.y-btn-handler: y-btn pressed hasChanges=" (.-hasChanges y-btn)))
   ;  (js-debugger))
 
+(defn release []
+  (prn "top-scene.release: entered")
+  ; (set! top-scene-assets (bjs/AssetContainer. main-scene/scene))
+  ; (set! keep-assets (bjs/KeepAssets.))
+  ; (let [scene main-scene/scene
+  ;       uni-cam (.getCameraByID scene "uni-cam")
+  ;       webxr (.getCameraByID scene "webxr")
+  ;       sky-box (.getMeshByID scene "sky-box")
+  ;       teleportation-target (.getMeshByID scene "teleportationTarget")
+  ;       bg-helper (.getMeshByID scene "BackgroundHelper")]
+  ;   (.push (.-cameras keep-assets) uni-cam webxr)
+  ;   (.push (.-meshes keep-assets) sky-box teleportation-target bg-helper)
+  ;   (.moveAllFromScene top-scene-assets keep-assets))
+  (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx [:globals :top-scene :last-selected-idx] app-cc-idx])
+  (utils/release-common-scene-assets)
+  (cc/release))
+  ; (.stopRenderLoop main-scene/engine)
+  ; (let [target (.-_currentRenderTarget main-scene/engine)]
+  ;   (when target
+  ;     (.unBindFramebuffer main-scene/engine target))))
+
 (defn init [db]
   ; (init-app-planes)
-  (prn "app-carousel-theta-width=" app-carousel-theta-width)
+  ;; we need to setup the skybox each time (.e.g. when doing a soft switch)
+  (main-scene/init-env)
   (let [xr-helper main-scene/xr-helper]
     (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
   (let [scene main-scene/scene
@@ -313,7 +343,7 @@
         light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 8 5) scene)
         cam (utils/get-xr-camera)]
     ; (set! (.-isVisible (.getMeshByID main-scene/scene "ground")) false)
-    ; (set! (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
+    ; (set!  (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
     (when ground
       (set! (.-isVisible ground) false))
     (when sky-box
@@ -331,49 +361,19 @@
             "default"))))
     (bjs/TransformNode. "top-scene-root" scene)
     (set! (.-position cam) (bjs/Vector3. 0 4 -15))
-    ; quat (-> camera .-rotationQuaternion)
-    ; var abcQuaternion = BABYLON.Quaternion.RotationQuaternionFromAxis(alpha, 0, 0);
-    ; (set! (.-rotationQuaternion cam) (bjs/Quaternion.RotationQuaternionFromAxis 0 0 0) )
     (prn "cam=" cam)
-    ; (set! (.-rotationQuaternion cam) (bjs/Quaternion.FromEulerAngles (* -5.8 base/ONE-DEG) (* -3 base/ONE-DEG) 0))
     (set! (.-rotationQuaternion cam) (bjs/Quaternion.FromEulerAngles (* 0 base/ONE-DEG) (* 0 base/ONE-DEG) 0))
-    ; (js-debugger)
     (prn "cam quat=" (.-rotationQuaternion cam))
-    ; (prn "quat=" (bjs/Quaternion.RotationQuaternionFromAxis 0.0 0.0 0.0))
     (prn "quat=" (bjs/Quaternion.FromEulerAngles 0.0 0.0 0.0))
-    ; (let [cam-quat (-> cam .-rotationQuaternion)]
-    ;   (set! ()))
-    ; (prn "top-scene: cam pos=" (.-position cam))
-    ;; note: keep
-    ; (load-model "models/top_scene/sub_scenes/" "ff_scene.glb" "ff-scene"
-    ;             (partial model-loaded
-    ;                      {:root-prfx "ff-scene"
-    ;                       :scale  0.3
-    ;                       :delta-pos (bjs/Vector3. 0 0.2 0)}))
+    ; (init-scene-carousel)
+    (rf/dispatch [:cube-test.top-scene.events/init-scene-carousel])
+    ; (rf/dispatch [:cube-test.top-scene.events/set-globals])
+    db))
 
-    ; (let [choices [{:id :ff} {:id :cube-spin} {:id :face-slot}]
-    ;       parms {:id :app-cc :choices choices}]
-    ;   (rf/dispatch [:cube-test.utils.choice-carousel.events/init-choice-carousel parms db]))))
-    ; db))
-    (init-scene-carousel)))
-
-(defn release []
-  (prn "top-scene.release: entered")
-  (set! top-scene-assets (bjs/AssetContainer. main-scene/scene))
-  (set! keep-assets (bjs/KeepAssets.))
-  (let [scene main-scene/scene
-        uni-cam (.getCameraByID scene "uni-cam")
-        webxr (.getCameraByID scene "webxr")
-        sky-box (.getMeshByID scene "sky-box")]
-    (.push (.-cameras keep-assets) uni-cam webxr)
-    (.push (.-meshes keep-assets) sky-box)
-    (.moveAllFromScene top-scene-assets keep-assets))
-    ; (js-debugger))
-
-  (cc/release))
 
 ;; the main tick
 (defn render-loop []
+  ; (prn "top-scene.render-loop: entered")
   (if (= main-scene/xr-mode "vr")
     (controller/tick)
     (controller-xr/tick))
@@ -408,4 +408,5 @@
 
 
 (defn run-scene []
+  (.stopRenderLoop main-scene/engine)
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))

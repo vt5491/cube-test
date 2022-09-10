@@ -261,33 +261,42 @@
     (set! z-fwd-shadow-gen (bjs/ShadowGenerator. 1024 z-fwd-light))
     (.addShadowCaster z-fwd-shadow-gen triplet-cube)))
 
+;; var target = engine._currentRenderTarget;
+;; if (target) {
+;;              engine.unBindFramebuffer(target)};
+        
+(defn release []
+  (prn "geb-cube-scene: entered")
+  (utils/release-common-scene-assets))
+  ;; (let [target (.-_currentRenderTarget main-scene/engine)]
+  ;;   (when target
+  ;;     (.unBindFramebuffer main-scene/engine target))))
+
 (defn init []
   (println "geb-cube-scene.init: entered")
   ; (set! shadow-generator (bjs/ShadowGenerator. 1024))
+  (let [grnd (.getMeshByID main-scene/scene "ground")]
+    (when (and grnd (not (.-isEnabled grnd)))
+      (.setEnabled grnd))
+    (when (not grnd)
+      (main-scene/init-ground)))
+  (when-let [tele-port (.-teleportation main-scene/xr-helper)]
+    (prn "geb-cube.init: resetting tele-port")
+    (.detach tele-port)
+    (.attach tele-port))
+
   (let [light (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
     (.setEnabled light false))
   (swap! *active-triplet* (fn [x] "vat-cube"))
   (load-triplet-cube
-   "models/geb_cube/"
-   ; "geb_cube.glb"
-   "vat_cube.glb"
-   ; "geb-cube"
-   "vat-cube"
-   init-triplet-cube)
-   ; (fn [] (do
-   ;          (println "now in load cb")
-   ;          (let [triplet-cube (.getNodeByName main-scene/scene "geb-cube")]
-   ;            (set! x-fwd-shadow-gen (bjs/ShadowGenerator. 1024 x-fwd-light))
-   ;            (.addShadowCaster x-fwd-shadow-gen triplet-cube)
-   ;            (set! y-fwd-shadow-gen (bjs/ShadowGenerator. 1024 y-fwd-light))
-   ;            (.addShadowCaster y-fwd-shadow-gen triplet-cube)
-   ;            (set! y-bwd-shadow-gen (bjs/ShadowGenerator. 1024 y-bwd-light))
-   ;            (.addShadowCaster y-bwd-shadow-gen triplet-cube)
-   ;            (set! z-fwd-shadow-gen (bjs/ShadowGenerator. 1024 z-fwd-light))
-   ;            (.addShadowCaster z-fwd-shadow-gen triplet-cube)))))
+    "models/geb_cube/"
+    "vat_cube.glb"
+    "vat-cube"
+    init-triplet-cube)
   (init-screens)
   (init-lights)
-  (init-gui))
+  (init-gui)
+  (main-scene/load-main-gui release))
 
 ;; render
 (defn render-loop []
@@ -297,6 +306,7 @@
     (controller-xr/tick))
   ; (controller-xr/tick)
   (fps-panel/tick main-scene/engine)
+  (main-scene/tick)
   ; (when @*cell-action-pending*
   ;   ; (rot-cells)
   ;   (re-frame/dispatch [:vrubik-rot-cells-combo]))
@@ -306,5 +316,6 @@
   (.render main-scene/scene))
 
 (defn run-scene []
-  (println "triplet-cube-scene.run-scene: entered")
+  (println "geb-cube-scene: entered")
+  (.stopRenderLoop main-scene/engine render-loop)
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))

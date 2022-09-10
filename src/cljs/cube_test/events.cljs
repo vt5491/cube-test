@@ -36,8 +36,11 @@
 ;;
 (re-frame/reg-event-db
  ::initialize-db
- (fn [_ _]
-   db/default-db))
+ ; (fn [_ _])
+ (fn [db _]
+   (prn "events.initialize-db: db=" db)
+   ; db/default-db
+   (db/reset-db db)))
 
 (re-frame/reg-event-db
  ::seed-db
@@ -51,6 +54,12 @@
    (prn "db=" db)
    (prn "default-game-db=" default-game-db)
    (common/merge-dbs db default-game-db)))
+
+(re-frame/reg-event-db
+ ::reset-db
+ (fn [db _]
+   (prn "events: now in reset-db")
+   (db/reset-db db)))
 
 ;; method from the 'todomvc' example, to allow checking of the db spec as an interceptor
 (defn check-and-throw
@@ -92,7 +101,7 @@
 ; (defn soft-switch-app [top-level-scene])
 (defn soft-switch-app
   ([top-level-scene] (soft-switch-app top-level-scene nil))
-  ([top-level-scene cleanup-fn]
+  ([top-level-scene release-fn]
    (prn "events.soft-switch-app:top-level-scene =" top-level-scene)
    (let [scene main-scene/scene
          engine main-scene/engine]
@@ -102,13 +111,46 @@
      (set! game/soft-switch true)
      ; (js-debugger)
      ; (.removeAllFromScene cube-test.top-scene.top-scene.top-scene-assets)
-     (when cleanup-fn
-       (cleanup-fn))
-     (re-frame/dispatch-sync [:cube-test.top-scene.events/remove-asset-containers])
+     (when release-fn
+       (release-fn))
+     ; (re-frame/dispatch-sync [:cube-test.top-scene.events/remove-asset-containers])
+     ; (re-frame/dispatch [:cube-test.top-scene.events/remove-asset-containers])
      ; (when)
      ; (cube-test.top-scene.top-scene/)
      (cube-test.core.init top-level-scene))))
 
+; (reg-fx
+;    :effect2
+;    (fn [value]
+;       ... do something side-effect-y))
+; {:db  new-db
+;  :fx  [ [:dispatch   [:some-id "extra"]]]}
+
+; {:fx [[:dispatch [:event1 "param1" :param2]]
+;       [:dispatch [:second]]]}
+
+; (reg-event-fx
+;   :namespaced/id           ;; <-- namespaced keywords are often used
+;   [one two three]          ;; <-- a seq of interceptors
+;   (fn [{:keys [db] :as cofx} [_ arg1 arg2]] ;; destructure both arguments
+;     {:db (assoc db :some-key arg1)          ;; return a map of effects
+;      :fx [[:dispatch [:some-event arg2]]]}))
+(reg-fx
+   :core-init
+   (fn [top-level-scene]
+     (cube-test.core.init top-level-scene)))
+
+(re-frame/reg-event-fx
+  :soft-switch-app-evt
+  ; (fn [db [_]])
+  (fn [{:keys [db] :as cofx} [_ top-level-scene release-fn]]
+    (prn ":soft-switch-app: top-level-scene=" top-level-scene ",relese-fn=" release-fn)
+    (soft-switch-app top-level-scene release-fn)
+    {:db db
+     :fx [[:cube-test.top-scene.events/remove-asset-containers]
+          [:core-init top-level-scene]]}))
+
+    ; (dispatch-n [[:cube-test.top-scene.events/remove-asset-containers]])))
 ; (reg-event-fx
 ;  ::switch-app
 ;  ; (fn [db [_ top-level-scene]])

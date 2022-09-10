@@ -36,7 +36,7 @@
 (reg-event-db
  ::init-db
  (fn [db [_ id]]
-   (println ":twizzlers.init-db: now running")
+   (println ":twizzlers.init-db: db=" db)
    (twizzlers.db/init-db db)))
 
 (reg-event-db

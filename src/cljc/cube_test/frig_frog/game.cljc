@@ -98,4 +98,6 @@
     :ff-l1  (ff.scene-l1/tick)))
 
 (defn run-game []
+  ;; (let [session-manager main])
+  (.resetReferenceSpace main-scene/xr-helper.baseExperience.sessionManager)
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))

@@ -61,6 +61,7 @@
       [:button.debug-view {:on-click #(re-frame/dispatch [:debug-view])} "debug-view"]
       [:button.print-grid {:on-click #(re-frame/dispatch [:sync-db base/db-worker-thread])} "sync worker db"]
       [:button.print-grid {:on-click #(utils/pretty-print-meshes main-scene/scene)} "print meshes"]
+      [:button.print-grid {:on-click #(re-frame/dispatch [:print-db])} "print db"]
       [:br]
       (case top-level-scene
             :msg-cube (do (msg-cube.views/init-panel))

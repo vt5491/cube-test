@@ -20,7 +20,7 @@
     ; [:button.user-action {:on-click #(re-frame/dispatch [::events/switch-app :frig-frog])} "switch to frig-frog"]
     [:button.user-action {:on-click #(events/switch-app :frig-frog)} "hard-switch to frig-frog"]
     [:button.user-action {:on-click #(events/switch-app :top-scene)} "hard-switch to top-scene"]
-    [:button.user-action {:on-click #(events/soft-switch-app :top-scene cube-test.twizzlers.scene/cleanup)} "soft-switch to top-scene"]
+    [:button.user-action {:on-click #(events/soft-switch-app :top-scene cube-test.twizzlers.scene/release)} "soft-switch to top-scene"]
     (let [tc-1 @(subscribe [:twiz-cnt])]
       [:p "twiz-cnt-2: " tc-1])
     (let [gen-twiz-cube @(subscribe [:gen-twiz-cube])])

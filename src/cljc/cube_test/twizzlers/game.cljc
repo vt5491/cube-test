@@ -29,6 +29,7 @@
 
 (defn run-game []
   ; (run-render-loop)
+  (.stopRenderLoop main-scene/engine)
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
 
 (defn init []

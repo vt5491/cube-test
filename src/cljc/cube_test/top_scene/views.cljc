@@ -18,7 +18,9 @@
         ; ccs    @(subscribe [:cube-test.utils.choice-carousel.subs/choice-carousels-changed])
         ;; Note: how sub getters are globals? (no need to fully qualify the path)
         ; ccs    @(subscribe [:get-choice-carousels])
-        ccs    @(subscribe [:choice-carousels-changed])
+        ; last-idx @(subscribe [:get-last-selected-idx [:globals :top-scene :last-selected-idx]])
+        ccs    @(subscribe [:choice-carousels-changed [:globals :top-scene :last-selected-idx]])
+        ; ccs    @(subscribe [:choice-carousels-changed])
         _ (prn "now in top-scene.init-panel")]
     [:div
      [:br]
@@ -40,8 +42,12 @@
      [:br]
      [:button.user-action {:on-click #(rf/dispatch [:cube-test.top-scene.events/remove-asset-containers])} "remove asset-containers"]
      [:button.user-action {:on-click #(rf/dispatch [:cube-test.top-scene.events/add-asset-containers])} "add asset-containers"]
+     ; [:br]
+     ; [:button.user-action {:on-click #(cube-test.top-scene.top-scene/add-default-light)} "add default light"]
      [:br]
-     [:button.user-action {:on-click #(rf/dispatch [::ts-events/tmp 7])} "tmp"]]))
+     [:button.user-action {:on-click #(rf/dispatch [::ts-events/tmp 7])} "tmp"]
+     ; [:button.user-action {:on-click cube-test.top-scene.top-scene/tmp-2 7} "tmp-2"]
+     [:button.user-action {:on-click #(cube-test.top-scene.top-scene/tmp-2 7)} "tmp-2"]]))
      ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.top-scene.events/tmp 7])} "tmp"]]))
      ; [:button.user-action {:on-click #(rf/dispatch [::ff-events/init-frog-2 0 5])} "init frog-2"]]))
   ; (let [choices [{:id :ff} {:id :cube-spin} {:id :face-slot}]

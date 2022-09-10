@@ -141,3 +141,28 @@
                file
                main-scene/scene
                user-cb))
+
+;;TODO: this really belongs in top-scene (?)
+(defn release-common-scene-assets []
+  (prn "utils/release-main-scene-assets: entered")
+  ; (set! top-scene-assets (bjs/AssetContainer. main-scene/scene))
+  ; (set! keep-assets (bjs/KeepAssets.))
+  (let [scene main-scene/scene
+        top-scene-assets (bjs/AssetContainer. main-scene/scene)
+        keep-assets (bjs/KeepAssets.)
+        uni-cam (.getCameraByID scene "uni-cam")
+        webxr (.getCameraByID scene "webxr")
+        rig-camera (nth (.-rigCameras main-scene/xr-helper.baseExperience.camera) 0)
+        sky-box (.getMeshByID scene "sky-box")
+        teleportation-target (.getMeshByID scene "teleportationTarget")
+        bg-helper (.getMeshByID scene "BackgroundHelper")
+        grnd (.getMeshByID scene "ground")]
+    ; (js-debugger)
+    (.push (.-cameras keep-assets) uni-cam webxr)
+    (when rig-camera
+      (.push (.-cameras keep-assets) rig-camera))
+    ; (.push (.-cameras keep-assets) uni-cam)
+    (.push (.-meshes keep-assets) sky-box teleportation-target bg-helper grnd)
+    ; (.push (.-meshes keep-assets) teleportation-target)
+    (.moveAllFromScene top-scene-assets keep-assets)))
+    ; (.removeAllFromScene top-scene-assets)))
