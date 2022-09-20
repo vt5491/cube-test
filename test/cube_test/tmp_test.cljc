@@ -1355,3 +1355,28 @@ urs-seq
 (f3 (comp f1 f2))
 (f3 #(-> f1 f2))
 (f3 #(do (f1) (f2)))
+
+(.push [1 2] 3)
+(+ 1 1)
+(mod 5 4)
+(count [1 2 3])
+
+(let [s {:abc [{:def 7} {:ghi 8}]}
+      r (get-in s [:abc 0 :def])]
+  (prn "r=" r))
+
+(defn abc [val]
+  (+ 1 val))
+
+(abc 7)
+
+(defn ghi [path-vec]
+  (let [m {:a [{:b 10} {:c 11}]}]
+    (assoc-in m path-vec 7)))
+
+(ghi [:a 1 :b])
+
+(let [m {:hlobals {:a 7 :b 8}}]
+  (assoc {} :globals (:globals m)))
+(mod 7 7)
+(nth [0 1 2] 1)

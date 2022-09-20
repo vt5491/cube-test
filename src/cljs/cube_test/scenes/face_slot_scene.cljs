@@ -8,7 +8,8 @@
    [babylonjs-gui :as bjs-gui]
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
-   [cube-test.utils.fps-panel :as fps-panel]))
+   [cube-test.utils.fps-panel :as fps-panel]
+   [cube-test.utils :as utils]))
 
 (def ^:dynamic *top-rotor-face* (atom 0))
 (def ^:dynamic *mid-rotor-face* (atom 0))
@@ -288,11 +289,15 @@
     (controller/tick)
     (controller-xr/tick))
   (fps-panel/tick main-scene/engine)
+  (main-scene/tick)
   (.render main-scene/scene))
 
 (defn run-scene []
   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
 
+(defn release []
+  (prn "face-slot.release: entered")
+  (utils/release-common-scene-assets))
 ;;
 ;; init
 ;;
@@ -301,7 +306,8 @@
   (prn "top-rotor-unique-id=" top-rotor-uniq-id)
   (let [rotor (-> main-scene/scene (.getMeshByUniqueID top-rotor-uniq-id))
         rotor-pos (.-position rotor)]
-    (set! (.-position rotor) rotor-top-pos)))
+    (set! (.-position rotor) rotor-top-pos))
+  (main-scene/load-main-gui release))
 
 (defn init-mid-rotor []
   (println "init-mid-rotor entered")
@@ -348,4 +354,9 @@
                       (fn []
                         (println "hi from load-rotor-frame cb"))])
   (init-gui)
-  (init-snd))
+  (init-snd)
+  (main-scene/load-main-gui release)
+  (let [grnd (.getMeshByID main-scene/scene "ground")]
+   (when grnd
+     (.setEnabled grnd true)
+     (set! (.-isVisible grnd) true))))

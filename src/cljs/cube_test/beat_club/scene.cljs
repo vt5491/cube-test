@@ -375,9 +375,18 @@
       (prn "scene.stop-animation: anim-name-fq=" anim-name-fq)
       (.stop ag)))
 
+(defn release []
+  (prn "beat-club.release: entered")
+  (utils/release-common-scene-assets))
+
 (defn init [db]
   (let [scene main-scene/scene
         light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)
         camera main-scene/camera
         camera-pos (.-position camera)]
-    (init-gui)))
+    (init-gui)
+    (main-scene/load-main-gui release)
+    (let [grnd (.getMeshByID main-scene/scene "ground")]
+      (when grnd
+        (.setEnabled grnd true)
+        (set! (.-isVisible grnd) true)))))

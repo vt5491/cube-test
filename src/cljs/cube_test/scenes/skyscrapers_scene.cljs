@@ -169,6 +169,11 @@
      (bjs/Vector3. 4 0 0)
      model-loaded))
 
+(defn release []
+  (prn "skyscrapers-release: entered")
+  (utils/release-common-scene-assets))
+  ;; (.removeAllFromScene hemisferic-asset-container))
+
 ;; inits
 (defn init-empire-state-bldg [mesh-name]
   (println "now in init-empire-state-bldg, mesh-name=" mesh-name))
@@ -184,7 +189,13 @@
   (let [light (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
     (.setEnabled light true))
   ; (swap! *active-triplet* (fn [x] "vat-cube"))
-  (load-models))
+  (load-models)
+  (main-scene/load-main-gui release)
+  (let [grnd (.getMeshByID main-scene/scene "ground")]
+    (when grnd
+      (.setEnabled grnd true)
+      (set! (.-isVisible grnd) true)))
+  (main-scene/init-env))
   ; (load-empire-state-bldg
   ;  "models/skyscrapers/empire_state_bldg/"
   ;  "empire_state_bldg.glb"
@@ -199,6 +210,7 @@
     (controller/tick)
     (controller-xr/tick))
   (fps-panel/tick main-scene/engine)
+  (main-scene/tick)
   (.render main-scene/scene))
 
 (defn run-scene []

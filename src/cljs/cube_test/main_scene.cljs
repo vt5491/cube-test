@@ -13,11 +13,14 @@
    [cannon :as cannon]
    [oimo :as oimo]
    [promesa.core :as p]
+   [cljs.core.async :refer [go]]
+   [cljs.core.async.interop :refer-macros [<p!]]
    [webxr-polyfill :as xr-pf]))
 (defn dummy [])
 
 (def canvas)
 (def engine)
+(def engine-webgpu)
 ; (def scene)
 ; (defonce scene)
 (def env)
@@ -62,6 +65,7 @@
 ;; we have to pre-declare scene because it's defined with 'init' as a defonce.
 (declare scene)
 (declare init)
+(declare init-main)
 (declare init-part-2)
 (declare init-cube)
 (declare setup-skybox)
@@ -90,14 +94,53 @@
               "skyboxSize" 90)
              scene)))
 
-(defn init [top-level-scene-initializer]
+(defn init-env-2[]
+  ; (prn "top-scene.tmp-2: entered")
+  (set! env (bjs/EnvironmentHelper.
+             (js-obj
+              "createGround" true
+              "skyboxSize" 90)
+             scene)))
+
+(defn pre-init [init-main use-webgpu]
+  ; (go
+    (set! canvas (-> js/document (.getElementById "renderCanvas")))
+    ; (<p! (.initAsync engine))
+    ; (prn "init-engine: engine=" engine)
+    (if use-webgpu
+      (do
+        (set! engine (bjs/WebGPUEngine. canvas))
+        (-> (.initAsync engine)
+            (p/then init-main)))
+      (do
+        (set! engine (bjs/Engine. canvas true))
+        (prn "pre-init: init-main=" init-main)
+        ; #(init-main)
+        (init-main))))
+
+(defn init [dispatch-seq]
+  ; (pre-init #(init-main dispatch-seq) true)
+  (pre-init #(init-main dispatch-seq) false))
+
+; (defn init [top-level-scene-initializer])
+(defn init-main [top-level-scene-initializer]
   (set! top-level-scene-init top-level-scene-initializer)
 
+  ; (<p! (.launch puppeteer))
   ;; following line necessary for mixamo animations.
   (set! bjs/Animation.AllowMatricesInterpolation true)
-  (set! canvas (-> js/document (.getElementById "renderCanvas")))
-  (set! engine (bjs/Engine. canvas true))
+  ; (set! canvas (-> js/document (.getElementById "renderCanvas")))
+  ; (set! engine (bjs/Engine. canvas true))
+  ; (init-engine)
+  ; (go
+  ;   (set! engine (bjs/WebGPUEngine. canvas))
+  ;   (<p! (.initAsync engine)))
+   ; (set! engine (<p! (bjs/WebGPUEngine. canvas))))
+  ; (-> (bjs/WebGPUEngine. canvas) (p/then #(do
+  ;                                           (prn "web-gpu promose: arg=" %)
+  ;                                           (set! engine-webgpu %))))
   ;; Note: even though scene is defined inside 'init' it has file level scope.
+  (prn "point a: engine=" engine)
   (defonce scene (bjs/Scene. engine))
   ; (def scene (bjs/Scene. engine))
   (set! scene (bjs/Scene. engine))
@@ -180,12 +223,15 @@
         (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
         (.attachControl camera canvas true)
         (.setTarget camera (bjs/Vector3.Zero))
+        ;; Note: the promise for this is called during init and does *not*
+        ;; require that xr be entered.
         (-> (.createDefaultXRExperienceAsync scene
                                              (js-obj
                                               "floorMeshes"
                                               (array (.getMeshByID scene "ground"))))
             (p/then
              (fn [xr-default-exp]
+               (prn "createDefaultXRExperienceAsync promise-handler: xr-default-exp=" xr-default-exp)
                (set! xr-helper xr-default-exp)
                (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
                ;; Note: baseExperience is of type WebXRExperienceHelper
@@ -193,6 +239,8 @@
                ;;Note: setting rotations on the xr camera here have no effect.  You have to do it
                ;; on the pre-xr camera (any rotations on that *will* propagate to the xr camera)
                (re-frame/dispatch [:init-xr xr-default-exp])
+               ;; 'enter-xr-handler' is only called upon clicking the 'enter xr' button.
+               ;; note: baseExperience is type 'WebXRDefaultExperience'
                (-> xr-default-exp (.-baseExperience)
                    (.-onStateChangedObservable)
                    (.add enter-xr-handler))
@@ -333,7 +381,11 @@
       (set! (.-position main-gui-plane) (.add (.-position cam) gui-delta))
       (set! (.-rotation main-gui-plane) (bjs/Vector3. 0 cam-rot-y 0))
       ; (.addInPlace (.-position main-gui-plane) gui-delta)
-      (.setEnabled main-gui-plane true))))
+      ;; and toggle the visibility
+      ; (.setEnabled main-gui-plane true)
+      (if (not (.isEnabled main-gui-plane))
+        (.setEnabled main-gui-plane true)
+        (.setEnabled main-gui-plane false)))))
 
 (defn main-gui-loaded [cleanup-fn]
   (prn "main-gui-loaded: main-gui-adv-text=" main-gui-adv-text)

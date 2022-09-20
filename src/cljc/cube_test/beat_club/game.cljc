@@ -18,6 +18,7 @@
   (if fps-panel/fps-pnl
     (fps-panel/tick main-scene/engine))
   ; (beat-club-scene/tick)
+  (main-scene/tick)
   (.render main-scene/scene))
 
 (defn run-game []

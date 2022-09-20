@@ -64,7 +64,7 @@
 
 
 ;; called by a subscribe (reg-sub choice-carousels-changed)
-; (defn init-meshes [radius choices colors]
+;  defn init-meshes [radius choices colors]
 (defn init-meshes [radius choices colors focused-app-idx]
   (let [scene main-scene/scene
         n-choices (count choices)

@@ -487,6 +487,10 @@
        (assoc accum key (assoc val :cell (cell/init)))))
    {} vrubik-grid))
 
+(defn release []
+  (prn "vrubik.release: entered")
+  (utils/release-common-scene-assets))
+
 (defn init []
   (println "vrubik.init: entered")
   (let [light (bjs/PointLight. "pointLight" (bjs/Vector3. 0 5 -3) main-scene/scene)]
@@ -514,7 +518,12 @@
   (println "now dispatching do-it")
   (re-frame/dispatch [:call-doit-with-db])
   (re-frame/dispatch [:vrubik-init-game-state])
-  (re-frame/dispatch [:vrubik-init-cells]))
+  (re-frame/dispatch [:vrubik-init-cells])
+  (main-scene/load-main-gui release)
+  (let [grnd (.getMeshByID main-scene/scene "ground")]
+   (when grnd
+     (.setEnabled grnd true)
+     (set! (.-isVisible grnd) true))))
 
 ;; make a local copy of the relevent cells from the re-frame db
 ;; so we can efficiently access them on the game-level "tick".
@@ -609,6 +618,7 @@
   (let [action-cells @*action-cells*]
     (when (and action-cells (> (count action-cells) 0) (nth action-cells 0))
       (swap! *action-cells* rot-cells)))
+  (main-scene/tick)
   (.render main-scene/scene))
 
 (defn run-scene []

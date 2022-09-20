@@ -9,7 +9,8 @@
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.cube-fx :as cube-fx]
-   [cube-test.utils.fps-panel :as fps-panel]))
+   [cube-test.utils.fps-panel :as fps-panel]
+   [cube-test.utils :as utils]))
 
 (def light1)
 (def cube)
@@ -18,6 +19,10 @@
 (declare init-gui)
 (declare init-gui-2)
 (declare pointer-handler)
+
+(defn release []
+  (prn "cube-spin.release: entered")
+  (utils/release-common-scene-assets))
 
 (defn init []
   (println "cube-spin-scene.init: entered")
@@ -29,7 +34,12 @@
   (if (= main-scene/xr-mode "xr")
     (-> (.-onPointerObservable main-scene/scene) (.add pointer-handler)))
   (init-gui)
-  (init-gui-2))
+  (init-gui-2)
+  (main-scene/load-main-gui release)
+  (let [grnd (.getMeshByID main-scene/scene "ground")]
+   (when grnd
+     (.setEnabled grnd true)
+     (set! (.-isVisible grnd) true))))
 
 (defn init-cube[]
   (set! cube (bjs/MeshBuilder.CreateBox. "cube"
@@ -63,11 +73,9 @@
 
 (defn init-gui []
  (let [scene main-scene/scene
-      ;;  left-plane (bjs/Mesh.CreatePlane "left-plane" (js-obj "width" 2, "height" 2) scene)
        left-plane (bjs/Mesh.CreatePlane "left-plane" 2 scene)
        left-adv-texture (bjs-gui/AdvancedDynamicTexture.CreateForMesh left-plane 1024 1024)
        left-pnl (bjs-gui/StackPanel.)
-      ;;  left-pnl (bjs-gui/Grid.)
        left-hdr (bjs-gui/TextBlock.)
        bwd-btn (bjs-gui/Button.CreateImageButton "bwd-spin" "bwd" "textures/tux_tada.jpg")
        cb (bjs-gui/Checkbox.)]
@@ -95,41 +103,14 @@
   (init-cube)
   (let [
         scene main-scene/scene
-        ;; plane (bjs/Mesh.CreatePlane "plane" (js-obj "width" 1, "height" 1) scene)
-        ;; plane (bjs/Mesh.CreatePlane "plane" 1 scene)
-        ;; adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane)
         plane-2 (bjs/Mesh.CreatePlane "plane-2" 2)
         adv-text-2 (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane-2)
-        ;; panel (bjs-gui/StackPanel.)
-        ;; panel (bjs-gui/Grid.)
         panel-2 (bjs-gui/StackPanel.)
-        ;; panel-2 (bjs-gui/Grid.)
-        ;; header (bjs-gui/TextBlock.)
         header-2 (bjs-gui/TextBlock.)
-        ;; picker (bjs-gui/ColorPicker.)
         cb (bjs-gui/Checkbox.)
         fwd-btn (bjs-gui/Button.CreateImageButton "fwd" "click me" "textures/tux_tada.jpg")]
-    ;; (set! (.-position plane) (bjs/Vector3. -3.4 1.5 0.4))
     (set! (.-position plane-2) (bjs/Vector3. 1.4 1.5 0.4))
-    ;; (.addControl adv-text panel)
     (.addControl adv-text-2 panel-2)
-    ;; (set! (.-text header) "Color GUI")
-    ;; (set! (.-height header) "100px")
-    ;; (set! (.-color header) "white")
-    ;; (set! (.-textHorizontalAlignment header) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
-    ;; (set! (.-fontSize header) "120")
-    ;; (.addControl panel header)
-    ;; (set! (.-value picker) (-> cube .-material .-diffuseColor))
-    ;; (set! (.-horizontalAlignment picker) bjs-gui/Control.HORIZONTAL_ALIGNMENT_CENTER)
-    ;; (set! (.-height picker) "350px")
-    ;; (set! (.-width picker) "350px")
-    ;; (-> picker .-onValueChangedObservable (.add (fn [value]
-    ;;                                               (-> cube .-material .-diffuseColor (.copyFrom value)))))
-    ;; (-> picker .-onPointerUpObservable (.add (fn [value]
-    ;;                                            (prn "up the palace"))))
-    ;; (-> picker .-onPointerClickObservable (.add (fn [value])
-    ;;                                            (prn "click the palace")))
-    ;; (.addControl panel picker)
     ;; btn
     (set! (.-text header-2) "Forward")
     (set! (.-height header-2) "100px")
@@ -157,6 +138,7 @@
     (controller-xr/tick))
   (cube-fx/tick)
   (fps-panel/tick main-scene/engine)
+  (main-scene/tick)
   (.render main-scene/scene))
 
 (defn run-scene []

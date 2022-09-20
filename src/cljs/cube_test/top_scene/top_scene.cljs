@@ -28,8 +28,30 @@
 (def default-db
   {:top-scene-abc 7})
 
-; 0=ff, 5=geb, 6=twizzlers
-(def app-cc-idx-seed 0)
+;; steps to "top-scene-izing" a sub-scene:
+;; 1. create a release function in the subscene.  Something like:
+;;(defn release []
+;; (prn "twizzlers.release: entered"))
+;; (utils/release-common-scene-assets)
+;; (.removeAllFromScene hemisferic-asset-container))
+;; 2. add (main-scene/load-main-gui release) to the sub-scene's init
+;;  -> it can't be done at the top level scene because each sub-scene's
+;;     release function is potentially different and can't be known
+;;     during top-scene's init.
+;; 3. add (main-scene/tick) to the sub-scenes tick.
+;;  -> this will set up the a-btn to say "return to top scene".
+;; 4. add a soft-reset and hard-reset-path in game.cljs
+;; 5. (potential): if getting dark PBR mats, may need to add '(main-scene/init-env)' to
+;;   the sub-scenes init.
+;; 6. (optional): make ground visible
+; (let [grnd (.getMeshByID main-scene/scene "ground")]
+;   (when grnd
+;     (.setEnabled grnd true)
+;     (set! (.-isVisible grnd) true)))
+
+;; top-selectable scenes 7(beat-club),6(twizzlers), 5(geb), 4(skyscrapers), 3(vrubik), 2(face-slot), 1(cube-spin)
+; 0=ff, 4=skyscraper, 5=geb, 6=twizzlers,
+(def app-cc-idx-seed 7)
 ;; yes, kind of a magic number, but at least it's not hard-coded everywhere.
 (def app-cc-idx-shift-factor -2)
 ;; Note: this will be overriden by global->top-scene->last-selected-idx upon a "soft" switch.

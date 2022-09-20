@@ -266,7 +266,7 @@
 ;;              engine.unBindFramebuffer(target)};
         
 (defn release []
-  (prn "geb-cube-scene: entered")
+  (prn "geb-cube-scene.release: entered")
   (utils/release-common-scene-assets))
   ;; (let [target (.-_currentRenderTarget main-scene/engine)]
   ;;   (when target

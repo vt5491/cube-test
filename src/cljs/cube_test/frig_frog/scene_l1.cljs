@@ -101,6 +101,7 @@
       (set! (.-diffuseTexture mat) (bjs/Texture. "textures/geb_cube_wood.jpg"))))
 
 (defn create-walls []
+  (prn "scene-l1.create-walls: entered")
   (let [scene main-scene/scene
         rear-wall (bjs/MeshBuilder.CreatePlane "rear-wall"
                                              (clj->js {:width 10 :height 10 :subdivisions 10
@@ -123,6 +124,7 @@
         left-wall-mat (bjs-m/GridMaterial. "left-wall-mat" scene)
         right-wall-mat (bjs-m/GridMaterial. "right-wall-mat" scene)
         ground (.getMeshByID scene "ground")]
+    ;; (js-debugger)
     (set! (.-position rear-wall) (bjs/Vector3. 0 5 10))
     (set! (.-lineColor rear-wall-mat) (bjs/Color3.Blue))
     (set! (.-material rear-wall) rear-wall-mat)
@@ -143,6 +145,7 @@
     (when ground (set! (.-visibility ground) 1))))
 
 (defn remove-walls []
+  (prn "scene-l1.remove-walls: entered")
   (let [scene main-scene/scene
         rear-wall (.getMeshByID scene "rear-wall")
         front-wall (.getMeshByID scene "front-wall")
@@ -428,6 +431,15 @@
   ;; (.removeAllFromScene hemisferic-asset-container))
 
 (defn init [db]
+  ;; (main-scene/init-ground)
+  ;; (main-scene/init-env-2)
+  ;; (let [xr-helper main-scene/xr-helper]
+  ;;   (prn "scene-l1.init: xr-input=" (.-input xr-helper))
+  ;;   (js-debugger))
+    ;; (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
+  (prn "scene-l1.init: entered")
+  ;; (create-walls)
+
   (let [scene main-scene/scene
         ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
         light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
