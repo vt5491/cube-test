@@ -198,7 +198,8 @@
   (prn "xr-mode=" xr-mode)
   ;; note: this needs to be called by the client scene, since the cleanup-fn is different
   ;; for each scene.
-  ; (load-main-gui)
+  ;; Here we set it up with a null release so we can get access to buttons like 'reset camera'
+  (load-main-gui #())
   (if (= xr-mode "vr")
     (do
       (println "now setting up vr")
@@ -233,7 +234,8 @@
              (fn [xr-default-exp]
                (prn "createDefaultXRExperienceAsync promise-handler: xr-default-exp=" xr-default-exp)
                (set! xr-helper xr-default-exp)
-               (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
+               ; (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
+               (re-frame/dispatch [:cube-test.events/setup-xr-ctrl-cbs xr-default-exp])
                ;; Note: baseExperience is of type WebXRExperienceHelper
                (set! features-manager (-> xr-default-exp (.-baseExperience) (.-featuresManager)))
                ;;Note: setting rotations on the xr camera here have no effect.  You have to do it
@@ -392,7 +394,8 @@
   ;; (js-debugger)
   (let [yes-btn (.getControlByName main-gui-adv-text "yes-btn")
         no-btn (.getControlByName main-gui-adv-text "no-btn")
-        cancel-btn (.getControlByName main-gui-adv-text "cancel-btn")]
+        cancel-btn (.getControlByName main-gui-adv-text "cancel-btn")
+        reset-cam-btn (.getControlByName main-gui-adv-text "reset-cam-btn")]
     (when yes-btn
       (prn "main-scene: now initing buttons, no-btn=" no-btn)
       (-> yes-btn (.-onPointerClickObservable)
@@ -408,7 +411,12 @@
       (-> cancel-btn (.-onPointerClickObservable)
             (.add #(do
                      (prn "main-scene: you clicked cancel")
-                     (.setEnabled (.getMeshByID scene "main-gui-plane") false)))))))
+                     (.setEnabled (.getMeshByID scene "main-gui-plane") false)))))
+    (when reset-cam-btn
+      (-> reset-cam-btn (.-onPointerClickObservable)
+          (.add #(do
+                   (prn "camera reset clicked")
+                   (set! (.-position camera) camera-init-pos)))))))
 
 (defn load-main-gui [cleanup-fn]
   ; (prn "main-scene: load-main-gui: cleanup-fn=" cleanup-fn)

@@ -213,24 +213,26 @@
         (.add select-evt))
       (-> left-arrow (.-onPointerClickObservable)
         (.add left-evt))
-      (-> left-arrow-dbg (.-onPointerClickObservable)
-        (.add #(rf/dispatch [left-evt (/ delta-theta 10)])))
+      ; (-> left-arrow-dbg (.-onPointerClickObservable)
+      ;   (.add #(rf/dispatch [left-evt (/ delta-theta 10)])))
       (-> right-arrow (.-onPointerClickObservable)
-        ; (.add #(rf/dispatch [right-evt delta-theta]))
-        (.add right-evt))
-      (-> right-arrow-dbg (.-onPointerClickObservable)
-        (.add #(rf/dispatch [right-evt (/ delta-theta 10)]))))))
+        (.add right-evt)))))
+      ; (-> right-arrow-dbg (.-onPointerClickObservable)
+      ;   (.add #(rf/dispatch [right-evt (/ delta-theta 10)]))))))
 
 
 (defn load-choice-carousel-gui [left-evt right-evt select-evt delta-theta]
   (let [scene main-scene/scene
-        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 4, "height" 4) scene)
-        _ (set! (.-position plane) (bjs/Vector3. 0 3 0))
-        _ (.enableEdgesRendering plane)
-        _ (set! (.-edgesWidth plane) 1.0)
+        ; plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 4, "height" 4) scene)
+        plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 6, "height" 3) scene)
+        ; _ (set! (.-position plane) (bjs/Vector3. 0 3 0))
+        ; _ (.enableEdgesRendering plane)
+        ; _ (set! (.-edgesWidth plane) 1.0)
         adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 1920 1080)]
+    (set! (.-position plane) (bjs/Vector3. 0 2 0))
     (-> adv-text
-     (.parseFromURLAsync "guis/top_scene/choice_carousel_gui.json")
+     ; (.parseFromURLAsync "guis/top_scene/choice_carousel_gui.json")
+     (.parseFromURLAsync "guis/top_scene/choice_carousel_gui_2.json")
      (p/then #(choice-carousel-gui-loaded adv-text left-evt right-evt select-evt delta-theta)))))
 
 (defn rot-meshes [mesh-ids dir theta origin]

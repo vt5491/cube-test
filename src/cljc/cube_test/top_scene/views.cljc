@@ -45,7 +45,8 @@
      ; [:br]
      ; [:button.user-action {:on-click #(cube-test.top-scene.top-scene/add-default-light)} "add default light"]
      [:br]
-     [:button.user-action {:on-click #(rf/dispatch [::ts-events/tmp 7])} "tmp"]
+     ;  [:button.user-action {:on-click #(rf/dispatch [::ts-events/tmp 7])} "tmp"]
+     ;  [:button.user-action {:on-click #(cube-test.top-scene.top-scene/samp-gui-loaded cube-test.top-scene.top-scene/app-info-adv-text 6)} "tmp"]
      ; [:button.user-action {:on-click cube-test.top-scene.top-scene/tmp-2 7} "tmp-2"]
      [:button.user-action {:on-click #(cube-test.top-scene.top-scene/tmp-2 7)} "tmp-2"]]))
      ; [:button.user-action {:on-click #(rf/dispatch [:cube-test.top-scene.events/tmp 7])} "tmp"]]))

@@ -438,31 +438,39 @@
   ;;   (js-debugger))
     ;; (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
   (prn "scene-l1.init: entered")
+  ;; (rf/dispatch [:cube-test.events.setup-xr-ctrl-cbs main-scene/xr-helper])
+  ;; (js-debugger)
+  ;; (rf/dispatch [:cube-test.events/setup-xr-ctrl-cbs main-scene/xr-helper])
+  ;; (->  (.-baseExperience main-scene/xr-helper) (.-featuresManger) (.enableFeature "xr-controller-pointer-selection"))
+  ;; (.-featuresManger (.-baseExperience main-scene/xr-helper))
+  ;; (let [base-exp (.-baseExperience main-scene/xr-helper)
+  ;;       fm (.-featuresManger base-exp)])
+  ;; (let [xr-helper main-scene/xr-helper
+  ;;       fm (-> xr-helper (.-baseExperience) (.-featuresManager))]
+  ;;   ;; (.enableFeature fm "xr-controller-pointer-selection")
+  ;;   ;; (.detachFeature fm "xr-controller-pointer-selection")
+  ;;   (prn "scene_l1: disposing of fm")
+  ;;   ;; (.dispose fm)
+  ;;   (.attachFeature fm "xr-controller-pointer-selection")
+  ;;   (.attachFeature fm "xr-controller-teleportation"))
+    ;; (rf/dispatch [:cube-test.events/setup-xr-ctrl-cbs main-scene/xr-helper]))
+
   ;; (create-walls)
 
   (let [scene main-scene/scene
-        ; light1 (bjs/PointLight. "pointLight" (bjs/Vector3. 2 5 4) scene)
         light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
         light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 2 5) scene)
         camera main-scene/camera
-        ; cam-quat (bjs/Quaternion.FromEulerAngles (* -90 base/ONE-DEG) 0 0)
         cam-rot (bjs/Vector3. (* -15 base/ONE-DEG) 0 0)
         spin-cube (bjs/MeshBuilder.CreateBox. "spin_cube" (js-obj "height" 1 "width" 1 "depth" 1) scene)]
-    ; (set! (.-position camera) (bjs/Vector3. 1.54 4.77 -7.82))
     (set! (.-position camera) (bjs/Vector3. 2.2 2.2 -7.82))
     (set! (.-rotation camera) (.add (.-rotation camera) cam-rot))
-    ; (prn "cam quat=" (.-rotationQuaternion camera))
-    ; (js-debugger)
-    ; (.multiplyInPlace (.-rotationQuaternion camera) cam-quat)
 
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
     ; (init-gui)
     ;; set-up scene level "enter xr" hook
     (let [
-          ; tweak-partial (partial utils/tweak-xr-view 20 0 0)
-          ;left
-          ; tweak-partial (partial utils/tweak-xr-view 20 90 0)
           ;top
           tweak-partial (partial utils/tweak-xr-view 110 0 0)]
       (-> main-scene/xr-helper
@@ -475,18 +483,21 @@
     (set! (.-position spin-cube) (bjs/Vector3. 4 6 10))
     ;; seed the initial train id
     (ff.rules/update-train-id-cnt 1)
-    ; (ff.rules/init-player)
-    ; (ff.rules/init-game-piece "player" 0 5 0 0)
-    ; (ff.rules/init-game-piece ff.rules/player 0 5 0 0)
-    ; (ff.rules/init-game-piece :cube-test.frig-frog.rules/player 0 5 0 0)
     (ff.rules/init-player :cube-test.frig-frog.rules/btm-player 0 5)
     (ff.rules/set-player-last-pos :cube-test.frig-frog.rules/btm-player-last-pos 0 5)
-    ; (ff.rules/init-top-player :cube-test.frig-frog.rules/top-player 1 6)
     (ff.rules/init-player :cube-test.frig-frog.rules/top-player 0 5)
     (init-balls)
     (ff.tile/init)
     (init-snd)
-    (main-scene/load-main-gui release)))
+    (main-scene/load-main-gui release)
+    ;;vt-x
+    (let [xr-helper main-scene/xr-helper
+          fm (-> xr-helper (.-baseExperience) (.-featuresManager))]
+     ;; (.enableFeature fm "xr-controller-pointer-selection")
+    ;;  (.enableFeature fm bjs/WebXRFeatureName.TELEPORTATION)
+     (.attachFeature fm bjs/WebXRFeatureName.TELEPORTATION))))
+    ;;  (.enableFeature fm bjs/WebXRFeatureName.POINTER_SELECTION))))
+      
 
 
 (defn tick []

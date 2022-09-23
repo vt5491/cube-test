@@ -1380,3 +1380,25 @@ urs-seq
   (assoc {} :globals (:globals m)))
 (mod 7 7)
 (nth [0 1 2] 1)
+(mod -1 0)
+(<= 5 8 4.5)
+(<= 5 8 0)
+
+(def abc 0)
+(def max-abc 8)
+
+(set! abc 1)
+
+
+(let [n 0]
+  (set! abc (dec abc)))
+
+(count [0 1 2])
+
+(let [dec-idx (dec abc)]
+  (if (< dec-idx 0)
+    (set! abc (- max-abc 1))
+    (set! abc dec-idx)))
+
+(let [inc-idx (mod (inc abc) max-abc)]
+  (set! abc inc-idx))

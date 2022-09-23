@@ -216,7 +216,8 @@
 
 ;;> xr events
 (re-frame/reg-event-db
- :setup-xr-ctrl-cbs
+ ; :setup-xr-ctrl-cbs
+ ::setup-xr-ctrl-cbs
  (fn [db [_ xr]]
    (ctrl-xr/setup-xr-ctrl-cbs xr)
    db))

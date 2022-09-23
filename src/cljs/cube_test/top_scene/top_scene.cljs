@@ -15,7 +15,8 @@
    [cube-test.base :as base]
    [cube-test.utils :as utils]
    [babylonjs-loaders :as bjs-l]
-   [cube-test.utils.choice-carousel.choice-carousel :as cc]))
+   [cube-test.utils.choice-carousel.choice-carousel :as cc]
+   [promesa.core :as p]))
 
 (declare animate-app-carousel)
 (declare release)
@@ -24,6 +25,7 @@
 (def face-slot-assets (bjs/AssetContainer. main-scene/scene))
 (def geb-cube-assets (bjs/AssetContainer. main-scene/scene))
 (def app-cc-asset-containers {})
+(def app-info-adv-text)
 
 (def default-db
   {:top-scene-abc 7})
@@ -51,7 +53,8 @@
 
 ;; top-selectable scenes 7(beat-club),6(twizzlers), 5(geb), 4(skyscrapers), 3(vrubik), 2(face-slot), 1(cube-spin)
 ; 0=ff, 4=skyscraper, 5=geb, 6=twizzlers,
-(def app-cc-idx-seed 7)
+(def app-cc-idx-seed 0)
+(def app-cc-focus-idx app-cc-idx-seed)
 ;; yes, kind of a magic number, but at least it's not hard-coded everywhere.
 (def app-cc-idx-shift-factor -2)
 ;; Note: this will be overriden by global->top-scene->last-selected-idx upon a "soft" switch.
@@ -95,7 +98,24 @@
                                             :skyscrapers-scene
                                             :geb-cube-scene
                                             :twizzlers
-                                            :beat-club]})
+                                            :beat-club]
+                         :titles ["Frig-Frog", "Cube Spin", "Face Slot", "VRubik", "Skyscrapers", "GEB Cubes", "Twizzlers", "Beat Club"]
+                         :blurbs ["Multi-level Frogger Game",
+                                  "Projectiles ejected from a spinning cube.",
+                                  "Create different faces from eyes, nose, and mouth wheels."
+                                  "VR Rubiks Cube: An early stage prototype."
+                                  "Various skyscrapers models I created in Blender"
+                                  "Various GEB cubes like as presented on the cover of the book 'Godel, Escher, and Bach' from Douglas Hofstadter."
+                                  "A Blender model of the L'hemisferic from the City of Arts and Sciences in Valencia, Spain."
+                                  "Various Meshes synchronize to the music."]
+                         :details ["Publish Date: 07/29/2022"
+                                   "Publish Date: 07/01/2020"
+                                   "Publish Date: 07/28/2020"
+                                   "Publish Date: 08/26/2020"
+                                   "Publish Date: 02/12/2021"
+                                   "Publish Date: 09/14/2020"
+                                   "Publish Date: 07/14/2021"
+                                   "Publish Date: 09/04/2021"]})
 ;; tried to make this dynamic, but too hard-- just settle with making it static instead.
 ; (def n-choices (- 8 1))
 (def n-choices (count (:model-files app-carousel-parms)))
@@ -110,48 +130,11 @@
 (def left-thumbrest)
 (def y-btn)
 
-
 (def tmp-container)
 (def tmp-keep-assets)
 (defn tmp [db val]
   (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx [:globals :top-scene :last-selected-idx] app-cc-idx]))
 
-;; Note: defunct
-; (defn init-app-planes []
-;   (let [scene main-scene/scene
-;         n_apps 4
-;         ff-top-plane (bjs/MeshBuilder.CreatePlane "ff-top-plane"
-;                                         (clj->js {:width 3 :height 3
-;                                                   :sideOrientation bjs/Mesh.DOUBLESIDE})
-;                                         scene)
-;         cube-spin-plane (bjs/MeshBuilder.CreatePlane "cube-spin-plane"
-;                                               (clj->js {:width 3 :height 3
-;                                                         :sideOrientation bjs/Mesh.DOUBLESIDE})
-;                                               scene)
-;         face-slot-plane (bjs/MeshBuilder.CreatePlane "face-slot-plane"
-;                                               (clj->js {:width 3 :height 3
-;                                                         :sideOrientation bjs/Mesh.DOUBLESIDE})
-;                                               scene)
-;         vrubik-plane (bjs/MeshBuilder.CreatePlane "vrubik-plane"
-;                                   (clj->js {:width 3 :height 3
-;                                             :sideOrientation bjs/Mesh.DOUBLESIDE})
-;                                   scene)
-;         x-quat-90 (.normalize (bjs/Quaternion.RotationAxis bjs/Axis.X (* base/ONE-DEG 90)))]
-;     (set! (.-rotationQuaternion ff-top-plane) x-quat-90)
-;     (set! (.-rotationQuaternion cube-spin-plane) x-quat-90)
-;     (set! (.-rotationQuaternion face-slot-plane) x-quat-90)
-;     (set! (.-rotationQuaternion vrubik-plane) x-quat-90)
-;     (set! (.-isPickable ff-top-plane) true)
-;     (set! (.-isPickable cube-spin-plane) true)
-;     (set! (.-isPickable face-slot-plane) true)
-;     (set! (.-isPickable vrubik-plane) true)
-;
-;     (let [r (:radius app-carousel-parms)
-;           theta (/ (* 360 base/ONE-DEG) n_apps)]
-;       (prn "theta=" theta)
-;       (set! (.-position cube-spin-plane) (bjs/Vector3. (* r (js/Math.cos (* 1 theta))) 0 (+ (* r (js/Math.sin (* 1 theta))) r)))
-;       (set! (.-position face-slot-plane) (bjs/Vector3. (* r (js/Math.cos (* 2 theta))) 0 (+ (* r (js/Math.sin (* 2 theta))) r)))
-;       (set! (.-position vrubik-plane) (bjs/Vector3. (* r (js/Math.cos (* 4 theta))) 0 (+ (* r (js/Math.sin (* 4 theta))) r))))))
 (defn tmp-2 [val]
   (prn "top-scene.tmp-2: entered")
   (set! main-scene/env (bjs/EnvironmentHelper.
@@ -159,6 +142,65 @@
                            "createGround" false
                            "skyboxSize" 90)
                           main-scene/scene)))
+
+
+    ; var text1 = new BABYLON.GUI.TextBlock();
+    ; text1.text = "Hello world";
+    ; text1.color = "white";
+    ; text1.fontSize = 24;
+    ; advancedTexture.addControl(text1)));
+(defn create-samp-texture []
+  (let [scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "samp-plane" (js-obj "width" 6, "height" 4) scene)
+        ; dyn-texture (js/BABYLON.DynamicTexture. "samp-texture" (js-obj "width" 256 "height" 60) scene)
+        dyn-texture (bjs-gui/AdvancedDynamicTexture. "samp-texture" 1024 1024 scene)
+        samp-mat (js/BABYLON.StandardMaterial. "samp-mat" scene)
+        text-1 (bjs-gui/TextBlock. "text-1")
+        text-2 (bjs-gui/TextBlock. "text-2")]
+    (set! (.-position plane) (bjs/Vector3. 0 5.5 0))
+    (set! (.-material plane) samp-mat)
+    (set! (.-diffuseTexture samp-mat) dyn-texture)
+    ; (.drawText (-> plane .-material .-diffuseTexture) "Hello"
+    ;            50 50 "60px green" "white" "blue" true true)
+    ; ; (.drawText (-> plane .-material .-diffuseTexture) "San Jose")
+    ; (.drawText dyn-texture "San Jose"
+    ;            150 150 "bold 100px Arial" "white" "blue" true true)
+    (set! (.-text text-1) "Hello")
+    (set! (.-fontSize text-1) 100)
+    (set! (.-color text-1) "white")
+    (.addControl dyn-texture text-1)
+    (set! (.-text text-2) "San Jose")
+    (set! (.-fontSize text-2) 100)
+    (set! (.-color text-2) "white")
+    (set! (.-topInPixels text-2) 120)
+    (.addControl dyn-texture text-2)))
+
+(defn update-app-info-gui [adv-text idx]
+  (let [tb-1 (.getControlByName adv-text "tb-1")
+        tb-2 (.getControlByName adv-text "tb-2")
+        tb-3 (.getControlByName adv-text "tb-3")]
+    ; (set! (.-color tb-1)  "grey")
+    ; (set! (.-color tb-1) bjs/Color3.Black)
+    (set! (.-color tb-1) (bjs/Color3.FromHexString "A9A9A9"))
+    (set! (.-fontStyle tb-1) "bold")
+    (set! (.-fontSize tb-1) "160")
+    (set! (.-fontSize tb-2) "100")
+    (set! (.-text tb-1) (nth (:titles app-carousel-parms) idx))
+    (set! (.-text tb-2) (nth (:blurbs app-carousel-parms) idx))
+    (set! (.-text tb-3) (nth (:details app-carousel-parms) idx))))
+
+(defn load-app-info-gui []
+  (let [scene main-scene/scene
+        plane (bjs/MeshBuilder.CreatePlane "samp-plane" (js-obj "width" 7, "height" 4) scene)
+        ;  adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 1024 1024)
+        adv-text (bjs-gui/AdvancedDynamicTexture.CreateForMesh plane 1792 1024)]
+    ; (set! (.-position plane) (bjs/Vector3. 0 -2 0))
+    (set! (.-position plane) (bjs/Vector3. 0 6.0 1))
+    (set! app-info-adv-text adv-text)
+    (-> adv-text
+     (.parseFromURLAsync "guis/top_scene/app_info_gui.json")
+     ; (p/then #(update-app-info-gui adv-text app-cc-idx-seed))
+     (p/then #(update-app-info-gui adv-text app-cc-focus-idx)))))
 
 (defn ff-cube-loaded [meshes particle-systems skeletons anim-groups name user-cb]
   (println "ff-cube-loaded")
@@ -246,7 +288,10 @@
     (rf/dispatch [:cube-test.utils.choice-carousel.events/init-choice-carousel parms]))
   (let [last-idx (get-in db [:globals :top-scene :last-selected-idx])]
     (if last-idx
-      (set! app-cc-idx last-idx)
+      (do
+        (set! app-cc-idx last-idx)
+        (set! app-cc-focus-idx last-idx))
+      ;; else
       (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx [:globals :top-scene :last-selected-idx] app-cc-idx])))
   db)
 
@@ -262,6 +307,7 @@
                   delta-theta)]
       ; (.rotateAround m1 app-carousel-origin bjs/Axis.Y theta)
       (cc/rot-meshes (:app-ids app-carousel-parms) dir theta app-carousel-origin)))
+
 
 (defn animate-app-carousel [dir]
   (set! app-carousel-is-animating true)
@@ -363,7 +409,9 @@
         ; tweak-partial #()
         light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
         light2 (bjs/PointLight. "pointLight-2" (bjs/Vector3. 10 8 5) scene)
-        cam (utils/get-xr-camera)]
+        cam (utils/get-xr-camera)
+        ; hemi-light (bjs/HemisphericLight. "hemi-light" (bjs/Vector3. 1 1 -2) scene)
+        light-3 (bjs/PointLight. "pointLight-3" (bjs/Vector3. 1 1 -2) scene)]
     ; (set! (.-isVisible (.getMeshByID main-scene/scene "ground")) false)
     ; (set!  (.-isVisible (.getMeshByID main-scene/scene "BackgroundSkybox")) false)
     (when ground
@@ -389,6 +437,10 @@
     (prn "quat=" (bjs/Quaternion.FromEulerAngles 0.0 0.0 0.0))
     ; (init-scene-carousel)
     (rf/dispatch [:cube-test.top-scene.events/init-scene-carousel])
+    ; (load-samp-gui app-cc-idx-seed)
+    ; (load-samp-gui)
+    (load-app-info-gui)
+    ; (create-samp-texture)
     ; (rf/dispatch [:cube-test.top-scene.events/set-globals])
     db))
 
@@ -415,7 +467,6 @@
     (fps-panel/tick main-scene/engine))
   (.render main-scene/scene)
   (when app-carousel-is-animating
-    ;;TODO: add less than zero rounding so never go beyond theta-width
     (let [dt (/ (.getDeltaTime main-scene/engine) 1000)
           delta-theta (* (/ dt app-carousel-rot-duration) app-carousel-theta-width)]
         (rot-app-carousel app-carousel-rot-dir delta-theta)
@@ -426,7 +477,17 @@
           ; (prn "stub rotate=" (* base/ONE-DEG app-carousel-rot-remaining))
           ; (rot-app-carousel (if (= app-carousel-rot-dir :left) :right :left) app-carousel-rot-remaining)
           (rot-app-carousel app-carousel-rot-dir app-carousel-rot-remaining)
-          (set! app-carousel-is-animating false)))))
+          (set! app-carousel-is-animating false)
+          ;; update the focus index
+          ;; TODO this logic should probably be part of the cc class itself.
+          (if (= app-carousel-rot-dir :left)
+            (let [dec-idx (dec app-cc-focus-idx)]
+              (if (< dec-idx 0)
+                (set! app-cc-focus-idx (- n-choices 1))
+                (set! app-cc-focus-idx dec-idx)))
+            (let [inc-idx (mod (inc app-cc-focus-idx) n-choices)]
+              (set! app-cc-focus-idx inc-idx)))
+          (update-app-info-gui app-info-adv-text app-cc-focus-idx)))))
 
 
 (defn run-scene []
