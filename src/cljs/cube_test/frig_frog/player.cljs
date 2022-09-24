@@ -97,10 +97,14 @@
 
 
 (defn player-motion-ctrl-added [motion-ctrl]
+  (prn "player.player-motion-ctrl-added. motion-ctrl.handednes=" (.-handedness motion-ctrl))
+  ;; (js-debugger)
   (when (= (.-handedness motion-ctrl) "left")
     (set! player-left-thumbstick (.getComponent motion-ctrl "xr-standard-thumbstick"))))
 
 (defn ctrl-added [xr-ctrl]
+  (prn "player.ctrl-added: xr-ctrl=" xr-ctrl)
+  ;; (js-debugger)
   (-> xr-ctrl .-onMotionControllerInitObservable (.add player-motion-ctrl-added)))
 
 (defn play-move-snd []
@@ -121,11 +125,24 @@
                            main-scene/scene)))
 (defn init-player []
   (utils/disable-default-joystick-ctrl)
-  (let [xr-helper main-scene/xr-helper]
-    (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
-  ; (init-snd "sounds/frig_frog/plastic_swipe.ogg")
-  ; (init-snd "sounds/frig_frog/cloth_slide.ogg")
-  ; (init-snd "sounds/frig_frog/paper_slide.ogg")
+  ;; (let [xr-helper main-scene/xr-helper]
+  ;;   (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
+  ;; (let [xr-helper main-scene/xr-helper
+  ;;       input (.-input xr-helper)
+  ;;       ctrl (nth (.-controllers input) 0)
+  ;;       input-source (.-inputSource ctrl)]
+  ;;   ;; (ctrl-added ctrl)
+  ;;   (player-motion-ctrl-added input-source))
+  ;; (let [])
+  ;; (if cube-test.top-scene.top-scene.left-ctrl
+  ;;    (player-motion-ctrl-added))
+  (if-let [left-ctrl cube-test.top-scene.top-scene.left-ctrl]
+     ;; e.g a soft-init - use the ctrl as setup by top-scene
+     (player-motion-ctrl-added left-ctrl)
+     ;;else -- do it the old fashioned way and set up everything ourselves
+     (let [xr-helper main-scene/xr-helper]
+        (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added))))
+
   (init-snd {:move-snd-file "sounds/frig_frog/paper_slide.ogg"
              :hit-snd-file "sounds/frig_frog/wipeout.ogg"}))
 

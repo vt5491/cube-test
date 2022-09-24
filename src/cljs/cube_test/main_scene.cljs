@@ -60,6 +60,7 @@
 (def adv-texture)
 (def top-level-scene-init)
 (def a-btn)
+(def b-btn)
 (def main-gui-adv-text)
 
 ;; we have to pre-declare scene because it's defined with 'init' as a defonce.
@@ -199,7 +200,8 @@
   ;; note: this needs to be called by the client scene, since the cleanup-fn is different
   ;; for each scene.
   ;; Here we set it up with a null release so we can get access to buttons like 'reset camera'
-  (load-main-gui #())
+  ;; Note: now done in top-scene, so it gets called upon soft restarts.
+  ; (load-main-gui #())
   (if (= xr-mode "vr")
     (do
       (println "now setting up vr")
@@ -360,7 +362,8 @@
   (when (= (.-handedness motion-ctrl) "right")
     ; (js-debugger)
     ; (set! left-thumbrest (.getComponent motion-ctrl "thumbrest"))
-    (set! a-btn (.getComponent motion-ctrl "a-button"))))
+    (set! a-btn (.getComponent motion-ctrl "a-button"))
+    (set! b-btn (.getComponent motion-ctrl "b-button"))))
 
 (defn ctrl-added [xr-ctrl]
   (-> xr-ctrl .-onMotionControllerInitObservable (.add motion-ctrl-added)))
@@ -388,6 +391,10 @@
       (if (not (.isEnabled main-gui-plane))
         (.setEnabled main-gui-plane true)
         (.setEnabled main-gui-plane false)))))
+
+(defn b-btn-handler []
+  (when (.-hasChanges b-btn)
+    (set! (.-position camera) camera-init-pos)))
 
 (defn main-gui-loaded [cleanup-fn]
   (prn "main-gui-loaded: main-gui-adv-text=" main-gui-adv-text)
@@ -445,4 +452,6 @@
 (defn tick []
   (when (= xr-mode "xr")
     (when (and a-btn (.-pressed a-btn))
-      (a-btn-handler))))
+      (a-btn-handler))
+    (when (and b-btn (.-pressed b-btn))
+      (b-btn-handler))))

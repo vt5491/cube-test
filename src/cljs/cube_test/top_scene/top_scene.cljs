@@ -30,7 +30,7 @@
 (def default-db
   {:top-scene-abc 7})
 
-;; steps to "top-scene-izing" a sub-scene:
+;; steps to  "top-scene-izing" a sub-scene:
 ;; 1. create a release function in the subscene.  Something like:
 ;;(defn release []
 ;; (prn "twizzlers.release: entered"))
@@ -53,7 +53,7 @@
 
 ;; top-selectable scenes 7(beat-club),6(twizzlers), 5(geb), 4(skyscrapers), 3(vrubik), 2(face-slot), 1(cube-spin)
 ; 0=ff, 4=skyscraper, 5=geb, 6=twizzlers,
-(def app-cc-idx-seed 0)
+(def app-cc-idx-seed 6)
 (def app-cc-focus-idx app-cc-idx-seed)
 ;; yes, kind of a magic number, but at least it's not hard-coded everywhere.
 (def app-cc-idx-shift-factor -2)
@@ -128,6 +128,7 @@
 (def app-carousel-rot-duration 1)
 
 (def left-thumbrest)
+(def left-ctrl)
 (def y-btn)
 
 (def tmp-container)
@@ -219,34 +220,6 @@
                file
                main-scene/scene
                #(ff-cube-loaded %1 %2 %3 %4 name user-cb)))
-
-; (defn model-loaded [root-prfx scale meshes particle-systems skeletons anim-groups name user-cb])
-;; following 2 defunct: replaced by cc/choice-model-loaded
-; (defn model-loaded [user-parms meshes particle-systems skeletons anim-groups name user-cb]
-;   (println "model-loaded")
-;   (let [root-prfx (:root-prfx user-parms)
-;         scale (:scale user-parms)
-;         delta-pos (:delta-pos user-parms)]
-;     (doall (map #(do
-;                    ; (prn "model-loaded: id %1=" (.-id %1) ",root-prfx=" root-prfx)
-;                    (when (re-matches #"__root__" (.-id %1))
-;                          ; (set! (.-name %1) name)
-;                          ; (set! (.-id %1) name)
-;                          ; (set! (.-name %1) "root")
-;                          ; (set! (.-id %1) "root")
-;                          (set! (.-name %1) root-prfx)
-;                          (set! (.-id %1) root-prfx)
-;                          (.scaleInPlace (.-scaling %1) scale)
-;                          (when delta-pos
-;                            (set! (.-position %1) (.add (.-position %1) delta-pos)))))
-;                 meshes))))
-;
-; (defn load-model [path file name user-cb]
-;   (.ImportMesh bjs/SceneLoader ""
-;                path
-;                file
-;                main-scene/scene
-;                user-cb))
 
 (defn app-selected [magic-idx-shift n-choices]
   (prn "top-scene:app-selected entered: app-cc-idx=" app-cc-idx ",magic-idx-shift=" magic-idx-shift ",n-choicse=" n-choices)
@@ -356,6 +329,7 @@
 (defn motion-ctrl-added [motion-ctrl]
   (when (= (.-handedness motion-ctrl) "left")
     ; (js-debugger)
+    (set! left-ctrl motion-ctrl)
     ; (set! left-thumbrest (.getComponent motion-ctrl "thumbrest"))
     (set! y-btn (.getComponent motion-ctrl "y-button"))))
 
@@ -440,6 +414,7 @@
     ; (load-samp-gui app-cc-idx-seed)
     ; (load-samp-gui)
     (load-app-info-gui)
+    (main-scene/load-main-gui #())
     ; (create-samp-texture)
     ; (rf/dispatch [:cube-test.top-scene.events/set-globals])
     db))

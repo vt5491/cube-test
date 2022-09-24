@@ -100,7 +100,10 @@
           tf (.getEnabledFeature fm bjs/WebXRFeatureName.TELEPORTATION)]
         ;; basically turn off the default rotation, so we can override at the scene/game level
         ; (prn "utils.ddjc b")
-        (.detach tf)
+        ;; by not having a detach and only zeroing out the rotationAngle, we can at least
+        ;; use the joystick of the right controller to do a teleport and thus get a ray pointer.
+        ;; Kind of a hack, but good enough for now.
+        ; (.detach tf)
         (set! (.-rotationAngle tf) 0))))
 
 ;; Every scene may need to potentially alter the xr camera, so we supply

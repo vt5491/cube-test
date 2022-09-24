@@ -489,14 +489,18 @@
     (init-balls)
     (ff.tile/init)
     (init-snd)
-    (main-scene/load-main-gui release)
+    (main-scene/load-main-gui release)))
     ;;vt-x
-    (let [xr-helper main-scene/xr-helper
-          fm (-> xr-helper (.-baseExperience) (.-featuresManager))]
-     ;; (.enableFeature fm "xr-controller-pointer-selection")
-    ;;  (.enableFeature fm bjs/WebXRFeatureName.TELEPORTATION)
-     (.attachFeature fm bjs/WebXRFeatureName.TELEPORTATION))))
+    ;; (let [xr-helper main-scene/xr-helper
+    ;;       fm (-> xr-helper (.-baseExperience) (.-featuresManager))]
+    ;;  (.attachFeature fm bjs/WebXRFeatureName.TELEPORTATION))))
     ;;  (.enableFeature fm bjs/WebXRFeatureName.POINTER_SELECTION))))
+    ;;vt-x end
+    ;; (let [grnd (.getMeshByID main-scene/scene "ground")]
+    ;;   (when grnd
+    ;;     (.setEnabled grnd true)
+    ;;     (set! (.-isVisible grnd) true)))))
+
       
 
 
@@ -505,4 +509,5 @@
   (when-let [spin-cube (.getMeshByID main-scene/scene "spin_cube")]
     (let [rot (.-rotation spin-cube)]
       (set! (.-rotation spin-cube)(bjs/Vector3. (.-x rot) (+ (.-y rot) (* base/ONE-DEG 0.5) (.-z rot))))))
-  (ff.rules/tick))
+  (ff.rules/tick)
+  (main-scene/tick))
