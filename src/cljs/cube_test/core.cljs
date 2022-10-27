@@ -35,6 +35,7 @@
    [cube-test.twizzlers.events]
    [cube-test.utils.events]
    ; [cube-test.top-scene.events]
+   ; [cube-test.tmp-scene.events]
    ;; workers
    [cljs-workers.core :as main]
    [cljs-workers.worker :as worker]

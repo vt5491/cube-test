@@ -15,7 +15,8 @@
    ; [cube-test.top-scene.events :as top-scene-events]
    [cube-test.frig-frog.game :as ff.game]
    [cube-test.top-scene.top-scene :as top-scene]
-   [cube-test.top-scene.events :as top-scene-events]))
+   [cube-test.top-scene.events :as top-scene-events]
+   [cube-test.tmp-scene.events :as tmp-scene-events]))
 
 (declare render-loop)
 (def soft-switch false)
@@ -34,18 +35,18 @@
    ; (condp = base/top-level-scene)
    (condp = top-level-scene
      :cube-spin-scene (do
-                         (println "top-level-scene=cube-spin-scene")
-                         ; (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-cube-spin-scene]))])
-                         ; (re-frame/dispatch [:init-cube-fx])
-                         ; (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                         ; (re-frame/dispatch [:run-cube-spin-scene])
-                         (let [soft-init-seq #(do
-                                                (re-frame/dispatch [:init-cube-spin-scene])
-                                                (re-frame/dispatch [:init-cube-fx])
-                                                (re-frame/dispatch [:init-fps-panel main-scene/scene])
-                                                (re-frame/dispatch [:run-cube-spin-scene]))
-                               full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
-                          (init-applicable-dispatch full-init-seq soft-init-seq)))
+                         (println "top-level-scene=cube-spin-scene"
+                             ; (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-cube-spin-scene]))])
+                             ; (re-frame/dispatch [:init-cube-fx])
+                             ; (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                             ; (re-frame/dispatch [:run-cube-spin-scene])
+                             (let [soft-init-seq #(do
+                                                    (re-frame/dispatch [:init-cube-spin-scene])
+                                                    (re-frame/dispatch [:init-cube-fx])
+                                                    (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                                                    (re-frame/dispatch [:run-cube-spin-scene]))
+                                   full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
+                              (init-applicable-dispatch full-init-seq soft-init-seq))))
      :face-slot-scene (do
                          (println "top-level-scene= face-slot-scene")
                          ; (re-frame/dispatch [:init-main-scene (fn [] (re-frame/dispatch [:init-face-slot-scene]))])
@@ -145,7 +146,6 @@
      :frig-frog (do
                    (let [soft-init-seq
                             #(do
-                                    (re-frame/dispatch [::frig-frog-events/init-game-db ff.game/default-game-db])
                                     (re-frame/dispatch [::frig-frog-events/init-rules])
                                     (re-frame/dispatch [::frig-frog-events/init-game])
                                     (re-frame/dispatch [:init-fps-panel main-scene/scene])
@@ -191,7 +191,18 @@
                                                (re-frame/dispatch [:init-fps-panel main-scene/scene])
                                                (re-frame/dispatch [::top-scene-events/run-scene]))
                          full-dispatch #(re-frame/dispatch [:init-main-scene support-dispatch])]
-                     (init-applicable-dispatch full-dispatch support-dispatch))))))
+                     (init-applicable-dispatch full-dispatch support-dispatch)))
+     :tmp-scene (do
+                      (println "top-level-scene= tmp-scene")
+                      (let [soft-init-seq #(do
+                                             ; (re-frame/dispatch [::tmp-scene-events.init-tmp-scene])
+                                             ; (re-frame/dispatch [:cube-test.tmp-scene.events/init-tmp-scene])
+                                             (cube-test.tmp-scene.scene/init)
+                                             ; (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                                             ; (re-frame/dispatch [::tmp-scene-events/run-tmp-scene])
+                                             (cube-test.tmp-scene.scene/run-scene))
+                            full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
+                        (init-applicable-dispatch full-init-seq soft-init-seq))))))
 
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)

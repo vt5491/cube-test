@@ -1,4 +1,4 @@
-;; events is refer to many
+;; events  refer to many
 (ns cube-test.events
   (:require
    [re-frame.core :refer [reg-event-db reg-event-fx reg-fx after] :as re-frame]
@@ -28,7 +28,8 @@
    [cube-test.msg-cube.data.msg :as msg-cube.msg]
    [cube-test.msg-cube.spec.db :as msg-cube.spec]
    [cube-test.twizzlers.game :as twizzlers.game]
-   [cube-test.utils.common :as common]))
+   [cube-test.utils.common :as common]
+   [cube-test.tmp-scene.scene :as tmp-scene]))
    ; [cube-test.worker :as worker]))
 
 ;;
