@@ -99,7 +99,8 @@
 ; (defn soft-switch-app
 ;   ([top-level-scene] (soft-switch-app top-level-scene nil))
 ;   ([top-level-scene cleanup]))
-; (defn soft-switch-app [top-level-scene])
+;  (defn soft-switch-app [top-level-scene])
+
 (defn soft-switch-app
   ([top-level-scene] (soft-switch-app top-level-scene nil))
   ([top-level-scene release-fn]

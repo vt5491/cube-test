@@ -26,7 +26,7 @@
 (def env)
 (def camera)
 (def camera-rig)
-; (def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
+;(def camera-init-pos (js/BABYLON.Vector3. 0 4 -15))
 (def camera-init-pos (js/BABYLON.Vector3. 0 0 -5))
 (def ^:dynamic *camera-init-pos* (atom {:x 0, :y 4, :z -7}))
 ; (def ^:dynamic *camera-init-pos* (atom {:x 58.6, :y 7.9, :z 12.7}))

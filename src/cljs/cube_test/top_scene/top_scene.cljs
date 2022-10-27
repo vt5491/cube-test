@@ -52,7 +52,7 @@
 ;     (set! (.-isVisible grnd) true)))
 
 ;; top-selectable scenes 7(beat-club),6(twizzlers), 5(geb), 4(skyscrapers), 3(vrubik), 2(face-slot), 1(cube-spin)
-; 0=ff, 4=skyscraper, 5=geb, 6=twizzlers,
+;  0=ff, 4=skyscraper, 5=geb, 6=twizzlers,
 (def app-cc-idx-seed 6)
 (def app-cc-focus-idx app-cc-idx-seed)
 ;; yes, kind of a magic number, but at least it's not hard-coded everywhere.
