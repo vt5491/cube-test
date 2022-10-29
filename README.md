@@ -1,5 +1,51 @@
 # cube-test
 
+An example of some VR "games" written in Clojurescript and Babylon.js.  I have quotes around "games" because most are just simple scenes, that is to say more like prototypes of some ideas for fuller games or simulations.  After attempting to write a few "real" games, and realizing how hard it is, and feeling the need to get in some more quick iterations of the game writing process (to get more feedback and avoid getting bogged down in a single scene), I decided to just create a project where I would metaphorically start with a simple cube on a plane, the archetypal VR "hello world" program, and then try to expand it in the smallest possible way possible and hope to actually complete something.  Thus the name "cube-test".
+
+If you want to try it out you can run it directly off github pages [here](https://vt5491.github.io/cube-test/resources/public/index.prod.html) .
+
+![opening shot](images/2022/10/opening-shot.png)
+
+### How to use
+1.  Click on the "Enter VR" icon in the lower left corner to enter VR.  You can do a certain amount without entering VR, but this is really intended to be a pure VR app.
+2. You can move around using standard Babylon.js teleportation buttons, or by pressing the left grip button and then flinging and releasing to get more of a flying motion (hard to describe, but easy once you get it).    Note: this is using an oculus rift controller as a reference, but it should work with other controllers as well.
+3. Click on the arrows to rotate the "choice carousel" and then select the desired sub-scene.  Note: if you ever lose the "vr selection ray", just click on the floor and it should reemerge.
+4. The right "A button" can be used to bring up a menu to allow you to return to the top-scene if you are in a sub-scene.
+
+![return](images/2022/10/return.png)
+
+5.  The buttons at the bottom are just left-overs from development.
+
+
+## Development Notes
+The main thing about this project is it serves as a useful reference (at least to me) for how to do certain things in Babylon and clojurescript.  I'm always forgetting the details of how to load a model from blender, or do a map in clojure etc., so I just search on this project from git bash with something like:
+
+```
+vturner2@LAPTOP-F0QM306P MINGW64 /d/vtstuff_d/github/cube-test/src (master)  
+$ find . -name "*.clj[cs]*" | xargs grep -i "load-model"  
+
+```
+and then I can find examples of how I did it before.
+
+The directory structure is becoming quite elaborate, as I get more opinionated about how things should be.  That's the beauty of having multiple scenes in one project -- you don't think of a lot of things when there's just a single scene.  I have a main-scene (common to all scenes), and then scenes at the app level, and main-game, and an app-level game object.  I have 'cljs' and 'cljc' files as necessary and each sub-scene has it's own private directory and typically has it's own view, events, subs, rules, and db files.
+
+I use re-frame as my main app engine.  When I first used re-frame, I didn't really exploit a reactive design. Once I started to understand reactive apps (about how you update the db to trigger an indirect update in a separate concern), I Unfortunately discovered that re-frame is interactive but not real-time.  That is to say re-frame events take on the order of 200ms which is about 10 ticks (at 60 fps) and it's uninterruptable. This might be acceptable in a web app (an interactive app), but is unacceptable in a game (a real-time app), causing a noticeable jerk in any real-time action that may be going on.
+
+To get around this, I first experimented using web workers, which does address the problem, but has a pretty high overhead to using.  I then tried [o'doyle rules](https://github.com/oakes/odoyle-rules) which worked better and appears to be real-time.  You can see examples of both of these methods in the code base if you're motivated enough to search for them.
+
+## Creating a production build
+This is really more just a note for me, the developer.  I normally develop with:
+```
+lein.bat dev
+```
+However, to create a production build do:
+```
+lein.bat prod
+```
+This creates a file 'cube-test/resources/public/js/compiled/app.js'.  Copy this file to 'app.prod.js' in the same directory and then upload to the git repo.  After a couple of minutes (you may need to clear your cache) you should get an updated module at 'https://vt5491.github.io/cube-test/resources/public/index.prod.html'
+
+## Original README notes (from the default re-frame project)...
+
 A [re-frame](https://github.com/day8/re-frame) application designed to ... well, that part is up to
 you.
 
