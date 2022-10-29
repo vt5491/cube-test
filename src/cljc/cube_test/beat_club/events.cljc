@@ -172,7 +172,8 @@
   ::load-intervals
   (fn [db _]
     (ajax/GET
-      "https://localhost:8281/sounds/rock_candy_intervals.txt"
+      ;; "https://localhost:8281/sounds/rock_candy_intervals.txt"
+      "sounds/rock_candy_intervals.txt"
       {:handler       #(re-frame/dispatch [::process-intervals-json %1 db])
        :error-handler #(re-frame/dispatch [::bad-response %1])})
 
@@ -207,7 +208,8 @@
      ;; else
      (do
        (prn "full-twitch-seq: path b")
-       (beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)
+      ;;  (beat-club.scene/load-mp3 "rock-candy" "https://localhost:8281/sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)
+       (beat-club.scene/load-mp3 "rock-candy" "sounds/music_tracks/montrose-rock-candy.mp3" beat-club.scene/mp3-loaded)
        (beat-club.scene/create-drum-twitches)
        {:db (:db cofx)
         :fx [
