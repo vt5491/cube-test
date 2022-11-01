@@ -9,7 +9,6 @@
      [cube-test.base :as base]
      [cube-test.utils :as utils]
      [cube-test.frig-frog.player :as ff.player]))
-     ; [cube-test.frig-frog.events :as events]))
 
 (def jumped)
 (def frog-left-thumbstick)
@@ -31,10 +30,6 @@
   (when (= main-scene/xr-mode "xr")
     (utils/disable-default-joystick-ctrl)
     (let [xr-helper main-scene/xr-helper]
-        ;   fm (-> xr-helper (.-baseExperience) (.-featuresManager))
-        ;   tf (.getEnabledFeature fm bjs/WebXRFeatureName.TELEPORTATION)]
-        ; ;; basically turn off the default rotation, so we can override at the frog level
-        ; (set! (.-rotationAngle tf) 0)
         ;; override the enter-xr event locally, so we can customize for just this game.
         (-> xr-helper (.-baseExperience) (.-onStateChangedObservable)
             (.add #(do

@@ -22,7 +22,8 @@
                  [funcool/promesa "5.1.0"]
                  ;;vt add
                  [cljstache "2.0.6"]
-                 [net.sekao/odoyle-rules "0.8.0"]
+                 ; [net.sekao/odoyle-rules "0.8.0"]
+                 [net.sekao/odoyle-rules "1.0.0"]
                  [cljs-ajax "0.8.3"]
                  [day8.re-frame/http-fx "0.2.3"]
                  ; [org.clojure/math.numeric-tower "0.0.4"]]

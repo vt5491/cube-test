@@ -22,19 +22,14 @@
 
 ;; absolute move.
 (defn move-player-to
-  ; ([mesh-id x y]  (move-player-to mesh-id x cube-test.frig-frog.board/board-height y))
   ([mesh-id x y]  (let [prfx (-> (re-matches #"^(.*)-.*" mesh-id) second)]
-                    ; (prn "player.move-player-to: prfx=" prfx)
                     (case prfx
                       "top" (move-player-to mesh-id x (:top cube-test.frig-frog.board/board-heights) y)
                       "btm" (move-player-to mesh-id x (:btm cube-test.frig-frog.board/board-heights) y)
-                      ; "btm" (move-player-to mesh-id x 0 y)
-                      ; nil   (move-player-to mesh-id x cube-test.frig-frog.board/board-height y)
                       nil   (move-player-to mesh-id x 0 y))))
   ;; note: with 3-d we use the bjs actual x,y,z not pretend "y" coordinates when only using 2
   ([mesh-id x y z]
    (let [scene main-scene/scene
-         ; mesh (or (.getMeshByID scene "player") (bjs/MeshBuilder.CreateCylinder. "player" (js-obj "tessellation" 6 "height" 0.7) scene))
          mesh (or (.getMeshByID scene mesh-id) (bjs/MeshBuilder.CreateCylinder. mesh-id (js-obj "tessellation" 6 "height" 0.7) scene))]
      (set! (.-position mesh) (bjs/Vector3. x y z)))))
 
@@ -56,28 +51,21 @@
     :cube-test.frig-frog.rules/btm-player (set! btm-player-jumped bool)))
 
 (defn jump-player-ctrl [id x-val y-val]
-    ; (prn "player.jump-player-ctrl: id=" id)
-  ; (let [player-jumped jumped])
   (cond
     (and (> y-val 0.5) (not (get-jumped id)))
     (do
-      ; (set! player-jumped true)
       (set-jumped id true)
       (cube-test.frig-frog.rules.player-move-tile-delta id 0 -1))
     (and (< y-val -0.5) (not (get-jumped id)))
     (do
-      ; (set! player-jumped true)
       (set-jumped id true)
-      ; (re-frame/dispatch [:cube-test.frig-frog.events/jump-frog 1 0])
       (cube-test.frig-frog.rules.player-move-tile-delta id 0 1))
     (and (> x-val 0.5) (not (get-jumped id)))
     (do
-      ; (set! player-jumped true)
       (set-jumped id true)
       (cube-test.frig-frog.rules.player-move-tile-delta id 1 0))
     (and (< x-val -0.5) (not (get-jumped id)))
     (do
-      ; (set! player-jumped true)
       (set-jumped id true)
       (cube-test.frig-frog.rules.player-move-tile-delta id -1 0))))
 
@@ -90,7 +78,6 @@
         (jump-player-ctrl :cube-test.frig-frog.rules/top-player x y)
         (jump-player-ctrl :cube-test.frig-frog.rules/btm-player x y))
       :else
-      ; (set! jumped false)
       (do
         (set-jumped :cube-test.frig-frog.rules/btm-player false)
         (set-jumped :cube-test.frig-frog.rules/top-player false)))))
@@ -98,13 +85,11 @@
 
 (defn player-motion-ctrl-added [motion-ctrl]
   (prn "player.player-motion-ctrl-added. motion-ctrl.handednes=" (.-handedness motion-ctrl))
-  ;; (js-debugger)
   (when (= (.-handedness motion-ctrl) "left")
     (set! player-left-thumbstick (.getComponent motion-ctrl "xr-standard-thumbstick"))))
 
 (defn ctrl-added [xr-ctrl]
   (prn "player.ctrl-added: xr-ctrl=" xr-ctrl)
-  ;; (js-debugger)
   (-> xr-ctrl .-onMotionControllerInitObservable (.add player-motion-ctrl-added)))
 
 (defn play-move-snd []
@@ -125,17 +110,6 @@
                            main-scene/scene)))
 (defn init-player []
   (utils/disable-default-joystick-ctrl)
-  ;; (let [xr-helper main-scene/xr-helper]
-  ;;   (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
-  ;; (let [xr-helper main-scene/xr-helper
-  ;;       input (.-input xr-helper)
-  ;;       ctrl (nth (.-controllers input) 0)
-  ;;       input-source (.-inputSource ctrl)]
-  ;;   ;; (ctrl-added ctrl)
-  ;;   (player-motion-ctrl-added input-source))
-  ;; (let [])
-  ;; (if cube-test.top-scene.top-scene.left-ctrl
-  ;;    (player-motion-ctrl-added))
   (if-let [left-ctrl cube-test.top-scene.top-scene.left-ctrl]
      ;; e.g a soft-init - use the ctrl as setup by top-scene
      (player-motion-ctrl-added left-ctrl)
@@ -149,9 +123,6 @@
 (defn ^:export tick []
   ;; Note: accessing the vr/xr controller has to be "on the tick".  It's simply not
   ;; available if you're not in full vr mode (hit the vr button *and* have the headset on)
-  ; (when (= main-scene/xr-mode "vr")
-  ;   (when-let [l-ctrl (.-leftController main-scene/camera)]
-  ;     (jump-frog-ctrl (.-x l-ctrl) (.-y l-ctrl))))
   (when (= main-scene/xr-mode "xr")
     (when (and player-left-thumbstick (.-hasChanges player-left-thumbstick))
       (let [axes (.-axes player-left-thumbstick)]

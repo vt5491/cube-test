@@ -7,7 +7,7 @@ If you want to try it out you can run it directly off github pages [here](https:
 ![opening shot](images/2022/10/opening-shot.png)
 
 ### How to use
-1.  Click on the "Enter VR" icon in the lower left corner to enter VR.  You can do a certain amount without entering VR, but this is really intended to be a pure VR app.
+1.  Click on the "Enter VR" icon in the lower right corner to enter VR.  You can do a certain amount without entering VR, but this is really intended to be a pure VR app.
 2. You can move around using standard Babylon.js teleportation buttons, or by pressing the left grip button and then flinging and releasing to get more of a flying motion (hard to describe, but easy once you get it).    Note: this is using an oculus rift controller as a reference, but it should work with other controllers as well.
 3. Click on the arrows to rotate the "choice carousel" and then select the desired sub-scene.  Note: if you ever lose the "vr selection ray", just click on the floor and it should reemerge.
 4. The right "A button" can be used to bring up a menu to allow you to return to the top-scene if you are in a sub-scene.

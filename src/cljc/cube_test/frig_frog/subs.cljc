@@ -76,31 +76,19 @@
 ;;
 ;; computations
 ;;
-; (reg-sub
-;  :board-changed-0
-;  :<- [:get-board]
-;  (fn [db query-v]))
 
 (defn board-changed [board query-v prfx]
-  ; (prn "subs.board-changed: query-v=" query-v)
-  ; (prn "subs.board-changed: board=" board)
-  ;(js-debugger)
   (when (and board (not (empty? board)))
     (let [prfx (-> query-v second (:prfx))
           last-board (ff-board/get-last-board prfx)
-          ; diff-full (clj-data/diff board @*last-board*)
           diff-full (clj-data/diff board @last-board)
           diff-a (first diff-full)
           diff-b (second diff-full)
           diff-c (nth diff-full 2)]
-      ; (prn "prfx=" prfx)
-      ; (let [[row0 row1 row2 ] diff-a
-      ;             (let [changed-tiles (filter some? diff-a)])])
       (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
         (doseq [{:keys [row col abc state]} tile-deltas]
           (rf/dispatch [::ff-events/draw-tile row col prfx])))
       ;;TODO: have a last-btm-board, last-top-board?
-      ; (swap! *last-board* (fn [x] board))
       (swap! last-board (fn [x] board)))))
 
 (reg-sub
@@ -112,17 +100,6 @@
  :top-board-changed
  :<- [:get-top-board]
  board-changed)
- ; (fn [board query-v]
- ;   (let [diff-full (clj-data/diff board @*last-board*)
- ;         diff-a (first diff-full)
- ;         diff-b (second diff-full)
- ;         diff-c (nth diff-full 2)]
- ;     (let [[row0 row1 row2 ] diff-a]
- ;          (let [changed-tiles (filter some? diff-a)]))
- ;     (let [tile-deltas (ff-board/parse-delta-2 diff-a)]
- ;       (doseq [{:keys [row col abc state]} tile-deltas]
- ;         (rf/dispatch [::ff-events/draw-tile row col]))))
- ;   (swap! *last-board* (fn [x] board))))
 
 (reg-sub
  :frog-changed
@@ -174,22 +151,12 @@
          diff-diff-a (first (clj-data/diff diff-a diff-b))
          ;; this gives the diff upon a drop
          ;; e.g drop n=2 (third element) gives:
-         ; [nil nil {:init-row 5, :vx 1, :init-col 0, :id :tr-2, :length 2} nil {:init-row 4, :vx -1, :vy 0, :init-col 7, :id :tr-1, :length 1}]
          diff-diff-b (second (clj-data/diff diff-a diff-b))]
-        ; (prn "trains-changed: diff-full=" diff-full)
-        ; (prn "trains-changed: diff-a=" diff-a)
-        ; (prn "trains-changed: diff-b=" diff-b)
-        ; (prn "cnt new-trains=" (count trains) ", cnt last-trains=" (count @*last-trains*))
-        ; (prn "trains-changed: diff-diff-a=" diff-diff-a)
-        ; (prn "trains-changed: diff-diff-b=" diff-diff-b)
-        ; (prn (filter (fn [x] (even? x)) [4 5 6 7 8]))
-        ; (prn (map (fn [x] (prn "x=" x)) [4 5 6]))
         (when (> (count trains) (count @*last-trains*))
           (when diff-a
             (do
               ;; add-zone
               (doall (map #(when %1
-                             ; (prn "%1=" %1)
                              (rf/dispatch [::ff-events/add-train-mesh %1]))
                            diff-a)))))
         (when (< (count trains) (count @*last-trains*))
@@ -210,7 +177,6 @@
  :quanta-width-changed
  :<- [:get-quanta-width]
  (fn [quanta-width query-v]
-   ; (prn "quanta width has changed")
    (rf/dispatch [::ff-events/update-quanta-width quanta-width])))
 
 (reg-sub

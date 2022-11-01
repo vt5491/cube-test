@@ -219,7 +219,6 @@
 (rf/reg-event-fx
  ::update-quanta-width
  (fn [cofx [_ new-quanta-width]]
-   ; (prn "events: updating quanta-width to" new-quanta-width)
    (set! ff.game/quanta-width new-quanta-width)
    {
     :db (:db cofx)}))
@@ -291,15 +290,6 @@
    {
      :db (:db cofx)}))
 
-; (rf/reg-event-fx
-;  ::init-view
-;  (fn [cofx [_ rot-delta]]
-;    (if rot-delta
-;      (ff.scene-l1/init-view rot-delta)
-;      (ff.scene-l1/init-view))
-;    {
-;      :db (:db cofx)}))
-
 (rf/reg-event-fx
  ::reset-view
  (fn [cofx [_]]
@@ -328,7 +318,6 @@
 (rf/reg-event-fx
  ::draw-tile
  (fn [cofx [_ pos-x pos-y prfx]]
-   ; (prn "events.draw-tile. prfx=" prfx)
    (ff.tile/draw prfx pos-x pos-y)
    {
     :db (:db cofx)}))

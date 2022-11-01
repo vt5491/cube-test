@@ -29,7 +29,6 @@
 (def cam-gui-adv-text)
 (def ball-moving false)
 (def intro-snd)
-; (def player-move-snd)
 
 (defn init-non-vr-view
   ([] (init-non-vr-view 180))
@@ -55,50 +54,23 @@
                                       1))]
       (set! (.-position vrHelper) (.add (.-position vrHelper) pos-delta)))))
 
-;; ".currentVRCamera" is supposed to return the vr or non-vr camera depending on the mode,
-;; but I find it doesn't work. So you have to distinguish the use cases yourself.
-;; Note: solution is to set position on the vrHelper itself
-;; Note: now in utils/tweak-xr-view
-; (defn init-view
-;   ([state] (init-view state 180))
-;   ([state delta-rot]
-;    (prn "ff.frog.scene_l1: init view entered,state=" state)
-;    (when (= state bjs/WebXRState.IN_XR)
-;      (let [
-;            ; camera main-scene/camera
-;            ; vrHelper main-scene/vrHelper
-;            ; xrHelper main-scene/xr-helper
-;            ;; this is a floating value that covers both vr and non-vr cameras
-;            current-cam (.-activeCamera main-scene/scene)
-;            quat-delta (bjs/Quaternion.RotationYawPitchRoll (* base/ONE-DEG delta-rot) 0 0)
-;            pos-delta (bjs/Vector3. 0 0 (if (neg? delta-rot)
-;                                          -1
-;                                          1))
-;            x-rot (-> current-cam (.-rotation) (.-x))
-;            y-rot (-> current-cam (.-rotation) (.-y))
-;            delta-rot-rads (-> (bjs/Angle.FromDegrees delta-rot) (.radians))
-;            unit-circ (bjs/Vector3. (js/Math.sin (+ y-rot delta-rot-rads)) 0 (js/Math.cos (+ y-rot delta-rot-rads)))
-;            new-tgt (.add (.-position current-cam) unit-circ)]
-;         (.setTarget current-cam new-tgt)
-;         (set! (.-rotation current-cam) (bjs/Vector3. (* 20 base/ONE-DEG) 0 0))))))
-
 (defn create-tiled-box []
-  (let [scene main-scene/scene
-        mat (bjs/StandardMaterial. "arrows-mat")
-        cols 6
-        rows 1
-        face-uv (map (fn [i] (bjs/Vector4. (/ i cols) 0 (/ (+ i 1) cols) (/ 1 rows))) (range 6))
-        opts (clj->js {:pattern "bjs/Mesh.FLIP_N_ROTATE_ROW"
-                       ; :faceUV face-uv
-                       :width 29
-                       :height 49
-                       :depth 29
-                       :tileSize 5
-                       :tileWidth 5
-                       :sideOrientation bjs/Mesh.DOUBLESIDE})
-        tile-box (bjs/MeshBuilder.CreateBox "tile-box-2" opts scene)]
-      (set! (.-material tile-box) mat)
-      (set! (.-diffuseTexture mat) (bjs/Texture. "textures/geb_cube_wood.jpg"))))
+ (let [scene main-scene/scene
+       mat (bjs/StandardMaterial. "arrows-mat")
+       cols 6
+       rows 1
+       face-uv (map (fn [i] (bjs/Vector4. (/ i cols) 0 (/ (+ i 1) cols) (/ 1 rows))) (range 6))
+       opts (clj->js {:pattern "bjs/Mesh.FLIP_N_ROTATE_ROW"
+                      ; :faceUV face-uv
+                      :width 29
+                      :height 49
+                      :depth 29
+                      :tileSize 5
+                      :tileWidth 5
+                      :sideOrientation bjs/Mesh.DOUBLESIDE})
+       tile-box (bjs/MeshBuilder.CreateBox "tile-box-2" opts scene)]
+     (set! (.-material tile-box) mat)
+     (set! (.-diffuseTexture mat) (bjs/Texture. "textures/geb_cube_wood.jpg"))))
 
 (defn create-walls []
   (prn "scene-l1.create-walls: entered")
@@ -162,7 +134,6 @@
   (let [vrHelper main-scene/vrHelper
         vr-cam (.-currentVRCamera vrHelper)
         ip @main-scene/*camera-init-pos*]
-        ; ip (bjs/Vector3. 2.2 2.2 -3.6)]
     (set! (.-position vr-cam) (bjs/Vector3. (:x ip) (:y ip) (:z ip)))))
 
 (defn secondary-btn-handler [stateObject]
@@ -248,10 +219,8 @@
 
 (defn cmd-gui-loaded []
   (prn "cmd-gui-loaded: cmd-gui-adv-text=" cmd-gui-adv-text)
-  ;; (js-debugger)
   (let [add-train-btn (.getControlByName cmd-gui-adv-text "add_train_btn")
         _ (prn "add-train-btn=" add-train-btn)
-        ; _ (prn "add-train-btn.onPointer=" (.-onPointerClickObservable add-train-btn))
         init-top-ball-btn (.getControlByName cmd-gui-adv-text "init_top_ball_btn")
         init-btm-ball-btn (.getControlByName cmd-gui-adv-text "init_btm_ball_btn")
         toggle-btm-ball-btn (.getControlByName cmd-gui-adv-text "toggle_btm_ball_btn")
@@ -286,7 +255,6 @@
 (defn load-cmd-gui []
   (let [scene main-scene/scene
         plane (bjs/MeshBuilder.CreatePlane "gui-plane" (js-obj "width" 4, "height" 4) scene)
-        ; _ (set! (.-position plane) (bjs/Vector3. 0 5 10))
         _ (set! (.-position plane) (bjs/Vector3. 0 3 10))
         _ (.enableEdgesRendering plane)
         _ (set! (.-edgesWidth plane) 1.0)
@@ -315,7 +283,6 @@
           (.add #(do
                    (prn "x-radio-down-btn pressed"))))
       (-> rot-cam-btn (.-onPointerClickObservable)
-          ; (.add #(do))
           (.add (fn [value]
                   (let [cam main-scene/camera
                         quat (.-rotationQuaternion cam)
@@ -357,26 +324,12 @@
   (set! reflector (bjs/Reflector. main-scene/scene "localhost" 1234)))
 
 (defn init-balls []
-  ; (ff.rules/init-ball-pos
-  ;   :id :cube-test.frig-frog.rules/top-ball
-  ;   :sub-id 2
-  ;   :x 8 :y 4
-  ;   :vx -1.5 :vy 0
-  ;   :anim true)
-  ; (ff.rules/init-ball-pos
-  ;   :id :cube-test.frig-frog.rules/btm-ball
-  ;   :sub-id 2
-  ;   :x 8 :y 4
-  ;   :vx -1.2 :vy 0
-  ;   :anim true)
   ;; now generate some random balls that will vary each time
-  ; (let [rnd-ball-rows (common/unique-rnd-sec)])
   (let [rnd-ball-rows #{5 8 2}
         rnd-vx #{1.0 -0.8 -1.1 -1.2}]
     (doall
       (map-indexed
         (fn [i row]
-          ; (prn "rnd-balls: i=" i ",row=" row)
           (let [vx (nth (seq rnd-vx) i)]
             (ff.rules/init-ball-pos
               :id (keyword (str "cube-test.frig-frog.rules/btm-ball" "-" (+ i 3)))
@@ -393,7 +346,6 @@
     (doall
       (map-indexed
        (fn [i row]
-         ; (prn "rnd-balls: i=" i ",row=" row)
          (let [vx (nth (seq rnd-vx) i)]
             (ff.rules/init-ball-pos
              :id (keyword (str "cube-test.frig-frog.rules/top-ball" "-" (+ i 3)))
@@ -406,9 +358,6 @@
              :anim true)))
        rnd-ball-rows))))
 
-; (defn play-intro []
-;   (prn "intro loaded"))
-;
 (defn init-snd []
   (set! intro-snd (bjs/Sound.
                     "intro-snd"
@@ -417,45 +366,13 @@
                     #(do
                        (prn "intro loaded")
                        (.play intro-snd)))))
-                    ; js-obj("readyToPlayCallback" #(prn "intro loaded"))
-                    ; js-obj("readyToPlayCallback" (fn [x](prn "intro loaded")))
-                    ; js-obj("readyToPlayCallback" play-intro))))
-  ; (set! player-move-snd (bjs/Sound.
-  ;                          "intro-snd"
-  ;                          "sounds/frig_frog/plastic_swipe.ogg"
-  ;                          main-scene/scene)))
  
 (defn release []
   (prn "ff.scene_l1.entered")
   (utils/release-common-scene-assets))
-  ;; (.removeAllFromScene hemisferic-asset-container))
 
 (defn init [db]
-  ;; (main-scene/init-ground)
-  ;; (main-scene/init-env-2)
-  ;; (let [xr-helper main-scene/xr-helper]
-  ;;   (prn "scene-l1.init: xr-input=" (.-input xr-helper))
-  ;;   (js-debugger))
-    ;; (-> xr-helper (.-input ) (.-onControllerAddedObservable) (.add ctrl-added)))
   (prn "scene-l1.init: entered")
-  ;; (rf/dispatch [:cube-test.events.setup-xr-ctrl-cbs main-scene/xr-helper])
-  ;; (js-debugger)
-  ;; (rf/dispatch [:cube-test.events/setup-xr-ctrl-cbs main-scene/xr-helper])
-  ;; (->  (.-baseExperience main-scene/xr-helper) (.-featuresManger) (.enableFeature "xr-controller-pointer-selection"))
-  ;; (.-featuresManger (.-baseExperience main-scene/xr-helper))
-  ;; (let [base-exp (.-baseExperience main-scene/xr-helper)
-  ;;       fm (.-featuresManger base-exp)])
-  ;; (let [xr-helper main-scene/xr-helper
-  ;;       fm (-> xr-helper (.-baseExperience) (.-featuresManager))]
-  ;;   ;; (.enableFeature fm "xr-controller-pointer-selection")
-  ;;   ;; (.detachFeature fm "xr-controller-pointer-selection")
-  ;;   (prn "scene_l1: disposing of fm")
-  ;;   ;; (.dispose fm)
-  ;;   (.attachFeature fm "xr-controller-pointer-selection")
-  ;;   (.attachFeature fm "xr-controller-teleportation"))
-    ;; (rf/dispatch [:cube-test.events/setup-xr-ctrl-cbs main-scene/xr-helper]))
-
-  ;; (create-walls)
 
   (let [scene main-scene/scene
         light1 (bjs/PointLight. "pointLight-1" (bjs/Vector3. 0 2 5) scene)
@@ -468,7 +385,6 @@
 
     (set! cube-test.frig-frog.board/board-width (* (:n-cols db) (:quanta-width db)))
     (set! cube-test.frig-frog.board/board-length (* (:n-rows db) (:quanta-width db)))
-    ; (init-gui)
     ;; set-up scene level "enter xr" hook
     (let [
           ;top
@@ -490,19 +406,6 @@
     (ff.tile/init)
     (init-snd)
     (main-scene/load-main-gui release)))
-    ;;vt-x
-    ;; (let [xr-helper main-scene/xr-helper
-    ;;       fm (-> xr-helper (.-baseExperience) (.-featuresManager))]
-    ;;  (.attachFeature fm bjs/WebXRFeatureName.TELEPORTATION))))
-    ;;  (.enableFeature fm bjs/WebXRFeatureName.POINTER_SELECTION))))
-    ;;vt-x end
-    ;; (let [grnd (.getMeshByID main-scene/scene "ground")]
-    ;;   (when grnd
-    ;;     (.setEnabled grnd true)
-    ;;     (set! (.-isVisible grnd) true)))))
-
-      
-
 
 (defn tick []
   (ff.train/tick)
