@@ -30,5 +30,8 @@
 ; (def top-level-scene :twizzlers)
 ; (def top-level-scene :beat-club)
 ; (def top-level-scene :frig-frog)
-(def top-level-scene :top-scene)
-; (def top-level-scene :tmp-scene)
+;; use top-scene for a scrolling selection of sub-scenes
+;; (def top-level-scene :top-scene)
+;; use tmp-scene for quicky one-offs.
+;; (def top-level-scene :tmp-scene)
+(def top-level-scene :lvs)

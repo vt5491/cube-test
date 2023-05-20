@@ -12,7 +12,8 @@
    [cube-test.frig-frog.game :as ff.game]
    [cube-test.top-scene.top-scene :as top-scene]
    [cube-test.top-scene.events :as top-scene-events]
-   [cube-test.tmp-scene.events :as tmp-scene-events]))
+   [cube-test.tmp-scene.events :as tmp-scene-events]
+   [cube-test.lvs.events :as lvs-events]))
 
 (declare render-loop)
 (def soft-switch false)
@@ -137,7 +138,17 @@
                                              (cube-test.tmp-scene.scene/init)
                                              (cube-test.tmp-scene.scene/run-scene))
                             full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
-                        (init-applicable-dispatch full-init-seq soft-init-seq))))))
+                        (init-applicable-dispatch full-init-seq soft-init-seq)))
+     :lvs (do
+                (println "top-level-scene= lvs")
+                (let [soft-init-seq #(do
+                                        (re-frame/dispatch [::top-scene-events/init-db top-scene/default-db])
+                                        (re-frame/dispatch [::lvs-events/init-db])
+                                        (re-frame/dispatch [::lvs-events/init-game]))
+                                        ;; (cube-test.lvs.reflect-scene/init)
+                                        ;; (cube-test.lvs.reflect-scene/run-scene))
+                      full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
+                  (init-applicable-dispatch full-init-seq soft-init-seq))))))
 
 ;;
 ;; main tick handler best placed in game.cljs (refer to many, referred by few)

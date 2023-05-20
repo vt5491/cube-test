@@ -16,6 +16,7 @@
  (fn [db [_ game-db]]
    ; (let [default-db top-scene/default-db]
    ;   default-db)
+   (prn "top-scene-events.init-db: db=" db ", game-db=" game-db)
    (utils/merge-dbs db game-db)))
 
 (rf/reg-event-fx

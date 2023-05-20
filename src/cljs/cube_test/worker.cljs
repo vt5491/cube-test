@@ -8,6 +8,8 @@
 ;;
 ;; handle messages sent by the worker to us (the main thread).
 ;;
+;; abc.def.ghi
+;; abc-def-ghi
 (defn handle-worker-msg [e]
   (prn "main.handle-worker-msg: e=" e)
   (let [

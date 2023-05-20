@@ -17,9 +17,11 @@
    [babylonjs-loaders :as bjs-l]
    [cube-test.utils.choice-carousel.choice-carousel :as cc]
    [promesa.core :as p]))
+  ;;  [cube-test.events :as events]))
 
 (declare animate-app-carousel)
 (declare release)
+;; (declare cube-test.events/soft-switch-app)
 (def keep-assets (bjs/KeepAssets.))
 (def top-scene-assets (bjs/AssetContainer. main-scene/scene))
 (def face-slot-assets (bjs/AssetContainer. main-scene/scene))
@@ -231,8 +233,9 @@
         top-level-scene (nth (:top-level-scenes app-carousel-parms) mod-idx)]
     (prn "top-scene. top-level-scene=" top-level-scene)
     ; (cube-test.events/switch-app top-level-scene)
-    ; (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
+    ;  (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
     (cube-test.events/soft-switch-app top-level-scene release)))
+    ;; (events/soft-switch-app top-level-scene release)))
     ; (rf/dispatch [:cube-test.events.soft-switch-app-evt top-level-scene release])
     ; (rf/dispatch [:soft-switch-app-evt top-level-scene release])))
 

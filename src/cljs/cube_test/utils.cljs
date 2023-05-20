@@ -132,7 +132,7 @@
         (set! (.-rotation current-cam) (bjs/Vector3. (* xr base/ONE-DEG) (* yr base/ONE-DEG) (* yr base/ONE-DEG)))
         (set! (.-position current-cam) (.add (.-position current-cam) pos-delta-top)))))
 
-;; prety-print all the meshes in a scene
+;; pretty-print all the meshes in a scene
 (defn pretty-print-meshes [scene]
   (let [mesh-objs (.-meshes scene)]
     (doall (map #(prn (.-name %)) mesh-objs))))
