@@ -6,7 +6,9 @@
    [cube-test.utils :as utils]
    [cube-test.main-scene :as main-scene]
    [cube-test.lvs.scenes.main :as lvs-main-scene]
-   [cube-test.lvs.scenes.reflect-scene :as lvs-reflect-scene]))
+   [cube-test.lvs.scenes.reflect-scene :as lvs-reflect-scene]
+   [cube-test.utils.fps-panel :as fps-panel]
+   [cube-test.controller-xr :as controller-xr]))
 
 (def active-scene)
 
@@ -20,5 +22,21 @@
                 (prn "calling lvs-main") 
                 (lvs-main-scene/init))
     :lvs-reflect (do
-                    (lvs-reflect-scene/init)
-                    (lvs-reflect-scene/run-scene))))
+                    (lvs-reflect-scene/init))))
+                    ;; (lvs-reflect-scene/run-scene))))
+
+(defn render-loop []
+  ;; (if (= main-scene/xr-mode "vr")
+  ;;   (controller/tick)
+  (controller-xr/tick)
+  (if fps-panel/fps-pnl
+    (fps-panel/tick main-scene/engine))
+  (case active-scene
+     :reflect-scene (lvs-reflect-scene/tick)
+     :main-scene (lvs-main-scene/tick))
+  (.render main-scene/scene))
+
+(defn run-game []
+  ; (run-render-loop)
+  (.stopRenderLoop main-scene/engine)
+  (.runRenderLoop main-scene/engine (fn [] (render-loop))))

@@ -178,7 +178,7 @@
   (set! white-mat (bjs/StandardMaterial. "white-mat" scene))
   (set! (.-diffuseColor white-mat) (bjs/Color3. 1 1 1))
   (set! black-mat (bjs/StandardMaterial. "black-mat" scene))
-  (set! (.-diffuseColor white-mat) (bjs/Color3. 0 0 0))
+  (set! (.-diffuseColor black-mat) (bjs/Color3. 0 0 0))
   (let [av (bjs/Debug.AxesViewer. scene)]
     (.update av (bjs/Vector3. 4 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
   (setup-skybox)

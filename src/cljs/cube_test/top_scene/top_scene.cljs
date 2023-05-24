@@ -225,7 +225,7 @@
 
 (defn app-selected [magic-idx-shift n-choices]
   (prn "top-scene:app-selected entered: app-cc-idx=" app-cc-idx ",magic-idx-shift=" magic-idx-shift ",n-choicse=" n-choices)
-  ; (let [mod-idx (mod (+ app-cc-idx -2) 8)])
+  ; (let [mod-idx (mod (+ app-cc-idx -2)  8)])
   ; (let [mod-idx (mod (+ app-cc-idx magic-idx-shift) n-choices)])
   (let [mod-idx app-cc-idx
         ; top-level-scene (nth (:top-level-scenes app-carousel-parms) app-cc-idx)

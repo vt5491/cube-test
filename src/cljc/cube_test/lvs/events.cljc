@@ -28,6 +28,11 @@
    (prn "lvs.events: db=" db)
    (lvs.game/init db)
    db))
+
+(reg-event-fx
+ ::run-game
+ (fn [_]
+   (lvs.game/run-game)))
 ;;
 ;; reflect-scene
 ;;
@@ -37,10 +42,10 @@
   (fn [cofx _]
     {:fx [(reflect-scene/init)]}))
 
-(reg-event-fx
-  :run-reflect-scene
-  (fn [cofx _]
-    {:fx [(reflect-scene/run-scene)]})) 
+;; (reg-event-fx
+;;   :run-reflect-scene
+;;   (fn [cofx _]
+;;     {:fx [(reflect-scene/run-scene)]})) 
 
 ;;
 ;; lvs-scene

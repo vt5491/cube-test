@@ -28,7 +28,8 @@
                       ;;  (-> probe .-renderList (.push (.getMeshByID scene "Cube.005")))
                       ;;  (set! (.-reflectionTexture %1) (bjs/MirrorTexture. "plane-texture" 2048 scene true))
                        (let [mirror-mat (bjs/StandardMaterial. "mirror-mat" scene)
-                             cube-5 (.getMeshByID scene "Cube.005")]
+                             cube-5 (.getMeshByID scene "Cube.005")
+                             cyl (.getMeshByID scene "Cylinder")]
                         ;;  (set! (.-reflectionTexture mirror-mat) (bjs/MirrorTexture. "mirror-mat" 2048 scene true))
                          (set! (.-reflectionTexture mirror-mat) (.-cubeTexture probe))
                         ;;  (set! (-> mirror-mat .-reflectionTexture .-renderList) [cube-5])
@@ -40,7 +41,7 @@
                          (set! (-> mirror-mat .-reflectionTexture .-level) 0.5)
                         ;;  (set! (.-renderList (.-reflectionTexture mirror-mat)) [cube-5])
                         ;;  (js-debugger)
-                         (-> probe .-renderList (.push cube-5))
+                         (-> probe .-renderList (.push cube-5 cyl))
                          (set! (.-material %1) mirror-mat)
                          (.attachToMesh probe %1)
                          ;; put a probe on cube-5
@@ -49,22 +50,13 @@
                           ;;  (js-debugger)
                            (-> cube-probe .-renderList (.push %1))
                            (set! (.-reflectionTexture cube-mat) (.-cubeTexture cube-probe))
-                           (.attachToMesh cube-probe cube-5)))))
-    ;;                     mesh.material.reflectionTexture.mirrorPlane = BABYLON.Plane.FromPositionAndNormal()))))))
-    ;; mesh.position, mesh.getFacetNormal(0).scale(-1);
-                        ;;  mirror.material.reflectionTexture.mirrorPlane = new BABYLON.Plane (0, -1.0, 0, -2.0);
-                        ;;  (-> probe .-renderList) .push
-                        ;;  (.push (.-renderList probe) cube-5)
-                        ;;  (.push (.-material cube-5) (.-cubeTexture probe)))))
-
-                        ;;  (set! (.-reflectionTexture (.-material cube-5)) (.-cubeTexture probe)))))
-                        ;;  (.-reflectionTexture mirrorMat))))
-                        ;;  (set! (.-reflectionTexture %1) (.-cubeTexture probe)))))
-                        ;; mirror.material.reflectionTexture.level = 0.5)));
-                      ;;  mirror.material.reflectionTexture.renderList = [greenSphere, yellowSphere, blueSphere, knot]));
-                      ;;  (set! (.-diffuseColor %1) main-scene/blue-mat)
-                      ;;  (set! (.-material %1) main-scene/orange-mat)))
-                      ;;  (set! (.-sideOrientation %1) bjs/Mesh.DOUBLESIDE)))
+                           (.attachToMesh cube-probe cube-5))
+                         ;; put a probe on Cylinder 
+                         (let [cyl-probe (bjs/ReflectionProbe. "cyl-probe" 512 scene)
+                               cyl-mat (.-material cyl)]
+                           (-> cyl-probe .-renderList (.push %1))
+                           (set! (.-reflectionTexture cyl-mat) (.-cubeTexture cyl-probe))
+                           (.attachToMesh cyl-probe cyl)))))
                    (when (re-matches #"Plane.009" (.-id %1))
                      (do 
                        (prn "found plane.009")
@@ -73,7 +65,34 @@
                    (when (re-matches #"Cube.005" (.-id %1))
                      (do 
                        (prn "found cube")
-                       (set! (.-material %1) main-scene/red-mat))))
+                       (set! (.-material %1) main-scene/red-mat)))
+                   (when (re-matches #"Sphere.002" (.-id %1))
+                     (let [grnd-mirror-mat (bjs/StandardMaterial. "grnd-mirror-mat" scene) 
+                           box (.getMeshByID scene "box")
+                           sph (.getMeshByID scene "Sphere")
+                           grnd (.getMeshByID scene "ground")
+                           probe-size 512
+                           grnd-probe (bjs/ReflectionProbe. "grnd-probe" probe-size scene)
+                           sph-probe (bjs/ReflectionProbe. "sph-probe" probe-size scene)
+                           sph2-probe (bjs/ReflectionProbe. "sph2-probe" probe-size scene)]
+                       (prn "found sphere.002, sph=" sph)
+                       (set! (.-material %1) main-scene/black-mat)
+                       (set! (.-position %1) (.add (.-position %1) (bjs/Vector3. -3 1 0)))
+                       (set! (.-position sph) (.add (.-position sph) (bjs/Vector3. -3 3 0)))
+                       (set! (.-reflectionTexture grnd-mirror-mat)(.-cubeTexture grnd-probe))
+                       (set! (-> grnd-mirror-mat .-reflectionTexture .-level) 0.5)
+                       (set! (-> grnd-mirror-mat .-reflectionTexture .-mirrorPlane)
+                         (bjs/Plane.FromPositionAndNormal 
+                          (.-position grnd)(-> (.getFacetNormal grnd 0)(.scale -1))))
+                       (-> grnd-probe .-renderList (.push %1 box))
+
+                       (-> sph2-probe .-renderList (.push grnd box sph))
+                       (set! (.-reflectionTexture (.-material %1)) (.-cubeTexture sph2-probe))
+                       (.attachToMesh sph2-probe %1)
+
+                       (-> sph-probe .-renderList (.push grnd box %1))
+                       (set! (.-reflectionTexture (.-material sph)) (.-cubeTexture sph-probe))
+                       (.attachToMesh sph-probe sph))))
                       ;;  (set! (.-diffuseColor %1) (.-blue-mat scene)))))
                 ;;  (when (re-matches #"__root__" (.-id %1))
                 ;;      (prn "mesh name=" (.-id %1))
@@ -114,14 +133,22 @@
       (set! (.-material samp-plane) b-mat)
       (set! (.-material box) b-mat)
       ;; (prn "normals of source-plane=" (.-normal source-plane))
-      (prn "normals samp-plane=" (.-normal samp-plane)))))
+      (prn "normals samp-plane=" (.-normal samp-plane))
+      (set! (.-position box) (bjs/Vector3. 3 0 -1))
+      (set! (.-position samp-plane) (bjs/Vector3. 0 0 4)))))
        ;; (js-debugger)))
   ;; (utils/load-model "models/lvs/" "ball_mirror.glb" "mirror" #(do (mirror-loaded %1) edit-mirror))) 
 
-(defn render-loop []
-  (controller-xr/tick)
-  (main-scene/tick)
-  (.render main-scene/scene))
+;; (defn render-loop []
+;;   (controller-xr/tick)
+;;   (main-scene/tick)
+;;   (.render main-scene/scene))
 
-(defn run-scene []
-  (.runRenderLoop main-scene/engine (fn [] (render-loop))))
+;; (defn run-scene []
+;;   (.runRenderLoop main-scene/engine (fn [] (render-loop))))
+
+(defn tick []
+  (let [engine main-scene/engine]
+        ;; delta-time (.getDeltaTime engine)
+        ;; bldg-cube-rot-y-delta (* (.-y bldg-cube-ang-vel) delta-time)]
+    (main-scene/tick)))
