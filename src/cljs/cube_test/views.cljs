@@ -14,6 +14,7 @@
    [cube-test.beat-club.views :as beat-club.views]
    [cube-test.frig-frog.views :as frig-frog.views]
    [cube-test.top-scene.views :as top-scene.views]
+   [cube-test.lvs.views :as lvs.views]
    [cube-test.game :as game]))
 
 (defn index []
@@ -68,6 +69,7 @@
             :twizzlers (do (twizzlers.views/init-panel))
             :beat-club (do (beat-club.views/init-panel))
             :frig-frog (do (frig-frog.views/init-panel))
+            :lvs (do (lvs.views/init-panel))
             :top-scene (do
                          (top-scene.views/init-panel))
             [:br])

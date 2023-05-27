@@ -1,10 +1,12 @@
+;; events is refer to many
 (ns cube-test.lvs.events
   (:require
    [re-frame.core :refer [dispatch dispatch-sync reg-event-db reg-event-fx reg-fx after ] :as rf]
    [cube-test.main-scene :as main-scene]
    [cube-test.lvs.game :as lvs.game]
    [cube-test.lvs.db :as lvs.db]
-   [cube-test.lvs.scenes.reflect-scene :as reflect-scene]))
+   [cube-test.lvs.scenes.reflect-scene :as reflect-scene]
+   [cube-test.utils.fps-panel :as fps-panel]))
 
 ;;
 ;; db
@@ -59,3 +61,24 @@
 ;;   :run-lvs-scene
 ;;   (fn [cofx _]
 ;;     {:fx [(lvs-scene/run-scene)]})) 
+
+;;
+;; views
+;;
+(reg-event-fx
+  ::tmp
+  (fn [cofx _]
+    (prn "now handling tmp"
+     (reflect-scene/move-fps-pnl))))
+    ;; {:fx [(do 
+    ;;         (prn "now handling tmp")
+    ;;         ;; (cube-test.lvs.scenes.reflect-scene/move-fps-pnl)
+    ;;         (reflect-scene/move-fps-pnl))]}))
+    ;;         ;; (let [fps-pnl cube-test.lvs.scenes.reflect-scene/fps-pnl]
+    ;;         ;;   (set! (.-position fps-pnl) (.add (.-position fps-pnl) (bjs/Vector3. 0.5 0 0)))))]}))
+
+(reg-event-fx
+  ::rot-cam
+  (fn [cofx _]
+    ;; {:fx [(reflect-scene/init)]}
+    {:fx [(prn "now handling rot-cam")]}))

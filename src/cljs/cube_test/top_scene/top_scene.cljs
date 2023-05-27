@@ -32,7 +32,7 @@
 (def default-db
   {:top-scene-abc 7})
 
-;; steps to  "top-scene-izing" a sub-scene:
+;; steps to "top-scene-izing" a sub-scene:
 ;; 1. create a release function in the subscene.  Something like:
 ;;(defn release []
 ;; (prn "twizzlers.release: entered"))
@@ -119,7 +119,7 @@
                                    "Publish Date: 07/14/2021"
                                    "Publish Date: 09/04/2021"]})
 ;; tried to make this dynamic, but too hard-- just settle with making it static instead.
-; (def n-choices (- 8 1))
+;  (def n-choices (- 8 1))
 (def n-choices (count (:model-files app-carousel-parms)))
 (def app-carousel-theta-width (/ (* 2.0 js/Math.PI) (count (:app-ids app-carousel-parms)) 1))
 ; (def app-carousel-theta-width (* base/ONE-DEG 5))
@@ -233,9 +233,9 @@
         top-level-scene (nth (:top-level-scenes app-carousel-parms) mod-idx)]
     (prn "top-scene. top-level-scene=" top-level-scene)
     ; (cube-test.events/switch-app top-level-scene)
-    ;  (rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
+    ;(rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
     (cube-test.events/soft-switch-app top-level-scene release)))
-    ;; (events/soft-switch-app top-level-scene release)))
+    ;;  (events/soft-switch-app top-level-scene release)))
     ; (rf/dispatch [:cube-test.events.soft-switch-app-evt top-level-scene release])
     ; (rf/dispatch [:soft-switch-app-evt top-level-scene release])))
 

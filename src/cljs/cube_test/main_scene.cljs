@@ -225,7 +225,7 @@
         ; camera.attachControl(canvas, true)
         (set! camera (bjs/UniversalCamera. "uni-cam" (bjs/Vector3. 0 4 -15) scene))
         (.attachControl camera canvas true)
-        (.setTarget camera (bjs/Vector3.Zero))
+        ;; (.setTarget camera (bjs/Vector3.Zero))
         ;; Note: the promise for this is called during init and does *not*
         ;; require that xr be entered.
         (-> (.createDefaultXRExperienceAsync scene
@@ -382,15 +382,16 @@
           ; gui-delta (bjs/Vector3. gui-delta-x 0 gui-delta-z)
           ; gui-delta (bjs/Vector3. 0 0 8)
           gui-delta (bjs/Vector3. (* gui-radius (js/Math.sin cam-rot-y)) 0 (* gui-radius (js/Math.cos cam-rot-y)))]
-      (prn "a-btn-handler: cam-rot=" cam-rot)
-      (set! (.-position main-gui-plane) (.add (.-position cam) gui-delta))
-      (set! (.-rotation main-gui-plane) (bjs/Vector3. 0 cam-rot-y 0))
-      ; (.addInPlace (.-position main-gui-plane) gui-delta)
-      ;; and toggle the visibility
-      ; (.setEnabled main-gui-plane true)
-      (if (not (.isEnabled main-gui-plane))
-        (.setEnabled main-gui-plane true)
-        (.setEnabled main-gui-plane false)))))
+      (when main-gui-plane
+        (prn "a-btn-handler: cam-rot=" cam-rot)
+        (set! (.-position main-gui-plane) (.add (.-position cam) gui-delta))
+        (set! (.-rotation main-gui-plane) (bjs/Vector3. 0 cam-rot-y 0))
+        ; (.addInPlace  (.-position main-gui-plane) gui-delta)
+        ;; and toggle the visibility
+        ; (.setEnabled main-gui-plane true)
+        (if (not (.isEnabled main-gui-plane))
+          (.setEnabled main-gui-plane true)
+          (.setEnabled main-gui-plane false))))))
 
 (defn b-btn-handler []
   (when (.-hasChanges b-btn)

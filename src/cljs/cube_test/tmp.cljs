@@ -13,7 +13,7 @@
 ;
 ; (+ js/Math.PI 1)
 ;
-(+ 1 1)
+(+ 1 2)
 ;
 ; (js/setTimeout (fn [] (prn "hi")) 2000)
 ;
@@ -674,6 +674,7 @@ my-msg
 (defn fb [a]
   (prn "a=" a))
 
+(fb 1)
 (defn fc [x]
   7)
 
@@ -741,3 +742,36 @@ my-msg
 
 (first '({:a 7}))
 (first '(1 2 3))
+
+;; 2023-05-26 first calva repl
+;; Note: use joyride, not babashka or npp
+;; (defn gen-m [{:keys [id level text] :as msg}])
+(defn my-f1 [{:keys [a b c] :as vals}]
+  (prn "a=" (:a vals) ",b=" (:b vals)))
+
+(my-f1 {:a 4 :b 5})
+
+(def m2 {:a 7 :b 8})
+(:a m2)
+
+(defn my-f2 [s {:keys [a b] :as vals}]
+  (prn "s=" s ",a=" (:a vals)))
+
+(my-f2 "hi" {:a 7 :b 8})
+(my-f2 "hi" {:b 7})
+(my-f2 "hi")
+
+(defn my-f3 
+  ([s] (my-f3 s {:a 1}))
+  ([s {:keys [a b] :as vals}]
+   (prn "s=" s ",a=" (:a vals))))
+
+(my-f3 "hi")
+
+(defn my-f4
+  ([s] (my-f4 s 6))
+  ([s t] 
+   (prn "s=" s ",t=" t)))
+
+(my-f4 4)
+(my-f4 4 7)

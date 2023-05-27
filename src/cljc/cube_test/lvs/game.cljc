@@ -14,7 +14,8 @@
 
 (defn init [db]
   ;; (set! active-scene (:active-scene default-game-db))
-  (set! active-scene :reflect-scene)
+  ;; (set! active-scene :reflect-scene)
+  (set! active-scene (:default-scene db))
   (prn "lvs-game.init: entered, db=" db)
   (prn "lvs-game.init: default-scene=" (:default-scene db))
   (case (:default-scene db)
@@ -32,8 +33,8 @@
   (if fps-panel/fps-pnl
     (fps-panel/tick main-scene/engine))
   (case active-scene
-     :reflect-scene (lvs-reflect-scene/tick)
-     :main-scene (lvs-main-scene/tick))
+     :lvs-reflect (lvs-reflect-scene/tick)
+     :lvs-main (lvs-main-scene/tick))
   (.render main-scene/scene))
 
 (defn run-game []

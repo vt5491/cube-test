@@ -17,7 +17,7 @@
 ;; to be dynamically set at runtime by any app that has a remote reframe worker db
 (def db-worker-thread)
 
-; (def top-level-scene :cube-spin-scene)
+;; (def top-level-scene :cube-spin-scene)
 ; (def top-level-scene :face-slot-scene)
 ;; note: tic-tac-attack supplanted by vrubik-scene. 'tic-tac-attack' anims not working
 ; (def top-level-scene :tic-tac-attack-scene)

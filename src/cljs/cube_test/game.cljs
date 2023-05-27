@@ -144,10 +144,11 @@
                 (let [soft-init-seq #(do
                                         (re-frame/dispatch [::top-scene-events/init-db top-scene/default-db])
                                         (re-frame/dispatch [::lvs-events/init-db])
+                                        ;; (re-frame/dispatch [:init-fps-panel main-scene/scene])
+                                        (re-frame/dispatch [:init-fps-panel main-scene/scene {:add-mini true}])
                                         (re-frame/dispatch [::lvs-events/init-game])
                                         ;; (cube-test.lvs.reflect-scene/init)
                                         ;; (cube-test.lvs.reflect-scene/run-scene))
-                                        (re-frame/dispatch [:init-fps-panel main-scene/scene])
                                         (re-frame/dispatch [::lvs-events/run-game]))
                       full-init-seq #(re-frame/dispatch [:init-main-scene soft-init-seq])]
                   (init-applicable-dispatch full-init-seq soft-init-seq))))))

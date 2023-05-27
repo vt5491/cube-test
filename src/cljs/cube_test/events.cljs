@@ -578,9 +578,12 @@
 ;; fps-panel
 (re-frame/reg-event-db
  :init-fps-panel
- (fn [db [_ scene]]
+ (fn [db [_ scene vals]]
    ;side effect
-   (fps-panel/init scene)
+  ;;  (fps-panel/init scene)
+  ;;  (fps-panel/init scene {:add-mini true})
+   (prn "events.init-fps-panel: vals=" vals)
+   (fps-panel/init scene vals)
    db))
 
 ;; general

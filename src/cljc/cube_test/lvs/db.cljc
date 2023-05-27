@@ -10,7 +10,8 @@
    :scenes {:reflect {:path "models/space_portal/" :fn "space_portal.glb" :loaded false}
             :lvs-main {:path "models/hemisferic/" :fn "hemisferic.glb" :loaded false}}
   ;;  :default-scene :lvs-main
-   :default-scene :lvs-reflect})
+  ;;  :default-scene :lvs-reflect})
+   :default-scene :lvs-main})
 
 (defn init-db [db]
   ; (utils/merge-dbs db cube-test.msg-cube.spec.db/default-db)
