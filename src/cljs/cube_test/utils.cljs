@@ -169,3 +169,30 @@
     ; (.push (.-meshes keep-assets) teleportation-target)
     (.moveAllFromScene top-scene-assets keep-assets)))
     ; (.removeAllFromScene top-scene-assets)))
+ 
+;; A generalized btn handler to throw up a gui in front of the camera
+(defn gui-btn-handler [btn gui]
+  (prn "uilts.gui-btn-handler: btn pressed hasChanges=" (.-hasChanges btn))
+  (when (.-hasChanges btn)
+    (let [scene main-scene/scene
+          ;; main-gui-plane (.getMeshByID scene "main-gui-plane")
+          cam (cube-test.utils.get-xr-camera)
+          cam-quat (.-rotationQuaternion cam)
+          cam-rot (.toEulerAngles cam-quat)
+          cam-rot-y (.-y cam-rot)
+          gui-radius 4.0
+          gui-delta-x (* gui-radius (js/Math.cos (.-x cam-rot)))
+          gui-delta-z (* gui-radius (js/Math.sin (.-z cam-rot)))
+          ; gui-delta (bjs/Vector3. gui-delta-x 0 gui-delta-z)
+          ; gui-delta (bjs/Vector3. 0 0 8)
+          gui-delta (bjs/Vector3. (* gui-radius (js/Math.sin cam-rot-y)) 0 (* gui-radius (js/Math.cos cam-rot-y)))]
+      (when gui
+        (prn "gui-btn-handler: cam-rot=" cam-rot)
+        (set! (.-position gui) (.add (.-position cam) gui-delta))
+        (set! (.-rotation gui) (bjs/Vector3. 0 cam-rot-y 0))
+        ; (.addInPlace  (.-position main-gui-plane) gui-delta)
+        ;; and toggle the visibility
+        ; (.setEnabled main-gui-plane true)
+        (if (not (.isEnabled gui))
+          (.setEnabled gui true)
+          (.setEnabled gui false))))))

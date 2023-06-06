@@ -12,9 +12,23 @@
 
 (def active-scene)
 
+;; xrCamera.setTransformationFromNonVRCamera (otherCamera);
+;; (defn reset-cam-tgt []
+;;   ;; (set! ()))
+;;   (let [scene main-scene/scene
+;;         cam main-scene/camera
+;;         cams (.-cameras scene)
+;;         cam-mtx (.getWorldMatrix cam)]
+;;     ;; (js-debugger)
+;;     (prn "cam rot" (.-rotation cam))
+;;     (prn "cam worldtarget=" (.getWorldMatrix cam))
+;;     (prn "uni-cam=" (.getMeshByID scene "uni-cam"))
+;;     (prn "cams=" cams)
+;;     (.setTransformationFromNonVRCamera cam (nth cams 0))))
+
 (defn init [db]
   ;; (set! active-scene (:active-scene default-game-db))
-  ;; (set! active-scene :reflect-scene)
+  ;;  (set! active-scene :reflect-scene)
   (set! active-scene (:default-scene db))
   (prn "lvs-game.init: entered, db=" db)
   (prn "lvs-game.init: default-scene=" (:default-scene db))

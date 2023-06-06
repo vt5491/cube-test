@@ -45,6 +45,7 @@
 (def white-mat)
 (def black-mat)
 (def poly-fill)
+;; note: xr-helper is type WebXRDefaultExperience
 (def xr-helper)
 (def session-mgr)
 (def skybox-mat)
@@ -182,6 +183,8 @@
   (let [av (bjs/Debug.AxesViewer. scene)]
     (.update av (bjs/Vector3. 4 0 0) (bjs/Vector3. 1 0 0) (bjs/Vector3. 0 1 0) (bjs/Vector3. 0 0 1)))
   (setup-skybox)
+  ;; (prn "main-scene: skybox=" (.getMeshByID scene "sky-box"))
+  ;; (js-debugger)
 
   (cond
     (re-seq #"Chrome" js/navigator.userAgent)
@@ -234,7 +237,7 @@
                                               (array (.getMeshByID scene "ground"))))
             (p/then
              (fn [xr-default-exp]
-               (prn "createDefaultXRExperienceAsync promise-handler: xr-default-exp=" xr-default-exp)
+              ;;  (prn "createDefaultXRExperienceAsync promise-handler: xr-default-exp=" xr-default-exp)
                (set! xr-helper xr-default-exp)
                ; (re-frame/dispatch [:setup-xr-ctrl-cbs xr-default-exp])
                (re-frame/dispatch [:cube-test.events/setup-xr-ctrl-cbs xr-default-exp])
@@ -301,11 +304,14 @@
     ;; full xr, so that downwind scenes can alter the non-xr camera as needed. The xr
     ;; camera, will always start with wherever the non-xr is currently positioned.
     (set! camera (-> xr-helper (.-baseExperience) (.-camera)))
-    (.setTransformationFromNonVRCamera camera)
+    ;; (.setTransformationFromNonVRCamera camera)
+    ;; Note: the following is the line that gets rid of any xr tilting
+    ;; shouldn't need any camera adjustment after this.
+    (.setTransformationFromNonVRCamera camera (nth (.-cameras scene) 0))
     ;; Do camera rotation adjustments (upon entering xr) here.
     (let [quat (-> camera .-rotationQuaternion)
           cur-angles (.toEulerAngles quat)
-          new-quat (bjs/Quaternion. (.-x quat) 0.785 (.-z quat) (.-w quat))]
+          new-quat (bjs/Quaternion. (.-x quat) 0.785 (.-z quat) (.-w quat))])))
              ; (.setTarget camera (bjs/Vector3. 0 (.-y camera) 0))
              ; (prn "camera.target=" (.-target camera))
              ;; Note: do runtime vr camera rotation here
@@ -315,7 +321,7 @@
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -135 base/ONE-DEG) 0))
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* -45 base/ONE-DEG) 0)))
              ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles (* -35 base/ONE-DEG) (* 135 base/ONE-DEG) (* 5 base/ONE-DEG)))
-        (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) (* 5 base/ONE-DEG))))))
+        ;;vt(.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 135 base/ONE-DEG) (* 5 base/ONE-DEG))))))
         ;; TODO this shouldn't be here. a total hack
         ; (cube-test.frig-frog.scene-l1.init-view 30))))
           ; (.multiplyInPlace quat (bjs/Quaternion.FromEulerAngles 0 (* 180 base/ONE-DEG) 0))
