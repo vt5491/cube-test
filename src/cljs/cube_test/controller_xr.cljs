@@ -23,8 +23,10 @@
 (def last-player-pos)
 (def last-grip-vel)
 (def last-grip-time)
+;; Note: this can be overridden at the app level too. e.g see lvs.scenes.main
 ; (def grip-factor 1.9) ;; probably the best
 (def grip-factor 1.8) ;; 2022-08-25
+;; (def grip-factor 1.9) ;; 2023-06-22
 ; (def grip-factor 2.1) ;; good for scale-factor=100
 ; (def grip-factor (if (>= base/scale-factor 100) 2.1 1.9))
 ; (def GRIP_DECELERATION_INT 1000)

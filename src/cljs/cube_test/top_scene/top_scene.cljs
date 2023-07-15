@@ -10,7 +10,7 @@
    [cube-test.controller :as controller]
    [cube-test.controller-xr :as controller-xr]
    [cube-test.utils.fps-panel :as fps-panel]
-   ; [cube-test.events :as events]
+  ;;  [cube-test.events :as events]
    ; [cube-test.top-scene.events :as top-scene-events]
    [cube-test.base :as base]
    [cube-test.utils :as utils]
@@ -234,7 +234,7 @@
     (prn "top-scene. top-level-scene=" top-level-scene)
     ; (cube-test.events/switch-app top-level-scene)
     ;(rf/dispatch [:cube-test.utils.choice-carousel.events/update-last-selected-idx app-cc-idx])
-    (cube-test.events/soft-switch-app top-level-scene release)))
+    (:cube-test.events/soft-switch-app top-level-scene release)))
     ;;  (events/soft-switch-app top-level-scene release)))
     ; (rf/dispatch [:cube-test.events.soft-switch-app-evt top-level-scene release])
     ; (rf/dispatch [:soft-switch-app-evt top-level-scene release])))

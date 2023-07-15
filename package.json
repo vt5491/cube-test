@@ -8,7 +8,7 @@
 		"babylonjs-materials": "^6.3.1",
 		"babylonjs-serializers": "^6.3.1",
 		"cannon": "^0.6.2",
-		"highlight.js": "^11.5.1",
+		"highlight.js": "11.1.0",
 		"oimo": "^1.0.9",
 		"pepjs": "^0.5.2",
 		"react": "^17.0.2",

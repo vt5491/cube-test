@@ -776,5 +776,35 @@ my-msg
 (my-f4 4)
 (my-f4 4 7)
 
-(+ 1 1)
+(+ 1 2)
+(prn "hi")
 (map #(do (prn %1)(prn (+ 1 %1))) [1 2 3])
+
+(defn f5 []
+  (prn "hi from f5-2")
+  (prn "hi again from f5"))
+
+(f5)
+
+(do
+  (prn "hi")
+  (+ 1 1)
+  (prn "middle")
+  (prn "bye"))
+
+(when (or false false)
+  (prn "hi"))
+
+(when (or "abc" "def")
+ (prn "match"))
+
+(let [val "Plane.003"]
+  (when (or (re-matches #"Plane\.003" val) (re-matches #"Plane\.004" val))
+    (prn "matches")))
+
+(re-matches #"Plane.003" "Plane.003")
+
+(when (or nil "def") 
+ (+ 1 1))
+
+(re-matches #"abc" "abc-def")

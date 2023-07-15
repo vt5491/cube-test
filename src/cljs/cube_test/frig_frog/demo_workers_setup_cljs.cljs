@@ -1,4 +1,4 @@
-;;defunct
+;; defunct
 (ns cube-test.frig-frog.demo-workers-setup-cljs
   (:require
     [re-frame.core :as rf]))

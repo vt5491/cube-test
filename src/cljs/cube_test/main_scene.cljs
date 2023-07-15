@@ -86,7 +86,10 @@
     (set! (.-physicsImpostor grnd)
       (bjs/PhysicsImpostor. grnd bjs/PhysicsImpostor.PlaneImposter
                             (js-obj "mass" 0 "restitution" 0.9) scene))
-    (set! (.-ground env) grnd)))
+    (set! (.-ground env) grnd)
+    ;; trying to use the ".-ground" controlled by env (EnvironmentHelper) is problematic.
+    ;; Get addressability to the ground mesh itself so we can manipulate outside of the EnvironmentHelper
+    (set! ground grnd)))
 
 (defn init-env []
   ; (prn "top-scene.tmp-2: entered")
@@ -153,6 +156,7 @@
   (.enablePhysics scene (bjs/Vector3. 0 -0.81 0) physics-plugin)
 
   (init-env)
+  ;;(init-env-2)
   ; (set! env (bjs/EnvironmentHelper.
   ;            (js-obj
   ;             "createGround" false
@@ -375,7 +379,7 @@
   (-> xr-ctrl .-onMotionControllerInitObservable (.add motion-ctrl-added)))
 
 (defn a-btn-handler []
-  (prn "main-scene.a-btn-handler: a-btn pressed hasChanges=" (.-hasChanges a-btn))
+  ;; (prn "main-scene.a-btn-handler: a-btn pressed hasChanges=" (.-hasChanges a-btn))
   (when (.-hasChanges a-btn)
     (let [main-gui-plane (.getMeshByID scene "main-gui-plane")
           cam (cube-test.utils.get-xr-camera)
